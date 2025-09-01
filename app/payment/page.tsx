@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { createPayment } from '@/lib/directus';
+import Link from 'next/link';
 // import QRCode from 'qrcode.react';
 
 export default function PaymentsPage() {
@@ -43,6 +44,14 @@ export default function PaymentsPage() {
           </div>
         )}
       </div>
-    </div>
+      {/* add back  button */}
+      <Link
+        className="mt-6 text-blue-500 hover:underline"
+        href="/"
+        rel="noopener noreferrer"
+      >
+        Back to Home  
+      </Link>
+    </div>  
   );
 }
