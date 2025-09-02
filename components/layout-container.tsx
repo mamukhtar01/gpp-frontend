@@ -2,7 +2,7 @@ import React from "react";
 import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
-import { Menu } from "lucide-react";
+
 import MenuTop from "./top-navigation";
 import Footer from "./footer";
 
