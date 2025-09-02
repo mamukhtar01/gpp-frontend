@@ -15,6 +15,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { ComboboxDemo } from "./case-search-combobox"
 
 const formSchema = z.object({
   payerName: z.string().min(3, { message: "Name must be at least 3 characters." }),
@@ -35,6 +36,8 @@ export function NepalQrForm() {
   }
 
   return (
+    <>
+    <ComboboxDemo />
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-8">
         <FormField
@@ -64,11 +67,13 @@ export function NepalQrForm() {
               <FormMessage className="col-span-3 pl-1" />
               
             </FormItem>
+            
           )}
         />
 
         <Button className="px-4 py-2 rounded bg-black text-white" type="submit">Generate QR Code</Button>
       </form>
     </Form>
+    </>
   )
 }
