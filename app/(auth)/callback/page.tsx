@@ -1,30 +1,24 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
-export default function AuthCallbackPage() {
+export default function AuthCallback() {
   const router = useRouter();
+  const params = useSearchParams();
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const accessToken = urlParams.get('access_token');
-    const refreshToken = urlParams.get('refresh_token');
+    const accessToken = params.get("access_token");
+    if (accessToken) {
+      // Save token securely (better: httpOnly cookie via API route)
+      localStorage.setItem("directus_token", accessToken);
 
-    if (accessToken && refreshToken) {
-      // Store tokens in localStorage (or secure cookies if possible)
-      localStorage.setItem('directus_access_token', accessToken);
-      localStorage.setItem('directus_refresh_token', refreshToken);
-      router.push('/'); // Redirect to home page
+      // Redirect to home
+      router.push("/home");
     } else {
-      console.error('Tokens not found in URL');
-      router.push('/login');
+      router.push("/login?error=missing_token");
     }
-  }, [router]);
+  }, [params, router]);
 
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <p>Logging you in...</p>
-    </div>
-  );
+  return <p>Signing you in...</p>;
 }
