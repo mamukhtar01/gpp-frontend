@@ -32,8 +32,7 @@ export default function NepalQRPanel(props: {
           billNumber: props.billNumber,
           storeLabel: "Store1",
           terminalLabel: "Terminal1",
-          purposeOfTransaction: "Bill payment",
-          // qrImage: true, // if your provider supports returning base64 image
+          purposeOfTransaction: "Bill payment"         
         }),
       });
       const json = await res.json();
