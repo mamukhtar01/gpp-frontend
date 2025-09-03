@@ -64,8 +64,7 @@ export async function POST(req: NextRequest) {
     const privateKeyPem = loadPrivateKeyPEM();
     const token = signTokenStringRSA256(tokenString, privateKeyPem);
 
-    console.log(token);
-
+    
     // 3) Build request payload
     const payload: Record<string, unknown> = {
       pointOfInitialization: 12,

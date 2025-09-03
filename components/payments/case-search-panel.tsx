@@ -14,7 +14,7 @@ export function CaseSearchPanel() {
   const [reference, setReference] = useState<string>("");
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const { setCaseData } = useCaseContext();
+  const { setCaseData, setQrData } = useCaseContext();
 
   async function handleGenerate() {
     setLoading(true);
@@ -34,8 +34,15 @@ export function CaseSearchPanel() {
       const json = await res.json();
       if (!res.ok) throw new Error(JSON.stringify(json));
 
-      // move to qrcode page with data
+      // Example: route.ts returns the upstream response object. many providers nest in data
+      const payload = (json.data ?? json);
+      // make sure we set the qrString in expected shape
       setCaseData(selectedCase);
+      setQrData({
+        qrString: payload.qrString ?? payload.data?.qrString ?? payload.qrStringBase64 ?? "",
+        validationTraceId: payload.validationTraceId ?? payload.data?.validationTraceId,
+      });
+
       router.push(`/payments/nepal-qr/${selectedCase?.id}`);
     } catch (e: unknown) {
       alert("Failed to generate QR: " + (e as Error).message);
