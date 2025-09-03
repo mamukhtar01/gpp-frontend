@@ -1,6 +1,6 @@
 import Image from "next/image"
 
-import  LoginForm  from "@/components/login-form"
+import  LoginForm  from "@/components/custom/login-form"
 
 export default async function LoginPage() {
 

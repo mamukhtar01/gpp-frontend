@@ -1,7 +1,6 @@
 "use client";
 
-import { NepalQrForm } from "@/components/nepalqr-from";
-import NepalQRPanel from "@/components/payments/NepalQrCodePanel";
+import { NepalQrForm } from "@/components/payments/nepalqr-from";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function PaymentsPage() {
