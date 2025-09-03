@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function PaymentsPage() {
   return (
-    <div className="">
+    <div className="max-w-2xl mx-auto">
       <Tabs defaultValue="mimosa" className="min-w-[800px]">
         <TabsList className="w-full justify-center mb-4">
           <TabsTrigger value="mimosa">MiMOSA</TabsTrigger>
