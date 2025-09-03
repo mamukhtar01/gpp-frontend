@@ -8,8 +8,11 @@ export async function GET(res: NextRequest) {
   try {
     const data = await client.request(
       readItems("Cases", {
-        fields: ["id", "case_id", "main_client", "case_status", "date_created"],
+        fields: ["id", "case_id", "main_client", "case_status", "package_price", "appointment_date", "date_created"],
         search: searchParams.get("search") || "",
+        filter: {
+          case_management_system: { _eq: 1 },
+        },
         sort: "-date_created",
         limit: 15,
       })
