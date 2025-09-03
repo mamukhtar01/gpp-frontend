@@ -3,7 +3,7 @@
 import React from "react";
 import { QRCodeSVG } from "qrcode.react";
 
-export default function NepalQRPanel(props: {
+export default function NepalQRCodePanel(props: {
   amount: number; // or string
   billNumber: string;
 }) {

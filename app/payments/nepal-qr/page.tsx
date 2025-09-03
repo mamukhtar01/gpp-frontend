@@ -1,6 +1,7 @@
 "use client";
 
-import { NepalQrForm } from "@/components/payments/nepalqr-from";
+
+import { CaseSearchPanel } from "@/components/payments/case-search-panel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function PaymentsPage() {
@@ -12,7 +13,7 @@ export default function PaymentsPage() {
           <TabsTrigger value="uktb">UKTB</TabsTrigger>
         </TabsList>
         <TabsContent value="mimosa">
-          <NepalQrForm />
+          <CaseSearchPanel />
         </TabsContent>
         <TabsContent value="uktb">
           Not implemented yet
