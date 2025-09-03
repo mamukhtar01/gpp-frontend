@@ -1,79 +1,44 @@
 "use client"
-
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-
-import { Button } from "@/components/ui/button"
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { ComboboxDemo } from "./case-search-combobox"
+import { CaseSearchCombobox, TCase } from "./case-search-combobox"
+import { Label } from "@radix-ui/react-label"
+import { Separator } from "@radix-ui/react-separator"
+import { useEffect, useState } from "react"
 
-const formSchema = z.object({
-  payerName: z.string().min(3, { message: "Name must be at least 3 characters." }),
-  amount: z.string().min(1, { message: "Amount is required." }),
-})
+
+
 
 export function NepalQrForm() {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      payerName: "",
-      amount: "",
-    },
-  })
+  const [selectedCase, setSelectedCase] = useState<TCase | null>(null)
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values)
-  }
+ 
 
   return (
     <>
-    <ComboboxDemo />
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-8">
-        <FormField
-          control={form.control}
-          name="payerName"
-          render={({ field }) => (
-            <FormItem className="grid grid-cols-6 items-center justify-center gap-4 p-2 rounded">
-              <FormLabel className="col-span-1 text-sm">Payer Name</FormLabel>
-              <FormControl className="col-span-2">
-                <Input placeholder="Enter payer name" {...field} />
-              </FormControl>
+    <CaseSearchCombobox  setSelectedCase={setSelectedCase} />
+    <Separator className="my-8" />
+      {
+        selectedCase && (
+          <>
+            <InputCol label="Case IDD" id="case_id" value={selectedCase.id} placeholder="Case ID" />
+            <InputCol label="Main Client" id="client" value={selectedCase.main_client} placeholder="Main Client" />
+            <InputCol label="Amount To Pay" id="amount" value={Number(selectedCase.package_price)} placeholder="Amount To Pay " />
+            <InputCol label="Reference" id="reference" value={""}  isDisabled={false} placeholder="Reference" />
+          </>
+        )
+      }
+    </>
+  )
+}
 
-              <FormMessage className="col-span-3 pl-1 " />
-            </FormItem>
-          )}
-        />
 
-        <FormField
-          control={form.control}
-          name="amount"
-          render={({ field }) => (
-            <FormItem className="grid grid-cols-6 items-center gap-2 p-2 rounded">
-              <FormLabel className="col-span-1 text-sm">Amount</FormLabel>
-              <FormControl className="col-span-2">
-                <Input placeholder="Enter amount (e.g. 2500)" {...field} />
-              </FormControl>
-              <FormMessage className="col-span-3 pl-1" />
-              
-            </FormItem>
-            
-          )}
-        />
-
-        <Button className="px-4 py-2 rounded bg-black text-white" type="submit">Generate QR Code</Button>
-      </form>
-    </Form>
+function InputCol({ label, id, value, placeholder, isDisabled=true, ...props }: { label: string; value: string | number; id: string; placeholder: string; isDisabled?: boolean } & React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <>
+     <div className="grid grid-cols-2  w-full max-w-sm items-center my-6">
+      <Label htmlFor={id}>{label}</Label>
+      <Input type="text" id={id} disabled={isDisabled} placeholder={placeholder} value={value} {...props} />
+    </div>
     </>
   )
 }
