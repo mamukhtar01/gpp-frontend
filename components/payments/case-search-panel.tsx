@@ -4,12 +4,45 @@ import { CaseSearchCombobox, TCase } from "./case-search-combobox";
 import { Label } from "@radix-ui/react-label";
 import { Separator } from "@radix-ui/react-separator";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useCaseContext } from "@/app/payments/nepal-qr/caseContext";
 
 import { QrCode } from "lucide-react";
 
 export function CaseSearchPanel() {
   const [selectedCase, setSelectedCase] = useState<TCase | null>(null);
   const [reference, setReference] = useState<string>("");
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const { setCaseData } = useCaseContext();
+
+  async function handleGenerate() {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/payments/nepalqr", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          transactionCurrency: "524",
+          transactionAmount: Number(selectedCase?.package_price ?? 0),
+          billNumber: reference,
+          storeLabel: "Store1",
+          terminalLabel: "Terminal1",
+          purposeOfTransaction: "Bill payment",
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(JSON.stringify(json));
+
+      // move to qrcode page with data
+      setCaseData(selectedCase);
+      router.push(`/payments/nepal-qr/${selectedCase?.id}`);
+    } catch (e: unknown) {
+      alert("Failed to generate QR: " + (e as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <>
@@ -47,17 +80,23 @@ export function CaseSearchPanel() {
           />
           <Separator className="my-16" />
           <div className="flex justify-between">
-            <button className="px-4 flex justify-center  py-4 rounded border border-gray-700 text-gray-700 hover:bg-gray-200 hover:cursor-pointer hover:font-semibold">
-              Generate Nepal QR
+            <button
+              onClick={handleGenerate}
+              disabled={loading}
+              className="px-4 flex justify-center  py-4 rounded border border-gray-700 text-gray-700 hover:bg-gray-200 hover:cursor-pointer hover:font-semibold"
+            >
+              {loading ? "Generating..." : "Generate Nepal QR"}
               <QrCode className="ml-2" />
             </button>
 
-             <button onClick={() => {
-               setSelectedCase(null);
-               setReference("");
-             }} className="px-4 flex justify-center  py-4 rounded border border-red-700 text-red-700 hover:bg-gray-200 hover:cursor-pointer hover:font-semibold">
+            <button
+              onClick={() => {
+                setSelectedCase(null);
+                setReference("");
+              }}
+              className="px-4 flex justify-center  py-4 rounded border border-red-700 text-red-700 hover:bg-gray-200 hover:cursor-pointer hover:font-semibold"
+            >
               Reset Fields
-              
             </button>
           </div>
         </>
