@@ -42,3 +42,19 @@ export type TNepalQRResponse = {
     validationTraceId: string;
   };
 };
+
+
+export type TPaymentPayload = {
+  case_id: string;
+  amount_in_dollar: string;
+  amount_in_local_currency: string;
+  type_of_payment: number;
+  date_of_payment: string;
+  transaction_id: string;
+  status: number;
+  validationTraceId: string;
+  payerInfo: string;
+  qr_timestamp: string;
+  paidAmount: string;
+  qr_string: string;
+};
