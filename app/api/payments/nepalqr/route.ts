@@ -88,8 +88,7 @@ export async function POST(req: NextRequest) {
       token,
     };
 
-    console.log(payload);
-
+  
     // Remove undefined fields cleanly
     Object.keys(payload).forEach(
       (k) => payload[k] === undefined && delete payload[k]
