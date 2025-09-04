@@ -41,6 +41,7 @@ export function CaseSearchPanel() {
       setQrData({
         qrString: payload.qrString ?? payload.data?.qrString ?? payload.qrStringBase64 ?? "",
         validationTraceId: payload.validationTraceId ?? payload.data?.validationTraceId,
+        timestamp: payload.timestamp ?? payload.data?.timestamp,
       });
 
       router.push(`/payments/nepal-qr/${selectedCase?.id}`);

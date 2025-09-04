@@ -15,6 +15,8 @@ export interface TCase {
 type QRData = {
   qrString: string;
   validationTraceId?: string;
+  transactionId?: string;
+  timestamp?: string;
 } | null;
 
 type CaseContextType = {

@@ -6,8 +6,6 @@ import { Separator } from "@radix-ui/react-separator";
 import { useCaseContext } from "@/app/payments/nepal-qr/caseContext";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { BadgeCheckIcon } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 
 export default function NepalQRCodePanel({
   params,
@@ -19,9 +17,44 @@ export default function NepalQRCodePanel({
 
   // if user refreshes or opens page directly and no context exists, go back to search
   useEffect(() => {
-    if (!caseData || !qrData) {
-      router.replace("/payments/nepal-qr");
+    async function fetchData() {
+      if (!caseData || !qrData) {
+        router.replace("/payments/nepal-qr");
+        return;
+      }
+
+      // if we have both case and qr data,
+      if (!caseData && !qrData) {
+        return;
+      }
+
+      // save data to db
+      await fetch("/api/payments/mimosa", {
+        method: "POST",
+        body: JSON.stringify({
+          case_id: caseData.id,
+          amount_in_dollar: caseData.package_price,
+          amount_in_local_currency: caseData.package_price,
+          type_of_payment: 2,
+          date_of_payment: new Date().toISOString(),
+          transaction_id: crypto.randomUUID(),
+          status: 2,
+          validationTraceId: qrData.validationTraceId,
+          payerInfo: caseData.main_client,
+          qr_timestamp: qrData.timestamp,
+          paidAmount: caseData.package_price,
+          qr_string: qrData.qrString,
+        }),
+      });
     }
+
+    fetchData()
+      .then(() => {
+        // Optionally, you can add any additional logic after the data is fetched
+      })
+      .catch((error) => {
+        console.error("Error in fetchData:", error);
+      });
   }, [caseData, qrData, router]);
 
   if (!qrData || !caseData) {

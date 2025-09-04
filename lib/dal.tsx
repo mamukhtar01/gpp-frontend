@@ -1,9 +1,7 @@
 import "server-only";
-import { cookies } from "next/headers";
 import client from "@/lib/directus";
 import { readMe } from "@directus/sdk";
 import { redirect } from "next/navigation";
-import { UserData } from "./types";
 
 export async function getUserData() {
   try {
@@ -20,7 +18,7 @@ export async function getUserData() {
     
 
     client.setToken(token);
-    const user = await client.request(readMe()) as UserData;
+    const user = await client.request(readMe());
 
     return { success: true, user };
   } catch (error) {
