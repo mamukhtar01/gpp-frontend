@@ -51,6 +51,8 @@ export  function CaseSearchCombobox({ setSelectedCase }: { setSelectedCase: (c: 
     setLoading(true)
 
     const debounce = setTimeout(async () => {
+
+      console.log("Searching cases for:", search)
       try {
         const res = await fetch(`/api/cases?search=${encodeURIComponent(search)}`, {
           signal: controller.signal,

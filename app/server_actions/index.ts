@@ -2,13 +2,14 @@
 
 import client from "@/lib/directus";
 import { createItem, readItems } from "@directus/sdk";
-
 import {
+  TNepalTxnVerifyPayload,
+  TTxnReportResponse,
   TCaseSearchResult,
   TNepalQRPayload,
   TNepalQRResponse,
   TPaymentPayload,
-} from "../types";
+} from "@/app/types";
 
 // Fetch case list on the server (replace with your data source)
 export async function getCases(): Promise<TCaseSearchResult[]> {
@@ -63,5 +64,58 @@ export async function createPayment(body: TPaymentPayload) {
   } catch (error) {
     console.error("Error saving payment data:", error);
     throw new Error("Failed to save payment data");
+  }
+}
+
+// Verify Payment Transaction
+
+export async function verifyPaymentTxn({
+  validationTraceId,
+}: {
+  validationTraceId: string;
+}): Promise<TTxnReportResponse | { error: string }> {
+  try {
+    const username = process.env.NEPALQR_USERNAME;
+    const password = process.env.NEPALQR_PASSWORD;
+    const URL = process.env.NEPALQR_VERIFY_URL;
+    const acquirerId = process.env.ACQUIRERID;
+    const merchantId = process.env.MERCHANTCODE;
+
+    if (!URL) {
+      return { error: "Verification URL not configured" };
+    }
+
+    if (!username || !password) {
+      return { error: "Missing authentication credentials" };
+    }
+
+    // Build request payload
+    const payload = {
+      acquirerId: acquirerId,
+      merchantId: merchantId,
+      validationTraceId: validationTraceId,
+    };
+
+    const auth = Buffer.from(`${username}:${password}`).toString("base64");
+
+    const res = await fetch(URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Basic ${auth}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const json: TTxnReportResponse = await res.json();
+
+    if (!res.ok) {
+      return { error: json.responseMessage || "Failed to verify QR" };
+    }
+
+    return json;
+  } catch (error) {
+    console.error("Error verifying QR:", error);
+    return { error: "Internal Server Error" };
   }
 }

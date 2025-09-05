@@ -46,6 +46,8 @@ export function CaseSearchPanel() {
         throw new Error("Invalid response from QR generation API");
       }
 
+      console.log("QR Generation Response:", json);
+
       const qrString = json.data?.qrString;
       const validationTraceId = json.data?.validationTraceId;
       const timestamp = json?.timestamp;
@@ -68,7 +70,10 @@ export function CaseSearchPanel() {
         paidAmount: selectedCase?.package_price ?? "0",
         qr_string: qrString,
       };
+      console.log("Creating payment record with:", paymentRecord);
       const paymentRes = await createPayment(paymentRecord);
+
+      console.log("Payment Creation Response:", paymentRes);
 
       if (!paymentRes) {
         throw new Error("Failed to create payment record");
