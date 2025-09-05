@@ -38,7 +38,7 @@ if (!paymentRecord || !paymentRecord.qr_string) {
     <div className="min-w-4xl items-center flex flex-col self-center">
       <div className="flex flex-row items-center justify-between w-full">
         <GoBackBtn />
-         <Link href={`/payments/nepal-qr/${case_id}/verify`}>
+         <Link href={`/payments/qrcode/${case_id}/verify`}>
         <Button
        
           className="text-sm text-green-600 hover:cursor-pointer"

@@ -5,10 +5,10 @@ import { Label } from "@radix-ui/react-label";
 import { Separator } from "@radix-ui/react-separator";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useCaseContext } from "@/app/payments/qrcode/caseContext";
 
 import { QrCode } from "lucide-react";
 import { createPayment } from "@/app/server_actions";
+import { useCaseContext } from "@/app/payments/qrcode/caseContext";
 
 export function CaseSearchPanel() {
   const [selectedCase, setSelectedCase] = useState<TCase | null>(null);
@@ -17,9 +17,13 @@ export function CaseSearchPanel() {
   const [loading, setLoading] = useState(false);
   const { setCaseData, setQrData } = useCaseContext();
 
-  async function handleGenerate() {
+  //
+
+  async function handleQRGenerateAndCreatePayment() {
+   
     setLoading(true);
     try {
+     
       // fetch directly here since we are in a client component
       const res = await fetch("/api/payments/nepalqr", {
         method: "POST",
@@ -34,19 +38,17 @@ export function CaseSearchPanel() {
         }),
       });
       const json = await res.json();
+
       if (!res.ok) throw new Error(JSON.stringify(json));
 
-      // Example: route.ts returns the upstream response object. many providers nest in data
-      const payload = json.data ?? json;
-
       // check qr and validationTraceId exists
-      if (!payload?.data?.qrString || !payload?.data?.validationTraceId) {
+      if (!json?.data?.qrString || !json?.data?.validationTraceId) {
         throw new Error("Invalid response from QR generation API");
       }
 
-      const qrString = payload.data?.qrString;
-      const validationTraceId = payload.data?.validationTraceId;
-      const timestamp = payload?.timestamp;
+      const qrString = json.data?.qrString;
+      const validationTraceId = json.data?.validationTraceId;
+      const timestamp = json?.timestamp;
 
       // create payment record.
 
@@ -72,7 +74,6 @@ export function CaseSearchPanel() {
         throw new Error("Failed to create payment record");
       }
 
-    
       // make sure we set the qrString in expected shape
       setCaseData(selectedCase);
       setQrData({
@@ -87,7 +88,7 @@ export function CaseSearchPanel() {
         validationTraceId,
       });
 
-      router.push(`/payments/nepal-qr/${selectedCase?.id}`);
+      router.push(`/payments/qrcode/${selectedCase?.id}`);
     } catch (e: unknown) {
       alert("Failed to generate QR: " + (e as Error).message);
     } finally {
@@ -132,7 +133,7 @@ export function CaseSearchPanel() {
           <Separator className="my-16" />
           <div className="flex justify-between">
             <button
-              onClick={handleGenerate}
+              onClick={handleQRGenerateAndCreatePayment}
               disabled={loading}
               className="px-4 flex justify-center  py-4 rounded border border-gray-700 text-gray-700 hover:bg-gray-200 hover:cursor-pointer hover:font-semibold"
             >

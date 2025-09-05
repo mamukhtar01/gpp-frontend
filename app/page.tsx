@@ -1,10 +1,10 @@
 // app/page.tsx (Next.js 13+ with App Router)
 import Link from "next/link";
 import { CreditCard, Wallet, Landmark, Smartphone, QrCode } from "lucide-react";
-import { getUserData } from "@/lib/dal";
+
 
 const paymentMethods = [
-  { title: "QR Payment", icon: <QrCode size={32} />, value: "Nepal QR Payment", href: "/payments/nepal-qr" },
+  { title: "QR Payment", icon: <QrCode size={32} />, value: "Nepal QR Payment", href: "/payments/qrcode" },
   { title: "Credit Card", icon: <CreditCard size={32} />, value: "**** 1234", href: "/credit-card" },
   { title: "Bank Transfer", icon: <Landmark size={32} />, value: "3 Pending", href: "/bank-transfer" },
   { title: "Mobile Money", icon: <Smartphone size={32} />, value: "Active", href: "/mobile-money" },
