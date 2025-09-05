@@ -1,5 +1,5 @@
-import { PaymentRecord } from "@/app/payments/types";
 import { verifyPaymentTxn } from "@/app/server_actions";
+import { TPaymentRecord } from "@/app/types";
 import client from "@/lib/directus";
 import { readItems } from "@directus/sdk";
 
@@ -12,7 +12,7 @@ export default async function CasePaymentPage({
 
   console.log("Fetching payment data for case_id:", case_id);
 
-  const response = await client.request<PaymentRecord[]>(
+  const response = await client.request<TPaymentRecord[]>(
     readItems("Payments", {
       filter: { case_id: { _eq: case_id } },
     })
