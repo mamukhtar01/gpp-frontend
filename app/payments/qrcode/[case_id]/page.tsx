@@ -4,6 +4,7 @@ import { Separator } from "@radix-ui/react-separator";
 import { Button } from "@/components/ui/button";
 import { getPaymentByCaseIdAction } from "@/app/server_actions";
 import GoBackBtn from "@/components/custom/gobackbtn";
+import Link from 'next/link';
 
 
 
@@ -37,13 +38,15 @@ if (!paymentRecord || !paymentRecord.qr_string) {
     <div className="min-w-4xl items-center flex flex-col self-center">
       <div className="flex flex-row items-center justify-between w-full">
         <GoBackBtn />
+         <Link href={`/payments/nepal-qr/${case_id}/verify`}>
         <Button
-          // onClick={() => router.back()}
+       
           className="text-sm text-green-600 hover:cursor-pointer"
           variant="secondary"
         >
           Verify Payment
         </Button>
+        </Link>
       </div>
 
       <Separator className="my-4 border-b border-gray-200" />

@@ -1,6 +1,7 @@
+import { PaymentRecord } from "@/app/payments/types";
 import client from "@/lib/directus";
 import { readItems } from "@directus/sdk";
-import { PaymentRecord } from "../../types";
+
 
 
 export default async function CasePaymentPage({params}: {params: {case_id: string}}) {

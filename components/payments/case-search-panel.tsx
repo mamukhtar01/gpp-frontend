@@ -5,7 +5,7 @@ import { Label } from "@radix-ui/react-label";
 import { Separator } from "@radix-ui/react-separator";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useCaseContext } from "@/app/payments/nepal-qr/caseContext";
+import { useCaseContext } from "@/app/payments/qrcode/caseContext";
 
 import { QrCode } from "lucide-react";
 import { createPayment } from "@/app/server_actions";
@@ -72,7 +72,7 @@ export function CaseSearchPanel() {
         throw new Error("Failed to create payment record");
       }
 
-      console.log("Payment record created:", paymentRes);
+    
       // make sure we set the qrString in expected shape
       setCaseData(selectedCase);
       setQrData({

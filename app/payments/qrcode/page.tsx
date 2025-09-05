@@ -12,6 +12,7 @@ export default async function PaymentsPage() {
           <TabsTrigger value="uktb">UKTB</TabsTrigger>
         </TabsList>
         <TabsContent value="mimosa">
+          {/* MiMOSA Payment Case Search Panel */}
           <CaseSearchPanel />
         </TabsContent>
         <TabsContent value="uktb">
