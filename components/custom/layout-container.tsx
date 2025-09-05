@@ -33,8 +33,8 @@ export default function LayoutContainer({ children }: Props) {
               <MenuTop />
             </div>
           </header>
-
-          <main className=" mx-auto px-4 py-8 flex-1 w-full">{children}</main>
+    
+          <main className=" mx-auto flex-1 w-full">{children}</main>
 
           <Footer />
         </div>

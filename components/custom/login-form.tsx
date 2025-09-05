@@ -6,14 +6,12 @@ const LoginForm: React.FC = () => {
   const [user, ] = useState<{ name: string } | null>(null);
   const router = useRouter();
    const handleSSOLogin = async () => {
-    
-  const res = await fetch('/api/proxy/auth', {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
-  });
 
-const data = await res.json();
-console.log(data)
+    // Redirect to your backend SSO endpoint
+    window.location.href = "https://iom-ppo-directus-dev.iom.int/auth/login/azure";
+    
+  
+
   };
 
 
