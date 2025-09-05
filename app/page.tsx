@@ -4,11 +4,11 @@ import { CreditCard, Wallet, Landmark, Smartphone, QrCode } from "lucide-react";
 
 
 const paymentMethods = [
-  { title: "QR Payment", icon: <QrCode size={32} />, value: "Nepal QR Payment", href: "/payments/qrcode" },
-  { title: "Credit Card", icon: <CreditCard size={32} />, value: "**** 1234", href: "/credit-card" },
-  { title: "Bank Transfer", icon: <Landmark size={32} />, value: "3 Pending", href: "/bank-transfer" },
-  { title: "Mobile Money", icon: <Smartphone size={32} />, value: "Active", href: "/mobile-money" },
-  { title: "Wallet Balance", icon: <Wallet size={32} />, value: "$245.90", href: "/wallet" },
+  { title: "QR Payment", icon: <QrCode size={32} />, value: "Generate QR Payment", href: "/payments/qrcode" },
+  { title: "Cash Payment", icon: <Wallet size={32} />, value: "Create Cash Payment", href: "/payments/cash" },
+  { title: "Credit Card", icon: <CreditCard size={32} />, value: "Accept Card Payment", href: "/payments/credit-card" },
+  { title: "Bank Transfer", icon: <Landmark size={32} />, value: "Record Bank Transfer", href: "/payments/bank-transfer" },
+  { title: "Mobile Money", icon: <Smartphone size={32} />, value: "Generate Mobile Payment", href: "/payments/mobile-money" },
 ];
 
 export default async function Home() {

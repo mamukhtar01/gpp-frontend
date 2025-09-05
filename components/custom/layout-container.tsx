@@ -24,7 +24,7 @@ export default function LayoutContainer({ children }: Props) {
       </Head>
       <body>
         <div className="min-h-screen flex flex-col bg-gray-50 text-black">
-          <header className="bg-white border-b">
+          <header className="bg-white border-b border-gray-200 shadow-xs">
             <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
               <Link href="/" className="flex items-center space-x-2">
                 <Image src="/iom-logo.svg" alt="" width={100} height={47} />
