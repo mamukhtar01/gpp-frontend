@@ -50,7 +50,7 @@ if (!paymentRecord || !paymentRecord.qr_string) {
 
       <div className="space-y-3 w-min grid gap-6 max-w-4xl p-6 justify-center items-center border border-gray-300 rounded bg-white">
         <div className="space-y-2  p-4 rounded flex flex-col items-center">
-          <QRCodeSVG value={qrValue} size={400} />
+          <QRCodeSVG value={qrValue} size={300} />
           <Separator className="my-6 border-b border-gray-200 " />
           <div className="text-xs break-all">
             Amount To Pay: <span className="font-semibold">{amount}</span>

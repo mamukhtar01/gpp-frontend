@@ -39,13 +39,8 @@ export function CaseSearchPanel() {
       // Example: route.ts returns the upstream response object. many providers nest in data
       const payload = json.data ?? json;
 
-      const qrString =
-        payload.qrString ??
-        payload.data?.qrString ??
-        payload.qrStringBase64 ??
-        "";
-      const validationTraceId =
-        payload.validationTraceId ?? payload.data?.validationTraceId;
+      const qrString = payload.qrString ?? payload.data?.qrString ?? "";
+      const validationTraceId = payload.validationTraceId ?? payload.data?.validationTraceId;
 
       // create payment record.
 
@@ -55,10 +50,10 @@ export function CaseSearchPanel() {
           Number(selectedCase?.package_price ?? 0) / 132
         ).toFixed(2), // example conversion
         amount_in_local_currency: selectedCase?.package_price ?? "0",
-        type_of_payment: 1, // assuming 1 represents Nepal QR
+        type_of_payment: 2, // assuming 1 represents Nepal QR
         date_of_payment: new Date().toISOString(),
         transaction_id: `TXN-${Date.now()}`, // example transaction ID
-        status: 2, // assuming 2 represents success
+        status: 1, // initial status (e.g., payment initiated)
         validationTraceId: validationTraceId ?? "",
         payerInfo: selectedCase?.main_client ?? "",
         qr_timestamp: new Date().toISOString(),
@@ -95,7 +90,7 @@ export function CaseSearchPanel() {
   }
 
   return (
-    <>
+    <div className="p-8 bg-white rounded shadow w-full max-w-3xl">
       <CaseSearchCombobox setSelectedCase={setSelectedCase} />
       <Separator className="my-8" />
       {selectedCase && (
@@ -151,7 +146,7 @@ export function CaseSearchPanel() {
           </div>
         </>
       )}
-    </>
+    </div>
   );
 }
 
