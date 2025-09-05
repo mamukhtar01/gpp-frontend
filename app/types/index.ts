@@ -7,6 +7,19 @@ export interface TCaseSearchResult {
   package_price: string | null;
 }
 
+
+// Nepal Transaction Report Payload and Response Types
+
+export type TNepalTxnVerifyPayload = {
+  validationTraceId: string;
+  merchantId: string;
+  acquirerId: string;
+}
+
+
+
+
+
 export type TNepalQRPayload = {
   transactionCurrency: number;
   transactionAmount: number;
@@ -43,3 +56,48 @@ export type TPaymentPayload = {
   paidAmount: string;
   qr_string: string;
 };
+
+
+
+// Root response type
+export interface TTxnReportResponse {
+  timestamp: string;
+  responseCode: string;
+  responseStatus: string;
+  responseMessage: string | null;
+  responseBody: TTxnReportBody[];
+}
+
+// Transaction type
+export interface TTxnReportBody {
+  sessionSrlNo: string;
+  recDate: string;
+  instructionId: string;
+  nQrTxnId: string;
+  acquirerId: string;
+  issuerId: string;
+  network: string;
+  issuerNetwork: string;
+  amount: number;
+  interchangeFee: number;
+  transactionFee: number;
+  debitStatus: string;
+  creditStatus: string;
+  payerName: string;
+  tranType: string;
+  payerMobileNumber: string;
+  merchantName: string;
+  merchantTxnRef: string;
+  terminal: string;
+  merchantBillNo: string;
+  instrument: string;
+  validationTraceId: string;
+  merchantPan: string;
+  nfcTxnId: string | null;
+  storeLabel: string;
+  localTransactionDateTime: string;
+  addenda1: string | null;
+  addenda2: string | null;
+  addenda3: string | null;
+  addenda4: string | null;
+}

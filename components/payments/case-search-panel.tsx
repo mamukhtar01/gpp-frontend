@@ -39,8 +39,14 @@ export function CaseSearchPanel() {
       // Example: route.ts returns the upstream response object. many providers nest in data
       const payload = json.data ?? json;
 
-      const qrString = payload.qrString ?? payload.data?.qrString ?? "";
-      const validationTraceId = payload.validationTraceId ?? payload.data?.validationTraceId;
+      // check qr and validationTraceId exists
+      if (!payload?.data?.qrString || !payload?.data?.validationTraceId) {
+        throw new Error("Invalid response from QR generation API");
+      }
+
+      const qrString = payload.data?.qrString;
+      const validationTraceId = payload.data?.validationTraceId;
+      const timestamp = payload?.timestamp;
 
       // create payment record.
 
@@ -56,7 +62,7 @@ export function CaseSearchPanel() {
         status: 1, // initial status (e.g., payment initiated)
         validationTraceId: validationTraceId ?? "",
         payerInfo: selectedCase?.main_client ?? "",
-        qr_timestamp: new Date().toISOString(),
+        qr_timestamp: timestamp ?? "",
         paidAmount: selectedCase?.package_price ?? "0",
         qr_string: qrString,
       };
