@@ -60,7 +60,7 @@ export type TPaymentPayload = {
 
 
 // Root response type
-export interface TTxnReportResponse {
+export interface TTxnReportResponseSuccess {
   timestamp: string;
   responseCode: string;
   responseStatus: string;
@@ -100,6 +100,15 @@ export interface TTxnReportBody {
   addenda2: string | null;
   addenda3: string | null;
   addenda4: string | null;
+}
+
+export type TTxnReportResponseFailure = {
+  responseCode: string // e.g. "E012"
+  responseDescription: string
+  billsPaymentDescription: string | null
+  billsPaymentResponseCode: string | null
+  fieldErrors: unknown[]
+  responseMessage: string | null
 }
 
 

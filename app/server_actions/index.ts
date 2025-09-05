@@ -3,12 +3,12 @@
 import client from "@/lib/directus";
 import { createItem, readItems } from "@directus/sdk";
 import {
-  TNepalTxnVerifyPayload,
-  TTxnReportResponse,
+  TTxnReportResponseSuccess,
   TCaseSearchResult,
   TNepalQRPayload,
   TNepalQRResponse,
   TPaymentPayload,
+  TTxnReportResponseFailure,
 } from "@/app/types";
 
 // Fetch case list on the server (replace with your data source)
@@ -73,7 +73,7 @@ export async function verifyPaymentTxn({
   validationTraceId,
 }: {
   validationTraceId: string;
-}): Promise<TTxnReportResponse | { error: string }> {
+}): Promise<TTxnReportResponseSuccess | TTxnReportResponseFailure | { error: string }> {
   try {
     const username = process.env.NEPALQR_USERNAME;
     const password = process.env.NEPALQR_PASSWORD;
@@ -107,7 +107,7 @@ export async function verifyPaymentTxn({
       body: JSON.stringify(payload),
     });
 
-    const json: TTxnReportResponse = await res.json();
+    const json: TTxnReportResponseSuccess = await res.json();
 
     if (!res.ok) {
       return { error: json.responseMessage || "Failed to verify QR" };
