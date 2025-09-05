@@ -3,7 +3,12 @@
 import client from "@/lib/directus";
 import { createItem, readItems } from "@directus/sdk";
 
-import { TCaseSearchResult, TNepalQRPayload, TNepalQRResponse, TPaymentPayload } from "../types";
+import {
+  TCaseSearchResult,
+  TNepalQRPayload,
+  TNepalQRResponse,
+  TPaymentPayload,
+} from "../types";
 
 // Fetch case list on the server (replace with your data source)
 export async function getCases(): Promise<TCaseSearchResult[]> {
@@ -14,7 +19,9 @@ export async function getCases(): Promise<TCaseSearchResult[]> {
 }
 
 // Generate QR on the server
-export async function generateQr(payload: TNepalQRPayload): Promise<TNepalQRResponse> {
+export async function generateQr(
+  payload: TNepalQRPayload
+): Promise<TNepalQRResponse> {
   const res = await fetch("https://your-api/payments/nepalqr", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -24,10 +31,6 @@ export async function generateQr(payload: TNepalQRPayload): Promise<TNepalQRResp
   if (!res.ok) throw new Error(JSON.stringify(json));
   return json.data ?? json;
 }
-
-
-
-
 
 export async function getPaymentByCaseIdAction(id: string) {
   console.log("Fetching case with ID:", id);
@@ -46,9 +49,6 @@ export async function getPaymentByCaseIdAction(id: string) {
   }
 }
 
-
-
-
 export async function createPayment(body: TPaymentPayload) {
   console.log("Received payment data:", body);
 
@@ -58,9 +58,7 @@ export async function createPayment(body: TPaymentPayload) {
   }
 
   try {
-    const response = await client.request(
-      createItem("Payments", body)
-    );
+    const response = await client.request(createItem("Payments", body));
     return response;
   } catch (error) {
     console.error("Error saving payment data:", error);

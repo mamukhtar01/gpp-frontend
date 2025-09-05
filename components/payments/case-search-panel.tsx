@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useCaseContext } from "@/app/payments/nepal-qr/caseContext";
 
 import { QrCode } from "lucide-react";
+import { createPayment } from "@/app/server_actions";
 
 export function CaseSearchPanel() {
   const [selectedCase, setSelectedCase] = useState<TCase | null>(null);
@@ -19,6 +20,7 @@ export function CaseSearchPanel() {
   async function handleGenerate() {
     setLoading(true);
     try {
+      // fetch directly here since we are in a client component
       const res = await fetch("/api/payments/nepalqr", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -35,12 +37,53 @@ export function CaseSearchPanel() {
       if (!res.ok) throw new Error(JSON.stringify(json));
 
       // Example: route.ts returns the upstream response object. many providers nest in data
-      const payload = (json.data ?? json);
+      const payload = json.data ?? json;
+
+      const qrString =
+        payload.qrString ??
+        payload.data?.qrString ??
+        payload.qrStringBase64 ??
+        "";
+      const validationTraceId =
+        payload.validationTraceId ?? payload.data?.validationTraceId;
+
+      // create payment record.
+
+      const paymentRecord = {
+        case_id: selectedCase?.id ?? "",
+        amount_in_dollar: (
+          Number(selectedCase?.package_price ?? 0) / 132
+        ).toFixed(2), // example conversion
+        amount_in_local_currency: selectedCase?.package_price ?? "0",
+        type_of_payment: 1, // assuming 1 represents Nepal QR
+        date_of_payment: new Date().toISOString(),
+        transaction_id: `TXN-${Date.now()}`, // example transaction ID
+        status: 2, // assuming 2 represents success
+        validationTraceId: validationTraceId ?? "",
+        payerInfo: selectedCase?.main_client ?? "",
+        qr_timestamp: new Date().toISOString(),
+        paidAmount: selectedCase?.package_price ?? "0",
+        qr_string: qrString,
+      };
+      const paymentRes = await createPayment(paymentRecord);
+
+      if (!paymentRes) {
+        throw new Error("Failed to create payment record");
+      }
+
+      console.log("Payment record created:", paymentRes);
       // make sure we set the qrString in expected shape
       setCaseData(selectedCase);
       setQrData({
-        qrString: payload.qrString ?? payload.data?.qrString ?? payload.qrStringBase64 ?? "",
-        validationTraceId: payload.validationTraceId ?? payload.data?.validationTraceId,
+        qrString: qrString,
+        validationTraceId: validationTraceId,
+      });
+
+      // make sure we set the qrString in expected shape
+      setCaseData(selectedCase);
+      setQrData({
+        qrString,
+        validationTraceId,
       });
 
       router.push(`/payments/nepal-qr/${selectedCase?.id}`);
