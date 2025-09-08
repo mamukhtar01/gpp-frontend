@@ -61,7 +61,7 @@ export function DataTable({
     },
   });
   return (
-    <div className="w-[65%]">
+    <div className="w-[65%] ">
       <div className="flex items-center py-4 w-80">
         <Input
           placeholder="Filter Payments by Case ..."
@@ -73,7 +73,7 @@ export function DataTable({
         />
       </div>
       <div className="overflow-hidden rounded-md border">
-        <Table>
+        <Table className="">
           <TableHeader className="bg-gray-100">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -92,10 +92,12 @@ export function DataTable({
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
+          <TableBody >
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
+                  className="hover:cursor-pointer hover:bg-gray-200"
+                  onClick={() => console.log(row)}
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                 >

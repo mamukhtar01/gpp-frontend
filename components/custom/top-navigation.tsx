@@ -12,15 +12,10 @@ export default async function MenuTop() {
       <Link href="/" className="hover:text-gray-900">
         Home
       </Link>
-      <Link href="/payment/nepal-qr" className="hover:text-gray-900">
-        Nepal QR
+      <Link href="/payments/status" className="hover:text-gray-900">
+        Payment Status
       </Link>
-      <Link href="/payment/stripe" className="hover:text-gray-900">
-        Stripe
-      </Link>
-      <Link href="/payment/dpo" className="hover:text-gray-900">
-        DPO
-      </Link>
+      
 
       {userData?.success ? (
         <Link href="/profile" className="hover:text-gray-900">
