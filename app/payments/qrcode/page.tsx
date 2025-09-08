@@ -10,13 +10,17 @@ export default async function PaymentsPage() {
         <TabsList className="w-full justify-center mb-4">
           <TabsTrigger value="mimosa">MiMOSA</TabsTrigger>
           <TabsTrigger value="uktb">UKTB</TabsTrigger>
+          <TabsTrigger value="jims">JIMS</TabsTrigger>
         </TabsList>
         <TabsContent value="mimosa">
           {/* MiMOSA Payment Case Search Panel */}
           <CaseSearchPanel />
         </TabsContent>
         <TabsContent value="uktb">
-          Not implemented yet
+         UKTB - Not implemented yet
+        </TabsContent>
+        <TabsContent value="jims">
+          JIMS - Not implemented yet
         </TabsContent>
       </Tabs>
      

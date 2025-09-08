@@ -10,32 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button";
 
-// const transactionReport = {
-//   timestamp: "2025-09-05T18:10:20.488+0000",
-//   responseCode: "200",
-//   responseStatus: "SUCCESS",
-//   responseMessage: null,
-//   responseBody: [
-//     {
-//       sessionSrlNo: "10325",
-//       recDate: "2025-09-05",
-//       instructionId: "CIPS-94684",
-//       issuerNetwork: "NQR",
-//       amount: 55,
-//       payerName: "Surendra Bahadur Pomo",
-//       payerMobileNumber: "+977-9702091333",
-//       merchantName: "IOM Teaching",
-//       merchantTxnRef: "NEPALPAYQR-532555",
-//       terminal: "Terminal1",
-//       merchantBillNo: "0",
-//       instrument: "CIPS",
-//       validationTraceId: "2509050000464129UWL",
-//       merchantPan: "0401OQKDIW5",
-//       storeLabel: "Store1",
-//       localTransactionDateTime: "2025-09-05T06:46:09.486+0000",
-//     },
-//   ],
-// }
+
 
 export default async function PaymentConfirmationPage({
   params,
