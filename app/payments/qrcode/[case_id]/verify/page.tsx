@@ -5,10 +5,11 @@ import { readItems } from "@directus/sdk";
 
 // app/payment-confirmation/page.tsx (Next.js App Router)
 
-import { CheckCircle2, XCircle } from "lucide-react"
+import { CheckCircle2 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { Button } from "@/components/ui/button";
+
+import { TransactionNotCompleted } from "./failed";
 
 
 
@@ -46,7 +47,7 @@ export default async function PaymentConfirmationPage({
 
   console.log("Transaction Report:", transactionReport);
   if (transactionReport.responseCode !== "200") {
-    return <TransactionFailed transactionReport={transactionReport as TTxnReportResponseFailure} />
+    return <TransactionNotCompleted transactionReport={transactionReport as TTxnReportResponseFailure} />
   }
 
   // Success case
@@ -107,26 +108,3 @@ export default async function PaymentConfirmationPage({
 
 
 
-function TransactionFailed({ transactionReport }: { transactionReport: TTxnReportResponseFailure }) {
-  return (
-     <div className="flex flex-col items-center justify-center bg-gray-50 p-6">
-            {/* ❌ FAILURE CASE */}
-            <CardHeader className="flex flex-col items-center">
-              <XCircle className="h-16 w-16 text-red-900" />
-              <CardTitle className="mt-2 text-2xl font-bold text-red-900">
-                Payment Failed
-              </CardTitle>
-              <p className="text-sm text-gray-500 mt-1">
-                {transactionReport.responseDescription ??
-                  "Your transaction could not be completed."}
-              </p>
-            </CardHeader>
-            <CardContent>
-              <Separator className="my-3" />
-              <Button variant="secondary" className="w-full hover:cursor-pointer"  >
-                Try Again
-              </Button>
-            </CardContent>
-          </div>
-  )
-}
