@@ -33,6 +33,25 @@ export async function generateQr(
   return json.data ?? json;
 }
 
+// Payment Actions
+
+export async function getPaymentsAction() {
+ 
+
+  try {
+    const data = await client.request(
+      readItems("Payments", {
+        fields: ["*"],
+        sort: ["-date_created"],
+      })
+    );
+
+    return data ?? null;
+  } catch (error) {
+    console.error("Error fetching payment:", error);
+    throw new Error("Failed to fetch payment");
+  }
+}
 export async function getPaymentByCaseIdAction(id: string) {
   console.log("Fetching case with ID:", id);
 
