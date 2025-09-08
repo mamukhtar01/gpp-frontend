@@ -12,7 +12,7 @@ import {  TTxnReportResponseFailure } from "@/app/types";
 export function TransactionNotCompleted({ transactionReport }: { transactionReport: TTxnReportResponseFailure }) {
   return (
      <div className="flex flex-col items-center justify-center bg-gray-50 p-6">
-            {/* ❌ FAILURE CASE */}
+            {/* Payment not Initiated */}
             <CardHeader className="flex flex-col items-center">
               <XCircle className="h-16 w-16 text-yellow-500" />
               <CardTitle className="mt-2 text-2xl font-bold text-yellow-600">

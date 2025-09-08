@@ -8,7 +8,8 @@ import { useRouter } from "next/navigation";
 
 import { QrCode } from "lucide-react";
 import { createPayment } from "@/app/server_actions";
-import { useCaseContext } from "@/app/payments/qrcode/caseContext";
+import { useCaseContext } from "@/app/(main)/payments/qrcode/caseContext";
+
 
 export function CaseSearchPanel() {
   const [selectedCase, setSelectedCase] = useState<TCase | null>(null);
