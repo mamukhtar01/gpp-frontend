@@ -31,7 +31,7 @@ export default async function LoginPage() {
         className="relative hidden lg:block w-full overflow-hidden"
         style={{
           height:
-            "calc(-125px + 100vh)", // Adjust 190px based on your header + footer heights
+            "calc(-125px + 115vh)", // Adjust 190px based on your header + footer heights
         }}
       >
         <Image

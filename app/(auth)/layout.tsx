@@ -1,6 +1,8 @@
 import React from "react";
 import Head from "next/head";
 
+import "../_css/globals.css";
+
 type Props = {
   children: React.ReactNode;
 };
