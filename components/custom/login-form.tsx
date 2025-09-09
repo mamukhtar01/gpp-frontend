@@ -8,8 +8,12 @@ const LoginForm: React.FC = () => {
    const handleSSOLogin = async () => {
 
     // Redirect to your backend SSO endpoint
-    window.location.href = "https://iom-ppo-directus-dev.iom.int/auth/login/azure";
-    
+    //window.location.href = "https://iom-ppo-directus-dev.iom.int/auth/login/azure";
+
+    // go home
+
+  
+    router.push("/")
   
 
   };
@@ -46,7 +50,7 @@ const LoginForm: React.FC = () => {
               <rect x="0" y="232" width="216" height="216" fill="#00A4EF" />
               <rect x="232" y="232" width="216" height="216" fill="#FFB900" />
             </svg>
-            Sign in with Microsoft
+           Login in with IOM Account
             </button>
         </div>
       ) : (

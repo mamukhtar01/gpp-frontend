@@ -12,7 +12,7 @@ export default async function LoginPage() {
             <div>
               <Image src="/iom-logo.svg" alt="IOM logo" width={100} height={47} />
             </div>
-            <h1 className="text-2xl font-bold">IOM Payment Platform</h1>
+            <h1 className="ml-4 text-2xl font-bold">IOM Payment Platform</h1>
           </a>
         </div>
 
