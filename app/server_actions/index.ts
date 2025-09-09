@@ -1,7 +1,7 @@
 "use server";
 
 import client from "@/lib/directus";
-import { createItem, readItems } from "@directus/sdk";
+import { createItem, readItems, updateItem } from "@directus/sdk";
 import {
   TTxnReportResponseSuccess,
   TCaseSearchResult,
@@ -36,8 +36,6 @@ export async function generateQr(
 // Payment Actions
 
 export async function getPaymentsAction() {
- 
-
   try {
     const data = await client.request(
       readItems("Payments", {
@@ -86,13 +84,39 @@ export async function createPayment(body: TPaymentPayload) {
   }
 }
 
+// Update Payment Status
+
+export async function updatePaymentStatus({
+  paymentId,
+  status,
+  payerInfo
+}: {
+  paymentId: string;
+  payerInfo:  string;
+  status: number;
+}) {
+  console.log("Updating payment status:", { paymentId, status });
+
+  try {
+    const response = await client.request(
+      updateItem("Payments", paymentId, { status, payerInfo })
+    );
+    return response;
+  } catch (error) {
+    console.error("Error updating payment status:", error);
+    throw new Error("Failed to update payment status");
+  }
+}
+
 // Verify Payment Transaction
 
 export async function verifyPaymentTxn({
   validationTraceId,
 }: {
   validationTraceId: string;
-}): Promise<TTxnReportResponseSuccess | TTxnReportResponseFailure | { error: string }> {
+}): Promise<
+  TTxnReportResponseSuccess | TTxnReportResponseFailure | { error: string }
+> {
   try {
     const username = process.env.NEPALQR_USERNAME;
     const password = process.env.NEPALQR_PASSWORD;

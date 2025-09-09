@@ -1,4 +1,4 @@
-import { verifyPaymentTxn } from "@/app/server_actions";
+import { updatePaymentStatus, verifyPaymentTxn } from "@/app/server_actions";
 import { TPaymentRecord, TTxnReportResponseFailure } from "@/app/types";
 import client from "@/lib/directus";
 import { readItems } from "@directus/sdk";
@@ -56,8 +56,28 @@ export default async function PaymentConfirmationPage({
     throw new Error("Failed to verify payment transaction.");
   }
 
+// get transaction body
+const txn = transactionReport.responseBody[0];
 
-  const txn = transactionReport.responseBody[0]
+  // Update payment status in Directus to 'completed' (status = 1)
+
+ if(transactionReport.responseCode === "200" && transactionReport.responseStatus === "SUCCESS"){
+
+  const paymentId = response[0].id;
+  const payerInfo = txn.payerName;
+  if(!paymentId) throw new Error("No payment ID found for this payment.");
+
+   const result =   await updatePaymentStatus({
+    paymentId: paymentId!,
+    status: 2,
+    payerInfo
+   });
+
+   console.log("Payment status updated:", result);
+
+ }
+
+
 
   return (
     <div className="flex items-center justify-center bg-gray-50 p-6">

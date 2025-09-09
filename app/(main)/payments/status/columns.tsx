@@ -144,7 +144,7 @@ export const columns: ColumnDef<TPaymentRecord>[] = [
           >
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(payment.id)}
+              onClick={() => navigator.clipboard.writeText(payment.case_id)}
             >
               Copy ID
             </DropdownMenuItem>
