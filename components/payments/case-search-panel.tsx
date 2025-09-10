@@ -71,11 +71,11 @@ export function CaseSearchPanel() {
         paidAmount: selectedCase?.package_price ?? "0",
         qr_string: qrString,
       };
-      console.log("Creating payment record with:", paymentRecord);
+
+      // Create payment record in the database
       const paymentRes = await createPayment(paymentRecord);
-
-      console.log("Payment Creation Response:", paymentRes);
-
+ 
+      
       if (!paymentRes) {
         throw new Error("Failed to create payment record");
       }
