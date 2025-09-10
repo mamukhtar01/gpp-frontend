@@ -17,7 +17,7 @@ export default async function PaymentsPage() {
           <CaseSearchPanel />
         </TabsContent>
         <TabsContent value="uktb">
-         UKTB - Not implemented yet
+        <CaseSearchPanel />
         </TabsContent>
         <TabsContent value="jims">
           JIMS - Not implemented yet
