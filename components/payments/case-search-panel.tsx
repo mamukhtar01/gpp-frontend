@@ -141,10 +141,10 @@ export function CaseSearchPanel() {
             <button
               onClick={handleQRGenerateAndCreatePayment}
               disabled={loading}
-              className="px-4 flex justify-center  py-4 rounded border border-gray-700 text-gray-700 hover:bg-gray-200 hover:cursor-pointer hover:font-semibold"
+              className="px-4 flex justify-center  py-4 rounded border border-blue-800 text-blue-800 hover:bg-gray-200 hover:cursor-pointer hover:font-semibold"
             >
               {loading ? "Generating..." : "Generate Nepal QR"}
-              <QrCode className="ml-2" />
+              <QrCode className="ml-2 text-blue-800" />
             </button>
 
             <button

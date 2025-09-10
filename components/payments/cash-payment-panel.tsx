@@ -64,7 +64,7 @@ export function CashPaymentPanel() {
   }
 
   return (
-    <div className="p-8 bg-white rounded shadow w-full max-w-3xl">
+    <div className="p-8 bg-white rounded shadow w-full max-w-3xl ">
       <CaseSearchCombobox setSelectedCase={setSelectedCase} />
       <Separator className="my-8" />
       {selectedCase && (
@@ -102,10 +102,10 @@ export function CashPaymentPanel() {
             <button
               onClick={handleCashPayment}
               disabled={loading}
-              className="px-4 flex justify-center  py-4 rounded border border-gray-700 text-gray-700 hover:bg-gray-200 hover:cursor-pointer hover:font-semibold"
+              className="px-4 flex justify-center  py-4 rounded border border-blue-800 text-blue-800 hover:bg-gray-200 hover:cursor-pointer hover:font-semibold"
             >
               {loading ? "Creating Payment Record..." : "Create Cash Payment"}
-              <Banknote className="ml-2" />
+              <Banknote className="ml-2 text-blue-800" />
             </button>
 
             <button
