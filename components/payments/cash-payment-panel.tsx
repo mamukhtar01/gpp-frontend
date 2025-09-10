@@ -6,9 +6,8 @@ import { Separator } from "@radix-ui/react-separator";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import {Banknote } from "lucide-react";
+import { Banknote } from "lucide-react";
 import { createPayment } from "@/app/server_actions";
-
 
 export function CashPaymentPanel() {
   const [selectedCase, setSelectedCase] = useState<TCase | null>(null);
@@ -16,15 +15,11 @@ export function CashPaymentPanel() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
-
   //
 
   async function handleCashPayment() {
-
     setLoading(true);
     try {
-     
-     
       // create payment record.
 
       const paymentRecord = {
@@ -33,7 +28,7 @@ export function CashPaymentPanel() {
           Number(selectedCase?.package_price ?? 0) / 132
         ).toFixed(2), // example conversion
         amount_in_local_currency: selectedCase?.package_price ?? "0",
-        type_of_payment: 2, // assuming 1 represents Nepal QR
+        type_of_payment: 3, // assuming 3 represents Cash Payment
         date_of_payment: new Date().toISOString(),
         transaction_id: `TXN-${Date.now()}`, // example transaction ID
         status: 2, // initial status (e.g., payment completed)
@@ -44,16 +39,11 @@ export function CashPaymentPanel() {
         qr_string: "",
       };
 
-
       const paymentRes = await createPayment(paymentRecord);
-
-    
 
       if (!paymentRes) {
         throw new Error("Failed to create payment record");
       }
-
-     
 
       router.push(`/payments/cash/${selectedCase?.id}`);
     } catch (e: unknown) {
