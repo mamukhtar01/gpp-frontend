@@ -7,7 +7,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Banknote } from "lucide-react";
-import { createPayment } from "@/app/server_actions";
+import { createPayment, updateCaseStatus } from "@/app/server_actions";
 
 export function CashPaymentPanel() {
   const [selectedCase, setSelectedCase] = useState<TCase | null>(null);
@@ -44,6 +44,19 @@ export function CashPaymentPanel() {
       if (!paymentRes) {
         throw new Error("Failed to create payment record");
       }
+
+      
+      // update case status to "Paid"
+      const updateRes = await updateCaseStatus({
+        caseId: selectedCase?.id ?? "",
+        case_status: 2, // assuming 2 represents "Paid"
+      });
+
+      if (!updateRes) {
+        throw new Error("Failed to update case status");
+      }
+
+      // Redirect to confirmation page
 
       router.push(`/payments/cash/${selectedCase?.id}`);
     } catch (e: unknown) {

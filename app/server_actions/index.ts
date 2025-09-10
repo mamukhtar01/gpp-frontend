@@ -11,6 +11,9 @@ import {
   TTxnReportResponseFailure,
 } from "@/app/types";
 
+
+// Case Actions
+
 // Fetch case list on the server (replace with your data source)
 export async function getCases(): Promise<TCaseSearchResult[]> {
   // Example: fetch from DB or API
@@ -18,6 +21,30 @@ export async function getCases(): Promise<TCaseSearchResult[]> {
   if (!res.ok) throw new Error("Failed to fetch cases");
   return res.json();
 }
+
+export async function updateCaseStatus({
+  caseId,
+  case_status,
+ 
+}: {
+  caseId: string;
+  case_status: number;
+}) {
+  console.log("Updating case status:", { caseId, case_status });
+
+  try {
+    const response = await client.request(
+      updateItem("Cases", caseId, { case_status })
+    );
+    return response;
+  } catch (error) {
+    console.error("Error updating case status:", error);
+    throw new Error("Failed to update case status");
+  }
+}
+
+
+// QR Code Actions
 
 // Generate QR on the server
 export async function generateQr(
