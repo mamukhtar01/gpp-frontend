@@ -92,11 +92,11 @@ export default function ReceiptActions({
   };
 
   return (
-    <div className="flex gap-3 justify-end mt-4">
+    <div className="flex gap-3 justify-between mt-4 ">
       <Button variant="outline" onClick={handleGoBack} size="sm">
         Go back
       </Button>
-      <Button onClick={handlePrint} size="sm">
+      <Button onClick={handlePrint} size="sm" variant={"outline"}>
         Print receipt
       </Button>
     </div>

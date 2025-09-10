@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { TPaymentRecord } from "@/app/types";
 import ReceiptActions from "@/components/custom/receipt-actions";
+import PaymentNotCompleted from "@/components/custom/payment-not-completed";
 
 export default async function PaymentConfirmationPage({
   params,
@@ -29,8 +30,9 @@ export default async function PaymentConfirmationPage({
     throw new Error("No payment record found for this case_id.");
   }
 
-  if (response[0].type_of_payment !== 2) {
-    throw new Error("payment failed");
+  if (response[0].status !== 2) {
+    // if status !== 2, payment is failed. render payment failed component
+  return <PaymentNotCompleted caseDetails={response[0]} />;
   }
 
   const payment = response[0];
@@ -60,11 +62,7 @@ export default async function PaymentConfirmationPage({
           </div>
           <div className="flex justify-between text-sm">
             <span className="font-medium">Type of Payment</span>
-            {payment.type_of_payment === 2 ? (
-              <span>Cash Payment</span>
-            ) : (
-              <span>Unknown</span>
-            )}
+          <PaymentType type_of_payment={payment.type_of_payment} />
           </div>
           <div className="flex justify-between text-sm">
             <span className="font-medium">Transaction Ref:</span>
@@ -81,6 +79,7 @@ export default async function PaymentConfirmationPage({
             <span>{payment.amount_in_local_currency}</span>
           </div>
           {/* Receipt action buttons (client component) */}
+          <Separator className="my-8 border-dashed border-gray-300 border-b-2" />
           <ReceiptActions
             receipt={{
               payerInfo: payment.payerInfo ?? undefined,
@@ -96,4 +95,22 @@ export default async function PaymentConfirmationPage({
       </Card>
     </div>
   );
+}
+
+
+
+
+function PaymentType({ type_of_payment }: { type_of_payment: number }) {
+  switch (type_of_payment) {
+    case 1:
+      return <span>Bank Deposit</span>;
+    case 2:
+      return <span>Nepal QR Payment</span>;
+    case 3:
+      return <span>Cash Payment</span>;
+    case 4:
+        return <span>Card Payment</span>;
+    default:
+      return <span>Unknown</span>;
+  } 
 }

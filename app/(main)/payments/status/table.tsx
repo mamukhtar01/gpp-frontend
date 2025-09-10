@@ -26,6 +26,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { TPaymentRecord } from "./columns";
+import { useRouter } from "next/navigation";
 
 export function DataTable({
   data,
@@ -34,6 +35,10 @@ export function DataTable({
   data: TPaymentRecord[];
   columns: ColumnDef<TPaymentRecord>[];
 }) {
+
+
+  const router = useRouter();
+
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -97,7 +102,10 @@ export function DataTable({
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   className="hover:cursor-pointer hover:bg-gray-200"
-                  onClick={() => console.log(row)}
+                  onClick={() => {
+                    
+                    router.push(`/payments/cash/${row.original.case_id}`);
+                  }}
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                 >
