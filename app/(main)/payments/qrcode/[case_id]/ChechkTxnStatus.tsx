@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import forge from 'node-forge';
 
 const NCHL_PUBLIC_KEY = `
@@ -75,7 +75,7 @@ const CheckTxnStatus: React.FC<CheckTxnStatusProps> = ({ payload, onResult, auto
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
 
-  const runWebSocket = async () => {
+  const runWebSocket = useCallback(async () => {
     setResult('');
     setError('');
     setLoading(true);
@@ -109,16 +109,16 @@ const CheckTxnStatus: React.FC<CheckTxnStatusProps> = ({ payload, onResult, auto
       if (onResult) onResult('WebSocket error: ' + e);
     }
     setLoading(false);
-  };
+  }, [payload, onResult]);
 
   useEffect(() => {
     if (autoRun) {
       runWebSocket();
     }
     // If you want to re-run when payload changes, uncomment below:
-    // eslint-disable-next-line
+   
     // }, [payload]);
-  }, []);
+  }, [autoRun, runWebSocket]);
 
   return (
     <div>
