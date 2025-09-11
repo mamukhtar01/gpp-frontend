@@ -1,4 +1,4 @@
-import { CaseSearchPanel } from "@/components/payments/case-search-panel";
+import { QrCodePaymentPanel } from "@/components/payments/qrcode-payment-panel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default async function PaymentsPage() {
@@ -14,13 +14,13 @@ export default async function PaymentsPage() {
         </TabsList>
         <TabsContent value="mimosa">
           {/* MiMOSA Payment Case Search Panel */}
-          <CaseSearchPanel />
+          <QrCodePaymentPanel />
         </TabsContent>
         <TabsContent value="uktb">
-        <CaseSearchPanel />
+        <QrCodePaymentPanel />
         </TabsContent>
         <TabsContent value="jims">
-        <CaseSearchPanel />
+        <QrCodePaymentPanel />
         </TabsContent>
       </Tabs>
      

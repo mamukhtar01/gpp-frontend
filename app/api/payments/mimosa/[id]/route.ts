@@ -2,7 +2,7 @@ import client from "@/lib/directus";
 import { readItems } from "@directus/sdk";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(res: NextRequest, { params }: { params: { id: string } }
+export async function GET(res: NextRequest, { params }: { params: Promise<{ id: string }> }
 ) {
     const { id } = await params;
 

@@ -13,7 +13,7 @@ import PaymentNotCompleted from "@/components/custom/payment-not-completed";
 export default async function PaymentConfirmationPage({
   params,
 }: {
-  params: { case_id: string };
+  params: Promise<{ case_id: string }>;
 }) {
 
   // Extract case_id from params

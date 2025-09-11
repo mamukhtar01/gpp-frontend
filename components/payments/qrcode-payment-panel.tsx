@@ -11,7 +11,7 @@ import { createPayment } from "@/app/server_actions";
 import { useCaseContext } from "@/app/(main)/payments/qrcode/caseContext";
 
 
-export function CaseSearchPanel() {
+export function QrCodePaymentPanel() {
   const [selectedCase, setSelectedCase] = useState<TCase | null>(null);
   const [reference, setReference] = useState<string>("");
   const router = useRouter();
@@ -25,6 +25,7 @@ export function CaseSearchPanel() {
     setLoading(true);
     try {
      
+      /*
       // fetch directly here since we are in a client component
       const res = await fetch("/api/payments/nepalqr", {
         method: "POST",
@@ -52,6 +53,17 @@ export function CaseSearchPanel() {
       const qrString = json.data?.qrString;
       const validationTraceId = json.data?.validationTraceId;
       const timestamp = json?.timestamp;
+
+      */
+      // create sample qrcode data
+      const qrData = {
+        qrString: "00020101021129370016A0000006770101110113006600000000023031343030303030303030303030303030303030303030303030305204000053039865407.005802NP5913GPP TESTING6008Kathmandu61051000162290525Test Reference1236304B14",
+        validationTraceId: "VALIDATION_TRACE_ID",
+        timestamp: new Date().toISOString(),
+      };
+
+      const { qrString, validationTraceId, timestamp } = qrData;
+
 
       // create payment record.
 

@@ -79,24 +79,22 @@ async function websocketClient(payload: TPayload): Promise<string> {
 }
 
 export default function CheckTxnSatus({ validationTraceId }: { validationTraceId: string  }) {
-  const runWebSocketClient = async () => {
-    try {
-      const response = await websocketClient({
-        merchant_id: "Terminal1",
-        request_id: validationTraceId,
-        username: "iomnqr",
-      });
-      console.log("WebSocket response:", response);
-    } catch (error) {
-      console.error("Error occurred while connecting to WebSocket:", error);
-    }
-
-   
-  };
-
    useEffect(() => {
+      const runWebSocketClient = async () => {
+        try {
+          const response = await websocketClient({
+            merchant_id: "Terminal1",
+            request_id: validationTraceId,
+            username: "iomnqr",
+          });
+          console.log("WebSocket response:", response);
+        } catch (error) {
+          console.error("Error occurred while connecting to WebSocket:", error);
+        }
+      };
+
       runWebSocketClient();
-    }, []);
+    }, [validationTraceId]);
 
     return <div>WebSocket Client Module</div>;
 }

@@ -16,7 +16,7 @@ import { TransactionNotCompleted } from "./failed";
 export default async function PaymentConfirmationPage({
   params,
 }: {
-  params: { case_id: string };
+  params: Promise<{ case_id: string }>;
 }) {
   const { case_id } = await params;
 
