@@ -1,0 +1,78 @@
+name: "nextjs-deploy-$(Date:yyyyMMdd)-$(Rev:.r)"
+
+pr:
+  branches:
+    include:
+      - main
+trigger:
+  branches:
+    include:
+      - main
+
+jobs:
+- job: build_and_deploy_job
+  displayName: Build and Deploy Job
+  condition: or(
+      eq(variables['Build.Reason'], 'Manual'),
+      eq(variables['Build.Reason'], 'PullRequest'),
+      eq(variables['Build.Reason'], 'IndividualCI')
+    )
+  pool:
+    vmImage: ubuntu-latest
+
+  variables:
+    - group: Azure-Static-Web-Apps-white-island-01bcee203-variable-group
+
+  steps:
+  - checkout: self
+    submodules: true
+
+  # Export all env vars for build
+  - script: |
+      echo "##vso[task.setvariable variable=NEXT_PUBLIC_DIRECTUS_URL]$(NEXT_PUBLIC_DIRECTUS_URL)"
+      echo "##vso[task.setvariable variable=DIRECTUS_ACCESS_TOKEN]$(DIRECTUS_ACCESS_TOKEN)"
+      echo "##vso[task.setvariable variable=DIRECTUS_REFRESH_TOKEN]$(DIRECTUS_REFRESH_TOKEN)"
+      echo "##vso[task.setvariable variable=NEPALQR_AUTH]$(NEPALQR_AUTH)"
+      echo "##vso[task.setvariable variable=NEPALQR_URL]$(NEPALQR_URL)"
+      echo "##vso[task.setvariable variable=NEPALQR_VERIFY_URL]$(NEPALQR_VERIFY_URL)"
+      echo "##vso[task.setvariable variable=ACQUIRERID]$(ACQUIRERID)"
+      echo "##vso[task.setvariable variable=MERCHANTCODE]$(MERCHANTCODE)"
+      echo "##vso[task.setvariable variable=MERCHANTNAME]$(MERCHANTNAME)"
+      echo "##vso[task.setvariable variable=MERCHANTCATEGORYCODE]$(MERCHANTCATEGORYCODE)"
+      echo "##vso[task.setvariable variable=NEPALQR_USER_ID]$(NEPALQR_USER_ID)"
+      echo "##vso[task.setvariable variable=NEPALQR_USERNAME]$(NEPALQR_USERNAME)"
+      echo "##vso[task.setvariable variable=NEPALQR_PASSWORD]$(NEPALQR_PASSWORD)"
+      echo "##vso[task.setvariable variable=MERCHANTCOUNTRY]$(MERCHANTCOUNTRY)"
+      echo "##vso[task.setvariable variable=MERCHANTCITY]$(MERCHANTCITY)"
+      echo "##vso[task.setvariable variable=MERCHANTPOSTALCODE]$(MERCHANTPOSTALCODE)"
+      echo "##vso[task.setvariable variable=MERCHANTLANGUAGE]$(MERCHANTLANGUAGE)"
+      echo "##vso[task.setvariable variable=TRANSACTIONCURRENCY]$(TRANSACTIONCURRENCY)"
+      echo "##vso[task.setvariable variable=NEXT_PRIVATE_KEY_PEM_B64]$(NEXT_PRIVATE_KEY_PEM_B64)"
+    displayName: "Export env vars for build"
+
+  - task: AzureStaticWebApp@0
+    env:
+      NEXT_PUBLIC_DIRECTUS_URL: $(NEXT_PUBLIC_DIRECTUS_URL)
+      DIRECTUS_ACCESS_TOKEN: $(DIRECTUS_ACCESS_TOKEN)
+      DIRECTUS_REFRESH_TOKEN: $(DIRECTUS_REFRESH_TOKEN)
+      NEPALQR_AUTH: $(NEPALQR_AUTH)
+      NEPALQR_URL: $(NEPALQR_URL)
+      NEPALQR_VERIFY_URL: $(NEPALQR_VERIFY_URL)
+      ACQUIRERID: $(ACQUIRERID)
+      MERCHANTCODE: $(MERCHANTCODE)
+      MERCHANTNAME: $(MERCHANTNAME)
+      MERCHANTCATEGORYCODE: $(MERCHANTCATEGORYCODE)
+      NEPALQR_USER_ID: $(NEPALQR_USER_ID)
+      NEPALQR_USERNAME: $(NEPALQR_USERNAME)
+      NEPALQR_PASSWORD: $(NEPALQR_PASSWORD)
+      MERCHANTCOUNTRY: $(MERCHANTCOUNTRY)
+      MERCHANTCITY: $(MERCHANTCITY)
+      MERCHANTPOSTALCODE: $(MERCHANTPOSTALCODE)
+      MERCHANTLANGUAGE: $(MERCHANTLANGUAGE)
+      TRANSACTIONCURRENCY: $(TRANSACTIONCURRENCY)
+      NEXT_PRIVATE_KEY_PEM_B64: $(NEXT_PRIVATE_KEY_PEM_B64)
+    inputs:
+      azure_static_web_apps_api_token: $(AZURE_STATIC_WEB_APPS_API_TOKEN_WHITE_ISLAND_01BCEE203)
+      app_location: "/"
+      api_location: ""
+      output_location: ""
