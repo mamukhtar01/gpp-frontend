@@ -68,7 +68,8 @@ jobs:
     env:
       # Build-time / frontend
       NEXT_PUBLIC_DIRECTUS_URL: "https://iom-ppo-directus-dev.iom.int"
-      DIRECTUS_URL: "https://iom-ppo-directus-dev.iom.int"      NEPALQR_URL: $(NEPALQR_URL)
+      DIRECTUS_URL: "https://iom-ppo-directus-dev.iom.int"
+      NEPALQR_URL: $(NEPALQR_URL)
       NEPALQR_VERIFY_URL: $(NEPALQR_VERIFY_URL)
       NEPALQR_USERNAME: $(NEPALQR_USERNAME)
       NEPALQR_PASSWORD: $(NEPALQR_PASSWORD)
