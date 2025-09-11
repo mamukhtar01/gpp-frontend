@@ -27,9 +27,22 @@ jobs:
   - checkout: self
     submodules: true
 
-  # Export all env vars for build
+  # Debug step: check which env vars are empty
+  - script: |
+      echo "🔹 NEXT_PUBLIC_DIRECTUS_URL = '$(NEXT_PUBLIC_DIRECTUS_URL)'"
+      echo "🔹 DIRECTUS_URL = '$(DIRECTUS_URL)'"
+      echo "🔹 DIRECTUS_ACCESS_TOKEN = '$(DIRECTUS_ACCESS_TOKEN)'"
+      echo "🔹 DIRECTUS_REFRESH_TOKEN = '$(DIRECTUS_REFRESH_TOKEN)'"
+      echo "🔹 NEPALQR_URL = '$(NEPALQR_URL)'"
+      echo "🔹 NEPALQR_VERIFY_URL = '$(NEPALQR_VERIFY_URL)'"
+      echo "🔹 NEPALQR_USERNAME = '$(NEPALQR_USERNAME)'"
+      echo "🔹 NEPALQR_PASSWORD = '$(NEPALQR_PASSWORD)'"
+    displayName: "Check env vars for build"
+
+  # Export variables for build
   - script: |
       echo "##vso[task.setvariable variable=NEXT_PUBLIC_DIRECTUS_URL]$(NEXT_PUBLIC_DIRECTUS_URL)"
+      echo "##vso[task.setvariable variable=DIRECTUS_URL]$(DIRECTUS_URL)"
       echo "##vso[task.setvariable variable=DIRECTUS_ACCESS_TOKEN]$(DIRECTUS_ACCESS_TOKEN)"
       echo "##vso[task.setvariable variable=DIRECTUS_REFRESH_TOKEN]$(DIRECTUS_REFRESH_TOKEN)"
       echo "##vso[task.setvariable variable=NEPALQR_AUTH]$(NEPALQR_AUTH)"
@@ -50,27 +63,32 @@ jobs:
       echo "##vso[task.setvariable variable=NEXT_PRIVATE_KEY_PEM_B64]$(NEXT_PRIVATE_KEY_PEM_B64)"
     displayName: "Export env vars for build"
 
+  # Build & deploy task
   - task: AzureStaticWebApp@0
     env:
+      # Build-time / frontend
       NEXT_PUBLIC_DIRECTUS_URL: $(NEXT_PUBLIC_DIRECTUS_URL)
+      NEPALQR_URL: $(NEPALQR_URL)
+      NEPALQR_VERIFY_URL: $(NEPALQR_VERIFY_URL)
+      NEPALQR_USERNAME: $(NEPALQR_USERNAME)
+      NEPALQR_PASSWORD: $(NEPALQR_PASSWORD)
+      NEXT_PRIVATE_KEY_PEM_B64: $(NEXT_PRIVATE_KEY_PEM_B64)
+      
+      # Server-side / runtime
+      DIRECTUS_URL: $(DIRECTUS_URL)
       DIRECTUS_ACCESS_TOKEN: $(DIRECTUS_ACCESS_TOKEN)
       DIRECTUS_REFRESH_TOKEN: $(DIRECTUS_REFRESH_TOKEN)
       NEPALQR_AUTH: $(NEPALQR_AUTH)
-      NEPALQR_URL: $(NEPALQR_URL)
-      NEPALQR_VERIFY_URL: $(NEPALQR_VERIFY_URL)
       ACQUIRERID: $(ACQUIRERID)
       MERCHANTCODE: $(MERCHANTCODE)
       MERCHANTNAME: $(MERCHANTNAME)
       MERCHANTCATEGORYCODE: $(MERCHANTCATEGORYCODE)
       NEPALQR_USER_ID: $(NEPALQR_USER_ID)
-      NEPALQR_USERNAME: $(NEPALQR_USERNAME)
-      NEPALQR_PASSWORD: $(NEPALQR_PASSWORD)
       MERCHANTCOUNTRY: $(MERCHANTCOUNTRY)
       MERCHANTCITY: $(MERCHANTCITY)
       MERCHANTPOSTALCODE: $(MERCHANTPOSTALCODE)
       MERCHANTLANGUAGE: $(MERCHANTLANGUAGE)
       TRANSACTIONCURRENCY: $(TRANSACTIONCURRENCY)
-      NEXT_PRIVATE_KEY_PEM_B64: $(NEXT_PRIVATE_KEY_PEM_B64)
     inputs:
       azure_static_web_apps_api_token: $(AZURE_STATIC_WEB_APPS_API_TOKEN_WHITE_ISLAND_01BCEE203)
       app_location: "/"
