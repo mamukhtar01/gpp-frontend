@@ -35,7 +35,8 @@ export default async function LoginPage() {
         <Image
           src="/bg-vertical.png"
           alt="Global Payment Platform"
-          fill
+          width={600}
+          height={1000}
           className="object-cover"
           priority
         />
