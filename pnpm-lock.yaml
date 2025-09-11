@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@directus/sdk':
-        specifier: ^20.0.3
-        version: 20.0.3
+        specifier: ^19.1.0
+        version: 19.1.0
       '@hookform/resolvers':
         specifier: ^5.2.1
         version: 5.2.1(react-hook-form@7.62.0(react@19.1.0))
@@ -161,8 +161,8 @@ packages:
     resolution: {integrity: sha512-9uIQ10o0WGdpP6GDhXcdOJPJuDgFtIDtN/9+ArJQ2NAfAmiuhTQdzkaTGR33v43GYS2UrSA0eX2pPPHoFVvpxA==}
     engines: {node: '>=6.9.0'}
 
-  '@directus/sdk@20.0.3':
-    resolution: {integrity: sha512-PFTYx8QxYi36L9zjOVldwZ88Iln9pBGtEamEjLGFuYqy1jk5jKJ7qA7827KfeZJkz3EtNNZM6J605I7s/ayD2g==}
+  '@directus/sdk@19.1.0':
+    resolution: {integrity: sha512-Nqem9BsvvGyVtAa69mGPtoMoMVkZxdIREdsWvvTzNF4/1XqaFfEiFL7PhtUNfc46/Nufus2+QUKYQbNiAWe3ZA==}
     engines: {node: '>=22'}
 
   '@emnapi/core@1.5.0':
@@ -2646,7 +2646,7 @@ snapshots:
 
   '@babel/runtime@7.28.3': {}
 
-  '@directus/sdk@20.0.3': {}
+  '@directus/sdk@19.1.0': {}
 
   '@emnapi/core@1.5.0':
     dependencies:
