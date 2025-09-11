@@ -1,23 +1,22 @@
-import Image from "next/image"
-import LoginForm from "@/components/custom/login-form"
+import Image from "next/image";
+import LoginForm from "@/components/custom/login-form";
 
 export default async function LoginPage() {
   return (
-    <div
-      className="grid lg:[grid-template-columns:1fr_1px_1fr]"
-    >
-      <div className="flex flex-col gap-4 p-6 md:p-10">
-        <div className="flex justify-center gap-2 md:justify-start">
-          <a href="#" className="flex items-center gap-2 font-medium">
-            <div>
-              <Image src="/iom-logo.svg" alt="IOM logo" width={100} height={47} />
-            </div>
-            <h1 className="ml-4 text-2xl font-bold">IOM Payment Platform</h1>
-          </a>
-        </div>
-
-        <div className="flex flex-1 items-center justify-center min-h-[50vh]">
-          <div className="w-full max-w-xs">
+    <div className="grid lg:[grid-template-columns:1fr_1px_1fr]">
+      <div className="flex flex-col ">
+        <div className="flex flex-1 flex-col items-center justify-center min-h-[50vh]">
+          <div className="">
+            <Image
+              src="/logo-blue.png"
+              alt="Global Payment Platform"
+              width={300}
+              height={100}  
+              className="object-cover"
+              priority
+            />
+          </div>
+          <div className="w-full flex justify-center max-w-xs mt-4">
             <LoginForm />
           </div>
         </div>
@@ -30,18 +29,17 @@ export default async function LoginPage() {
       <div
         className="relative hidden lg:block w-full overflow-hidden"
         style={{
-          height:
-            "calc(-125px + 115vh)", // Adjust 190px based on your header + footer heights
+          height: "calc(-125px + 115vh)", // Adjust 190px based on your header + footer heights
         }}
       >
         <Image
-          src="/login-bg.jpg"
-          alt="Login background"                 
+          src="/bg-vertical.png"
+          alt="Global Payment Platform"
           fill
           className="object-cover"
           priority
         />
       </div>
     </div>
-  )
+  );
 }

@@ -3,6 +3,18 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --brand: #0033a0;
+  /* Brand color plate for #0033a0 */
+  --brand-50: #e9eefc;
+  --brand-100: #cfe0fa;
+  --brand-200: #9dbff6;
+  --brand-300: #6b9ff0;
+  --brand-400: #3b7fe8;
+  --brand-500: #0033a0;
+  --brand-600: #002b85;
+  --brand-700: #002063;
+  --brand-800: #00143f;
+  --brand-900: #000920;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   /* --font-gillsansnova is provided by next/font's generated class on <html> */

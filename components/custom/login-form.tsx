@@ -3,43 +3,32 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 
 const LoginForm: React.FC = () => {
-  const [user, ] = useState<{ name: string } | null>(null);
+  const [user] = useState<{ name: string } | null>(null);
   const router = useRouter();
-   const handleSSOLogin = async () => {
-
+  const handleSSOLogin = async () => {
     // Redirect to your backend SSO endpoint
     //window.location.href = "https://iom-ppo-directus-dev.iom.int/auth/login/azure";
 
     // go home
 
-  
-    router.push("/")
-  
-
+    router.push("/");
   };
 
-
-
   return (
-    <div style={{ textAlign: "center", marginTop: "50px" }}>
+    <div>
       {!user ? (
         <div>
-            <button
-           
+          <button
             onClick={handleSSOLogin}
             style={{
               display: "flex",
               alignItems: "center",
-              backgroundColor: "#fff",
-              color: "#2F2F2F",
-              border: "1px solid #2F2F2F",
               padding: "10px 20px",
               borderRadius: "5px",
               cursor: "pointer",
             }}
-            className="hover:bg-gray-100!"
-
-            >
+            className="hover:!bg-blue-100 hover:border-blue-600 hover:text-blue-800 transition border border-gray-300 bg-brand-200 text-brand-500 font-semibold"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 448 512"
@@ -50,12 +39,14 @@ const LoginForm: React.FC = () => {
               <rect x="0" y="232" width="216" height="216" fill="#00A4EF" />
               <rect x="232" y="232" width="216" height="216" fill="#FFB900" />
             </svg>
-           Login in with IOM Account
-            </button>
+            Login in with IOM Account
+          </button>
         </div>
       ) : (
         <div className="bg-gray-100 p-4 rounded">
-          <h2>Welcome, <span className="font-bold">{user.name}</span>!</h2>
+          <h2>
+            Welcome, <span className="font-bold">{user.name}</span>!
+          </h2>
         </div>
       )}
     </div>
