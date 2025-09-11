@@ -3,6 +3,10 @@ import {DbSchema} from './schema';
 
 const url = process.env.DIRECTUS_URL ?? process.env.NEXT_PUBLIC_DIRECTUS_URL
 
+if (!url) {
+  throw new Error("DIRECTUS_URL or NEXT_PUBLIC_DIRECTUS_URL is not defined");
+}
+
 const client = createDirectus<DbSchema>(url!)
   .with(rest())
   .with(authentication("cookie", { credentials: "include" }));
