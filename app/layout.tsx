@@ -1,6 +1,46 @@
-import Head from "next/head";
+import localFont from "next/font/local";
 import "./_css/globals.css";
 import { Metadata } from "next";
+
+const gillSansNova = localFont({
+  src: [
+    {
+      path: "../public/fonts/GillSansNova-Book.otf",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/GillSansNova-BookItalic.otf",
+      weight: "400",
+      style: "italic",
+    },
+    {
+      path: "../public/fonts/GillSansNova-Light.otf",
+      weight: "300",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/GillSansNova-LightItalic.otf",
+      weight: "300",
+      style: "italic",
+    },
+    {
+      path: "../public/fonts/GillSansNova-SemiBold.otf",
+      weight: "600",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/GillSansNova-SemiBoldItalic.otf",
+      weight: "600",
+      style: "italic",
+    },
+  ],
+  variable: "--font-gillsansnova", // Creates CSS variable
+  display: "swap", // improves rendering
+})
+
+
+
 
 type Props = {
   children: React.ReactNode;
@@ -9,22 +49,15 @@ type Props = {
 export const metadata: Metadata = {
   title: "IOM - GPP",
   description: "IOM Global Payment Platform",
-  
+  icons: {
+    icon: '/logo.png',
+  },
 };
 
 export default function RootLayout({ children }: Props) {
   return (
-    <html lang="en" >
-      <Head>
-        <title>IOM - PPO</title>
-        <link rel="icon" href="/logo.png" />
-        <meta name="viewport" content="width=device-width,initial-scale=1" />
-        <meta
-          name="description"
-          content="GPP Payments — generate QR and other payment methods"
-        />
-      </Head>
-      <body > {children} </body>
+    <html lang="en" className={gillSansNova.variable}>
+  <body>{children}</body>
     </html>
   );
 }
