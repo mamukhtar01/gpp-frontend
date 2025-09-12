@@ -6,8 +6,7 @@ trigger:
 variables:
   imageName: gpp-frontend-app
   tag: $(Build.BuildId)
-  NEXT_PUBLIC_API_URL: $(NEXT_PUBLIC_API_URL)   # pipeline variables
-  DATABASE_URL: $(DATABASE_URL)               # pipeline variables
+  NEXT_PUBLIC_DIRECTUS_URL: $(NEXT_PUBLIC_DIRECTUS_URL)   # pipeline variables
 
 stages:
 - stage: BuildAndPush
@@ -20,21 +19,20 @@ stages:
     steps:
     - task: AzureCLI@2
       inputs:
-        azureSubscription: '<your-azure-service-connection>'
+        azureSubscription: 'IOM-Dev Test'
         scriptType: bash
         scriptLocation: inlineScript
         inlineScript: |
           echo "Logging in to Azure Container Registry..."
-          az acr login --name <your-acr-name>
+          az acr login --name acrppodev
 
           echo "Building Docker image with build-time env vars..."
           docker build \
-            --build-arg NEXT_PUBLIC_API_URL=$(NEXT_PUBLIC_API_URL) \
-            --build-arg DATABASE_URL=$(DATABASE_URL) \
-            -t <your-acr-name>.azurecr.io/$(imageName):$(tag) .
+            --build-arg NEXT_PUBLIC_DIRECTUS_URL=$(NEXT_PUBLIC_DIRECTUS_URL) \
+            -t acrppodev.azurecr.io/$(imageName):$(tag) .
 
           echo "Pushing Docker image..."
-          docker push <your-acr-name>.azurecr.io/$(imageName):$(tag)
+          docker push acrppodev.azurecr.io/$(imageName):$(tag)
 
 - stage: Deploy
   displayName: Deploy to Azure App Service
@@ -48,7 +46,7 @@ stages:
     - task: AzureWebAppContainer@1
       displayName: Deploy to App Service
       inputs:
-        azureSubscription: '<your-azure-service-connection>'
-        appName: '<your-app-service-name>'
+        azureSubscription: 'IOM-Dev Test'
+        appName: 'gpp-frontend-app'
         containers: |
-          <your-acr-name>.azurecr.io/$(imageName):$(tag)
+          acrppodev.azurecr.io/$(imageName):$(tag)

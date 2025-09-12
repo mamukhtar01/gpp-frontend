@@ -1,8 +1,7 @@
 .next
 Dockerfile
 *.log
-*.yml
-*.yaml
+azure*
 node_modules
 npm-debug.log
 .DS_Store
