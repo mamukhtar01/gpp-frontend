@@ -1,0 +1,54 @@
+trigger:
+  branches:
+    include:
+      - main  # adjust to your default branch
+
+variables:
+  imageName: gpp-frontend-app
+  tag: $(Build.BuildId)
+  NEXT_PUBLIC_API_URL: $(NEXT_PUBLIC_API_URL)   # pipeline variables
+  DATABASE_URL: $(DATABASE_URL)               # pipeline variables
+
+stages:
+- stage: BuildAndPush
+  displayName: Build and Push Docker Image
+  jobs:
+  - job: Build
+    displayName: Build Docker Image
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: AzureCLI@2
+      inputs:
+        azureSubscription: '<your-azure-service-connection>'
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          echo "Logging in to Azure Container Registry..."
+          az acr login --name <your-acr-name>
+
+          echo "Building Docker image with build-time env vars..."
+          docker build \
+            --build-arg NEXT_PUBLIC_API_URL=$(NEXT_PUBLIC_API_URL) \
+            --build-arg DATABASE_URL=$(DATABASE_URL) \
+            -t <your-acr-name>.azurecr.io/$(imageName):$(tag) .
+
+          echo "Pushing Docker image..."
+          docker push <your-acr-name>.azurecr.io/$(imageName):$(tag)
+
+- stage: Deploy
+  displayName: Deploy to Azure App Service
+  dependsOn: BuildAndPush
+  jobs:
+  - job: Deploy
+    displayName: Deploy Docker Image to App Service
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: AzureWebAppContainer@1
+      displayName: Deploy to App Service
+      inputs:
+        azureSubscription: '<your-azure-service-connection>'
+        appName: '<your-app-service-name>'
+        containers: |
+          <your-acr-name>.azurecr.io/$(imageName):$(tag)
