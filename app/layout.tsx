@@ -1,6 +1,7 @@
 import localFont from "next/font/local";
 import "./_css/globals.css";
 import { Metadata } from "next";
+import Head from "next/head";
 
 const gillSansNova = localFont({
   src: [
@@ -48,15 +49,15 @@ type Props = {
 
 export const metadata: Metadata = {
   title: "IOM - GPP",
-  description: "IOM Global Payment Platform",
-  icons: {
-    icon: '/logo.png',
-  },
+  description: "IOM Global Payment Platform", 
 };
 
 export default function RootLayout({ children }: Props) {
   return (
     <html lang="en" className={gillSansNova.variable}>
+    <Head>
+      <link rel="icon" href="/favicon.ico" sizes="any" />
+    </Head>
   <body>{children}</body>
     </html>
   );
