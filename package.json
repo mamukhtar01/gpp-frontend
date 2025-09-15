@@ -44,12 +44,13 @@
     "@types/node": "^20.19.13",
     "@types/node-forge": "^1.3.14",
     "@types/react": "^19.1.12",
-    "@types/react-dom": "^19.1.9",
-    "eslint": "^9.35.0",
-    "eslint-config-next": "15.4.6",
-    "tailwindcss": "^4.1.13",
-    "tw-animate-css": "^1.3.8",
-    "typescript": "^5.9.2"
+  "@types/react-dom": "^19.1.9",
+  "eslint": "^9.35.0",
+  "eslint-config-next": "15.4.6",
+  "tailwindcss": "^4.1.13",
+  "autoprefixer": "^10.4.14",
+  "tw-animate-css": "^1.3.8",
+  "typescript": "^5.9.2"
   },
   "engines": {
     "node": ">=22"

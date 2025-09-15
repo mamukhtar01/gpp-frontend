@@ -20,8 +20,8 @@ export default function LayoutContainer({ children }: Props) {
             <Link href="/" className="flex items-center">
               <Image src="/iom-logo.svg" alt="IOM" width={110} height={48} />
             </Link>
-            <div className="h-10 w-0.5 bg-[#0033a0] opacity-30" />
-            <span className="text-[#0033a0] font-semibold tracking-wide">
+            <div className="h-10 w-0.5 bg-brand-600 opacity-30" />
+            <span className="text-brand-500 font-semibold tracking-wide">
               GLOBAL PAYMENT PLATFORM
             </span>
           </div>

@@ -27,7 +27,7 @@ const LoginForm: React.FC = () => {
               borderRadius: "5px",
               cursor: "pointer",
             }}
-            className="hover:!bg-blue-100 hover:border-blue-600 hover:text-blue-800 transition border border-gray-300 bg-brand-200 text-brand-500 font-semibold"
+            className="hover:bg-brand-100 hover:brand-500 transition border border-brand-300 hover:text-brand-500 font-semibold"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
