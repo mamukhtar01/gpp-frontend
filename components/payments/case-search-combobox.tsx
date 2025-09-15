@@ -90,7 +90,7 @@ export  function CaseSearchCombobox({ setSelectedCase }: { setSelectedCase: (c: 
         >
           {value
             ? cases.find((caseItem) => caseItem.id === value)?.id
-            : "Select Case Number..."}
+            : "Search Case Number..."}
           <ChevronsUpDown className="opacity-50" />
         </Button>
       </PopoverTrigger>

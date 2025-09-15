@@ -115,7 +115,7 @@ export function QrCodePaymentPanel() {
   }
 
   return (
-    <div className="p-8 bg-white rounded shadow w-full max-w-3xl">
+    <div className="p-8 bg-white rounded shadow w-full max-w-3xl min-h-[470px]">
       <CaseSearchCombobox setSelectedCase={setSelectedCase} />
       <Separator className="my-8" />
       {selectedCase && (
@@ -149,26 +149,26 @@ export function QrCodePaymentPanel() {
             }
           />
           <Separator className="my-16" />
-          <div className="flex justify-between">
-            <button
-              onClick={handleQRGenerateAndCreatePayment}
-              disabled={loading}
-              className="px-4 flex justify-center  py-4 rounded border border-blue-800 text-blue-800 hover:bg-gray-200 hover:cursor-pointer hover:font-semibold"
-            >
-              {loading ? "Generating..." : "Generate Nepal QR"}
-              <QrCode className="ml-2 text-blue-800" />
-            </button>
+                <div className="flex gap-6 mt-2 justify-between">
+                  <button
+                    onClick={handleQRGenerateAndCreatePayment}
+                    disabled={loading}
+                    className="flex items-center justify-center h-12 w-[220px] rounded-md bg-brand-500 text-white font-bold text-base shadow-sm hover:bg-brand-600 hover:cursor-pointer transition disabled:opacity-60"
+                  >
+                    {loading ? "GENERATING..." : "GENERATE NEPAL QR"}
+                    <QrCode className="ml-2 w-5 h-5" />
+                  </button>
 
-            <button
-              onClick={() => {
-                setSelectedCase(null);
-                setReference("");
-              }}
-              className="px-4 flex justify-center  py-4 rounded border border-red-700 text-red-700 hover:bg-gray-200 hover:cursor-pointer hover:font-semibold"
-            >
-              Reset Fields
-            </button>
-          </div>
+                  <button
+                    onClick={() => {
+                      setSelectedCase(null);
+                      setReference("");
+                    }}
+                    className="flex items-center justify-center h-12 w-[140px] rounded-md border border-brand-700 text-brand-500 font-bold text-base bg-white hover:cursor-pointer hover:bg-blue-50 transition"
+                  >
+                    RESET FIELD
+                  </button>
+                </div>
         </>
       )}
     </div>

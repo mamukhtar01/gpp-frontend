@@ -12,20 +12,28 @@ type Props = {
 
 export default function LayoutContainer({ children }: Props) {
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 text-black">
-      <header className="bg-white border-b border-gray-200 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2">
-            <Image src="/iom-logo.svg" alt="" width={100} height={47} />
-            <span className="ml-6 font-semibold text-lg">
-              Global Payment Platform
+    <div className="min-h-screen flex flex-col bg-[#f7f9fb] text-black">
+      <header className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          {/* Left: Logo + title */}
+          <div className="flex items-center space-x-6">
+            <Link href="/" className="flex items-center">
+              <Image src="/iom-logo.svg" alt="IOM" width={110} height={48} />
+            </Link>
+            <div className="h-10 w-0.5 bg-brand-600 opacity-30" />
+            <span className="text-brand-500 font-semibold tracking-wide">
+              GLOBAL PAYMENT PLATFORM
             </span>
-          </Link>
-          <MenuTop />
+          </div>
+
+          {/* Right: Top navigation */}
+          <div className="flex items-center justify-end">
+            <MenuTop />
+          </div>
         </div>
       </header>
 
-      <main className=" mx-auto flex-1 w-full">{children}</main>
+      <main className="mx-auto flex-1 w-full">{children}</main>
 
       <Footer />
     </div>

@@ -7,7 +7,7 @@ export default async function PaymentsPage() {
   return (
     <div className="max-w-2xl mx-auto">
       <Tabs defaultValue="mimosa" className="min-w-[800px]">
-        <TabsList className="w-full justify-center mb-4">
+        <TabsList className="w-full flex justify-start gap-4 mb-6">
           <TabsTrigger value="mimosa">MiMOSA</TabsTrigger>
           <TabsTrigger value="uktb">UKTB</TabsTrigger>
           <TabsTrigger value="jims">JIMS</TabsTrigger>
