@@ -8,24 +8,30 @@ export default async function MenuTop() {
   const userData = await getUserData();
 
   return (
-    <nav className="flex items-center space-x-4 text-sm text-gray-600">
-      <Link href="/" className="hover:text-gray-900">
-        Home
-      </Link>
-      <Link href="/payments/status" className="hover:text-gray-900">
-        Payment Status
-      </Link>
-      
+    <nav className="flex items-center text-sm text-gray-600 pr-2">
+      <div className="flex items-center space-x-6">
+        <Link href="/" className="hidden md:inline hover:text-gray-900">
+          Home
+        </Link>
 
-      {userData?.success ? (
-        <Link href="/profile" className="hover:text-gray-900">
-          {userData?.user?.first_name}  
+        <Link href="/payments/status" className="hidden md:inline hover:text-gray-900">
+          Payment Status
         </Link>
-      ) : (
-        <Link href="/login" className="hover:text-gray-900">
-          <LogIn className="h-4 w-4" />
-        </Link>
-      )}
-      </nav>
-    );
-  }
+
+        <div className="hidden md:block h-5 w-px bg-gray-200" />
+
+        <div className="flex items-center">
+          {userData?.success ? (
+            <Link href="/profile" className="hover:text-gray-900 text-sm">
+              {userData?.user?.first_name}
+            </Link>
+          ) : (
+            <Link href="/login" className="hover:text-gray-900 text-sm">
+              <LogIn className="h-4 w-4" />
+            </Link>
+          )}
+        </div>
+      </div>
+    </nav>
+  );
+}
