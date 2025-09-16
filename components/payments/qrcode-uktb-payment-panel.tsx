@@ -97,6 +97,8 @@ export function QrCodeUKTBPaymentPanel() {
         )
         .toFixed(2);
 
+      const payerInfo = ukTBCases[0]?.main_client?.first_name || "" + " " + ukTBCases[0]?.main_client?.last_name || "";
+
 
 
       // create payment record.
@@ -110,7 +112,7 @@ export function QrCodeUKTBPaymentPanel() {
         transaction_id: `TXN-${Date.now()}`, // example transaction ID
         status: 1, // initial status (e.g., payment initiated)
         validationTraceId: validationTraceId ?? "",
-        payerInfo: selectedCase?.main_client.first_name + " " + selectedCase?.main_client.last_name || "",
+        payerInfo: payerInfo,
         qr_timestamp: timestamp ?? "",
         paidAmount: selectedCase?.package_price ?? "0",
         qr_string: qrString,
@@ -191,7 +193,7 @@ export function QrCodeUKTBPaymentPanel() {
                         className="p-2 w-auto ml-auto border-0 flex-1 text-center"
                         id={`${client.id}`}
                         type="text"
-                        onChange={(e) => {}}
+                        onChange={() => {}}
                         defaultValue=""
                         placeholder="add remark"
                       />
