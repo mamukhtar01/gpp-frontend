@@ -78,7 +78,7 @@ export function QrCodePaymentPanel() {
         transaction_id: `TXN-${Date.now()}`, // example transaction ID
         status: 1, // initial status (e.g., payment initiated)
         validationTraceId: validationTraceId ?? "",
-        payerInfo: selectedCase?.main_client ?? "",
+        payerInfo: selectedCase?.main_client.first_name + " " + selectedCase?.main_client.last_name || "",
         qr_timestamp: timestamp ?? "",
         paidAmount: selectedCase?.package_price ?? "0",
         qr_string: qrString,
@@ -116,7 +116,7 @@ export function QrCodePaymentPanel() {
 
   return (
     <div className="p-8 bg-white rounded shadow w-full max-w-3xl min-h-[470px]">
-      <CaseSearchCombobox setSelectedCase={setSelectedCase} />
+      <CaseSearchCombobox setSelectedCase={setSelectedCase} type="mimosa" />
       <Separator className="my-8" />
       {selectedCase && (
         <>
@@ -129,7 +129,7 @@ export function QrCodePaymentPanel() {
           <InputCol
             label="Main Client"
             id="client"
-            value={selectedCase.main_client ?? ""}
+            value={selectedCase.main_client?.first_name + " " + selectedCase.main_client?.last_name || ""}
             placeholder="Main Client"
           />
           <InputCol

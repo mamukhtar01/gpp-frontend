@@ -24,13 +24,22 @@ export interface TCase {
   case_status: number;         
   date_created: string;         
   id: string;                   
-  main_client: string;
-  package_price: string | null;        
+  main_client: {
+    id: string;
+    first_name: string;
+    last_name: string;
+  };
+  package_price: string | null;
+  appointment_date: string | null;
+  amount_to_pay_in_dollar: string | null;
+  amount_to_pay_in_local_currency: string | null;
+  local_currency: string | null;        
 }
 
+type TCaseType = "mimosa" | "uktb" | "jims" | ""
 
 
-export  function CaseSearchCombobox({ setSelectedCase }: { setSelectedCase: (c: TCase | null) => void }) {
+export  function CaseSearchCombobox({ setSelectedCase, type }: { setSelectedCase: (c: TCase | null) => void, type: TCaseType   }) {
   const [open, setOpen] = React.useState(false)
   const [value, setValue] = React.useState("")
   const [cases, setCases] = React.useState<TCase[]>([])
@@ -52,9 +61,9 @@ export  function CaseSearchCombobox({ setSelectedCase }: { setSelectedCase: (c: 
 
     const debounce = setTimeout(async () => {
 
-      console.log("Searching cases for:", search)
+     
       try {
-        const res = await fetch(`/api/cases?search=${encodeURIComponent(search)}`, {
+        const res = await fetch(`/api/cases?search=${encodeURIComponent(search)}&case_type=${type}`, {
           signal: controller.signal,
         })
         if (!res.ok) {
@@ -77,7 +86,11 @@ export  function CaseSearchCombobox({ setSelectedCase }: { setSelectedCase: (c: 
       clearTimeout(debounce)
       setLoading(false)
     }
-  }, [search])
+  }, [search, type])
+
+
+
+
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

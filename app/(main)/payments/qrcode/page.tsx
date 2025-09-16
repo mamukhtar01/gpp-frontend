@@ -1,4 +1,5 @@
 import { QrCodePaymentPanel } from "@/components/payments/qrcode-payment-panel";
+import { QrCodeUKTBPaymentPanel } from "@/components/payments/qrcode-uktb-payment-panel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default async function PaymentsPage() {
@@ -17,7 +18,7 @@ export default async function PaymentsPage() {
           <QrCodePaymentPanel />
         </TabsContent>
         <TabsContent value="uktb">
-        <QrCodePaymentPanel />
+        <QrCodeUKTBPaymentPanel />
         </TabsContent>
         <TabsContent value="jims">
         <QrCodePaymentPanel />
