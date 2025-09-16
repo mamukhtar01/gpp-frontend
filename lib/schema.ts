@@ -1,12 +1,13 @@
 export type DbSchema = {
-  Cases: Case[];
+  Cases: TCase[];
 
-  Payments: Payment[];
+  Payments: TPayment[];
+  Clients: TClient[];
 };
 
 
 
-type Case = {
+type TCase = {
     id: string;
     user_created: string | null;
     date_created: string;
@@ -14,7 +15,7 @@ type Case = {
     date_updated: string | null;
 
     case_management_system: number | null;
-    main_client: string | null;
+    main_client: TClient;
 
     amount_paid_in_dollar: number | null;
     amount_to_pay_in_dollar: number | null;
@@ -43,8 +44,22 @@ type Case = {
     additional_services: string[];
   }
 
+    export type TClient = {
+    id: string;
+    user_created: string | null;
+    date_created: string;
+    user_updated: string | null;
+    date_updated: string | null;
+    first_name: string | null;
+    last_name: string | null;   
+    email: string | null;
+    phone_number: string | null;
+    passport_number: string | null;
+    date_of_birth: string | null;
+  } | null;
 
-  type Payment = {
+
+  type TPayment = {
     id: string;
     user_created: string | null;
     date_created: string;
@@ -70,3 +85,5 @@ type Case = {
     qr_timestamp: string | null;
     paidAmount: number | string | null;
   };
+
+
