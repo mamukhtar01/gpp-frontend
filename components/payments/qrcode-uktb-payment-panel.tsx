@@ -13,6 +13,8 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
+import { QrCode } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export interface TUKTBCase {
   id: string;
@@ -30,10 +32,14 @@ export interface TUKTBCase {
 export function QrCodeUKTBPaymentPanel() {
   const [selectedCase, setSelectedCase] = useState<TCase | null>(null);
   const [ukTBCases, setUkCases] = useState<TUKTBCase[]>([]);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
 
   //
 
   async function handleQRGenerateAndCreatePayment() {
+    setLoading(true);
     try {
       /*
       // fetch directly here since we are in a client component
@@ -75,23 +81,36 @@ export function QrCodeUKTBPaymentPanel() {
 
       const { qrString, validationTraceId, timestamp } = qrData;
 
+        // Total Amounts to pay
+      const totalAmountToPayDollars = ukTBCases
+        .reduce(
+          (acc, client) => 
+            acc + Number(client.amountToPayDollars.replace(/[$,]/g, "")),
+          0
+        )
+        .toFixed(2);
+      const totalAmountToPayLocalCurrency = ukTBCases
+        .reduce(
+          (acc, client) =>
+            acc + Number(client.amountToPayLocalCurrency.replace(/[$,]/g, "")),
+          0
+        )
+        .toFixed(2);
+
+
+
       // create payment record.
 
       const paymentRecord = {
         case_id: selectedCase?.id ?? "",
-        amount_in_dollar: (
-          Number(selectedCase?.package_price ?? 0) / 132
-        ).toFixed(2), // example conversion
-        amount_in_local_currency: selectedCase?.package_price ?? "0",
+        amount_in_dollar: totalAmountToPayDollars ?? "0",
+        amount_in_local_currency: totalAmountToPayLocalCurrency ?? "0",
         type_of_payment: 2, // assuming 1 represents Nepal QR
         date_of_payment: new Date().toISOString(),
         transaction_id: `TXN-${Date.now()}`, // example transaction ID
         status: 1, // initial status (e.g., payment initiated)
         validationTraceId: validationTraceId ?? "",
-        payerInfo:
-          selectedCase?.main_client.first_name +
-            " " +
-            selectedCase?.main_client.last_name || "",
+        payerInfo: selectedCase?.main_client.first_name + " " + selectedCase?.main_client.last_name || "",
         qr_timestamp: timestamp ?? "",
         paidAmount: selectedCase?.package_price ?? "0",
         qr_string: qrString,
@@ -106,11 +125,11 @@ export function QrCodeUKTBPaymentPanel() {
 
       // make sure we set the qrString in expected shape
 
-      // router.push(`/payments/qrcode/${selectedCase?.id}?case_type=uktb`);
+      router.push(`/payments/qrcode/${selectedCase?.id}?case_type=uktb`);
     } catch (e: unknown) {
       alert("Failed to generate QR: " + (e as Error).message);
     } finally {
-      // setLoading(false);
+      setLoading(false);
     }
   }
 
@@ -137,6 +156,7 @@ export function QrCodeUKTBPaymentPanel() {
         ]);
       }
     }
+   
   }, [selectedCase]);
 
   return (
@@ -228,6 +248,26 @@ export function QrCodeUKTBPaymentPanel() {
               </>
             )}
           </Table>
+          <Separator className="my-16" />
+                <div className="flex gap-6 mt-2 justify-between">
+                  <button
+                    onClick={handleQRGenerateAndCreatePayment}
+                    disabled={loading}
+                    className="flex items-center justify-center h-12 w-[220px] rounded-md bg-brand-500 text-white font-bold text-base shadow-sm hover:bg-brand-600 hover:cursor-pointer transition disabled:opacity-60"
+                  >
+                    {loading ? "GENERATING..." : "GENERATE NEPAL QR"}
+                    <QrCode className="ml-2 w-5 h-5" />
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setSelectedCase(null);                    
+                    }}
+                    className="flex items-center justify-center h-12 w-[140px] rounded-md border border-brand-700 text-brand-500 font-bold text-base bg-white hover:cursor-pointer hover:bg-blue-50 transition"
+                  >
+                    RESET FIELD
+                  </button>
+                </div>
         </>
       )}
     </div>
