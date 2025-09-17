@@ -1,6 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Menu, Upload, FileText, ListChecks, RefreshCcw } from "lucide-react";
 import Link from "next/link";
 import {
@@ -27,7 +25,7 @@ export function SheetSidebarMenu() {
         </SheetHeader>
 
         <nav className="flex flex-col gap-2 mt-6">
-          <Link href="/main/payments/qrcode" className="flex items-center gap-3 px-4 py-2 rounded transition-colors text-left hover:bg-accent hover:text-accent-foreground group">
+          <Link href="/actions/upload/uktbcases" className="flex items-center gap-3 px-4 py-2 rounded transition-colors text-left hover:bg-accent hover:text-accent-foreground group">
             <Upload className="w-5 h-5 text-primary group-hover:text-accent-foreground" />
             <span>Upload UKTB Cases</span>
           </Link>
