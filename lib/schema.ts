@@ -3,6 +3,7 @@ export type DbSchema = {
 
   Payments: TPayment[];
   Clients: TClient[];
+  UKTB_Cases: TUKTB_Cases[];
 };
 
 
@@ -86,4 +87,20 @@ type TCase = {
     paidAmount: number | string | null;
   };
 
+
+
+  export type TUKTB_Cases = {
+  id: string; 
+  First_Name: string;
+  Last_Name: string;
+  Sex: "Male" | "Female" | string; // restrictable union if needed
+  date_of_birth: string; // ISO date string
+  telephone: string;
+  amount: string; // could be number if numeric
+  appointment_date: string; // ISO date string
+  appointment_time: string; // HH:mm:ss
+  location: string;
+  Country: number;
+  Currency: number;
+};
 
