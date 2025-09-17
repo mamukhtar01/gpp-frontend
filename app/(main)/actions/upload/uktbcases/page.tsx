@@ -4,14 +4,23 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import { parseExcelFile } from "@/lib/excel";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { uploadUKTBCases } from "@/app/server_actions";
 
 export default function UploadUKTBCasesPage() {
+  // Modal open state for upload confirmation
+  const [open, setOpen] = React.useState(false);
+  // Upload result message (success or error)
+  const [uploadResult, setUploadResult] = React.useState<null | { type: "success" | "error"; message: string }>(null);
+
+
   // Holds the parsed Excel data (headers and rows)
   const [excelData, setExcelData] = React.useState<{ headers: string[]; rows: unknown[][] } | null>(null);
   // Holds error messages for user feedback
   const [error, setError] = React.useState<string | null>(null);
   // Loading state for UX
   const [loading, setLoading] = React.useState(false);
+
 
   // Handles file input change, parses Excel, and updates state
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,6 +42,25 @@ export default function UploadUKTBCasesPage() {
       setExcelData(null);
     }
     setLoading(false);
+  };
+
+  const handleFileUpload = async () => {
+    if (!excelData) {
+      setError("No data to upload");
+      return;
+    }
+    try {
+      setLoading(true);
+      setUploadResult(null);
+      const data = await uploadUKTBCases(excelData.rows as string[][]);
+      setUploadResult({ type: "success", message: "Upload successful!" });
+      setExcelData(null); // Clear data after successful upload
+    } catch (error) {
+      setUploadResult({ type: "error", message: "Failed to upload data. Please try again." });
+      setError("Failed to upload data. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -81,10 +109,35 @@ export default function UploadUKTBCasesPage() {
             <div className="flex gap-2">
               {/* Reset button clears preview and error */}
               <Button variant="outline" onClick={() => { setExcelData(null); setError(null); }}>Reset & Re-upload</Button>
-              {/* TODO: Replace alert with actual upload logic */}
-              <Button className="" onClick={() => alert("Implement upload to backend here")}>Confirm & Upload</Button>
+              {/* Upload confirmation modal trigger */}
+              <Dialog open={open} onOpenChange={setOpen}>
+                <DialogTrigger asChild>
+                  <Button className="">Confirm & Upload</Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Confirm Upload</DialogTitle>
+                  </DialogHeader>
+                  <div className="py-2 text-gray-700">
+                    Are you sure you want to upload <span className="font-semibold">{excelData.rows.length}</span> cases to the database?
+                  </div>
+                  <DialogFooter>
+                    <DialogClose asChild>
+                      <Button variant="outline">Cancel</Button>
+                    </DialogClose>
+                    <Button onClick={async () => { setOpen(false); handleFileUpload(); }}>Yes, Upload</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Upload result message */}
+      {uploadResult && (
+        <div className={`mb-6 px-4 py-3 rounded text-base font-medium ${uploadResult.type === "success" ? "bg-green-50 text-green-700 border border-green-200" : "bg-red-50 text-red-700 border border-red-200"}`}>
+          {uploadResult.message}
         </div>
       )}
     </div>
