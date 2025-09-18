@@ -91,6 +91,10 @@ type TCase = {
 
   export type TUKTB_Cases = {
   id: string; 
+  visa_type: string;
+  native_name: string;
+  passport: string;
+  exam_date: string;
   First_Name: string;
   Last_Name: string;
   Sex: "Male" | "Female" | string; // restrictable union if needed

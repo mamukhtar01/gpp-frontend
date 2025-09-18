@@ -53,7 +53,7 @@ export async function GET(res: NextRequest) {
       })
     );
 
-    console.log("Fetched cases:", data);
+  //  console.log("Fetched cases:", data);
 
     return NextResponse.json(data, { status: 200 });
   } catch (error: unknown) {

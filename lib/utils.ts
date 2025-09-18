@@ -28,14 +28,19 @@ export function mapToUKTBCases(data: string[][]): TUKTB_Cases[] {
       }
 
       const [
+        , // Skip the first column (serial number)
         id,
+        visa_type,
         location,
         appointment_date,
         appointment_time,
+        exam_date,
         First_Name,
         Last_Name,
+        native_name,
         Sex,
         date_of_birth,
+        passport,
         telephone,     
       ] = item;
 
@@ -47,6 +52,10 @@ export function mapToUKTBCases(data: string[][]): TUKTB_Cases[] {
 
       results.push({
         id,
+        visa_type: visa_type?.trim(),
+        native_name: native_name?.trim(),
+        exam_date: exam_date?.trim(),
+        passport: passport?.trim(),
         First_Name: First_Name?.trim(),
         Last_Name: Last_Name?.trim(),
         Sex: Sex === "M" ? "Male" : Sex === "F" ? "Female" : Sex,

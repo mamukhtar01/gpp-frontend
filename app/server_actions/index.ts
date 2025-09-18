@@ -10,7 +10,6 @@ import {
   TPaymentPayload,
   TTxnReportResponseFailure,
 } from "@/app/types";
-import { TUKTB_Cases } from "@/lib/schema";
 import { mapToUKTBCases } from "@/lib/utils";
 
 
@@ -48,8 +47,8 @@ export async function updateCaseStatus({
 
 // create a function to upload UKTB cases from excel file
 export async function uploadUKTBCases(data: string[][]) {
- 
-  if (data.length === 0) {
+
+  if (data.length === 0 || data[0].length === 0) {
     throw new Error("No data to upload");
   }
 
