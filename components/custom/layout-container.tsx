@@ -5,6 +5,7 @@ import Image from "next/image";
 
 import MenuTop from "./top-navigation";
 import Footer from "./footer";
+import { SheetSidebarMenu } from "./sheet-sidebar";
 
 type Props = {
   children: React.ReactNode;
@@ -29,6 +30,8 @@ export default function LayoutContainer({ children }: Props) {
           {/* Right: Top navigation */}
           <div className="flex items-center justify-end">
             <MenuTop />
+            <div className="hidden mx-3 md:block h-5 w-px bg-gray-200" />
+          <SheetSidebarMenu />
           </div>
         </div>
       </header>

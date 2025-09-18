@@ -1,16 +1,10 @@
 // context/AppContext.tsx
 "use client";
+import { TCase } from "@/components/payments/case-search-combobox";
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 
 
-export interface TCase {
-  case_id: string | null;      
-  case_status: number;         
-  date_created: string;         
-  id: string;                   
-  main_client: string;
-  package_price: string | null;        
-}
+
 
 type QRData = {
   qrString: string;

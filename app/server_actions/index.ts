@@ -10,6 +10,7 @@ import {
   TPaymentPayload,
   TTxnReportResponseFailure,
 } from "@/app/types";
+import { mapToUKTBCases } from "@/lib/utils";
 
 
 // Case Actions
@@ -43,6 +44,28 @@ export async function updateCaseStatus({
   }
 }
 
+
+// create a function to upload UKTB cases from excel file
+export async function uploadUKTBCases(data: string[][]) {
+
+  if (data.length === 0 || data[0].length === 0) {
+    throw new Error("No data to upload");
+  }
+
+  try {
+  const cases = mapToUKTBCases(data);
+
+
+    // Create each case individually because createItem expects a single item
+    const responses = await Promise.all(
+      cases.map((caseItem) => client.request(createItem("UKTB_Cases", caseItem)))
+    );
+    return responses;
+  } catch (error) {
+    console.error("Error uploading UKTB cases:", error);
+    throw new Error("Failed to upload UKTB cases");
+  }
+}
 
 // QR Code Actions
 
