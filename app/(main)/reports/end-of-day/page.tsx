@@ -16,15 +16,10 @@ type Transaction = {
   cashier?: string;
 };
 
-type Props = {
-  transactions?: Transaction[];
-  reportDate?: string;
-  onExportCSV?: (rows: Transaction[]) => void;
-};
 
 // Helpers
-const formatCurrency = (val: number, currency = "USD") => {
-  return new Intl.NumberFormat(undefined, { style: "currency", currency }).format(val);
+const formatCurrency = (val: number) => {
+  return new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" }).format(val);
 };
 
 const sampleData: Transaction[] = [
@@ -33,9 +28,12 @@ const sampleData: Transaction[] = [
 ];
 
 
-export default function EndOfDayReport({ transactions = sampleData, reportDate, onExportCSV }: Props) {
+// Next.js page components must not accept props. Use default values inside the component.
+const EndOfDayReportPage = () => {
   const [page, setPage] = useState(1);
   const pageSize = 10;
+  const transactions = sampleData;
+  const reportDate = undefined;
 
   // Only include QR code and Cash payments (income only)
   const filtered = useMemo(
@@ -73,8 +71,6 @@ export default function EndOfDayReport({ transactions = sampleData, reportDate, 
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
-
-    if (onExportCSV) onExportCSV(rows);
   }
 
   return (
@@ -91,7 +87,7 @@ export default function EndOfDayReport({ transactions = sampleData, reportDate, 
           <div className="grid grid-cols-1 gap-4">
             <div className="p-4 rounded-lg border bg-white">
               <div className="text-sm text-muted-foreground">Total Income</div>
-              <div className="text-2xl font-semibold">{formatCurrency(totalIncome, filtered[0]?.currency || "USD")}</div>
+              <div className="text-2xl font-semibold">{formatCurrency(totalIncome)}</div>
             </div>
           </div>
 
@@ -123,7 +119,7 @@ export default function EndOfDayReport({ transactions = sampleData, reportDate, 
                           {t.type === "cash" ? "Cash" : "QR Code"}
                         </span>
                       </TableCell>
-                      <TableCell className="text-right">{formatCurrency(t.amount, t.currency || filtered[0]?.currency || "USD")}</TableCell>
+                      <TableCell className="text-right">{formatCurrency(t.amount)}</TableCell>
                       <TableCell>{t.cashier}</TableCell>
                     </TableRow>
                   ))
@@ -144,4 +140,6 @@ export default function EndOfDayReport({ transactions = sampleData, reportDate, 
       </Card>
     </div>
   );
-}
+};
+
+export default EndOfDayReportPage;

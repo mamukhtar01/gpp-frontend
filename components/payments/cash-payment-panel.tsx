@@ -33,7 +33,7 @@ export function CashPaymentPanel() {
         transaction_id: `TXN-${Date.now()}`, // example transaction ID
         status: 2, // initial status (e.g., payment completed)
         validationTraceId: "",
-        payerInfo: selectedCase?.main_client ?? "",
+        payerInfo: selectedCase?.main_client.first_name + " " + selectedCase?.main_client.last_name,
         qr_timestamp: "",
         paidAmount: selectedCase?.package_price ?? "0",
         qr_string: "",
@@ -68,7 +68,7 @@ export function CashPaymentPanel() {
 
   return (
     <div className="p-8 bg-white rounded shadow w-full max-w-3xl ">
-      <CaseSearchCombobox setSelectedCase={setSelectedCase} />
+      <CaseSearchCombobox setSelectedCase={setSelectedCase} type="mimosa" />
       <Separator className="my-8" />
       {selectedCase && (
         <>
@@ -81,7 +81,7 @@ export function CashPaymentPanel() {
           <InputCol
             label="Main Client"
             id="client"
-            value={selectedCase.main_client ?? ""}
+            value={`${selectedCase.main_client.first_name} ${selectedCase.main_client.last_name}`}
             placeholder="Main Client"
           />
           <InputCol

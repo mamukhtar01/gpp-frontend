@@ -20,14 +20,9 @@ type Transaction = {
   reference?: string;
 };
 
-type Props = {
-  date?: string; // optionally control the report date (ISO)
-  transactions?: Transaction[];
-  onExportCSV?: (rows: Transaction[]) => void;
-};
 
 // Helpers
-const formatCurrency = (val: number, currency = "USD") => {
+const formatCurrency = (val: number) => {
   return new Intl.NumberFormat(undefined, { style: "currency", currency: "NPR" }).format(val);
 };
 
@@ -45,12 +40,15 @@ const defaultSampleData: Transaction[] = [
   { id: 11, date: "2025-09-12", description: "QR Payment - Accessories", type: "qrcode", amount: 110.0, currency: "NPR", cashier: "Mohamed" },
 ];
 
-export default function DailyCashReport({ date, transactions = defaultSampleData, onExportCSV }: Props) {
+
+// Next.js page components must not accept props. Use default values inside the component.
+const DailyCashReportPage = () => {
   const [q, setQ] = useState("");
   const [filterType, setFilterType] = useState<string | null>("all");
-  const [selectedDate, setSelectedDate] = useState<string | undefined>(date ?? undefined);
+  const [selectedDate, setSelectedDate] = useState<string | undefined>(undefined);
   const [page, setPage] = useState(1);
   const pageSize = 10;
+  const transactions = defaultSampleData;
 
   // derived
   const filtered = useMemo(() => {
@@ -71,9 +69,9 @@ export default function DailyCashReport({ date, transactions = defaultSampleData
   }, [transactions, q, filterType, selectedDate]);
 
   const totals = useMemo(() => {
-  const totalCash = filtered.filter((t) => t.type === "cash").reduce((s, t) => s + t.amount, 0);
-  const totalQR = filtered.filter((t) => t.type === "qrcode").reduce((s, t) => s + t.amount, 0);
-  return { totalCash, totalQR, total: totalCash + totalQR };
+    const totalCash = filtered.filter((t) => t.type === "cash").reduce((s, t) => s + t.amount, 0);
+    const totalQR = filtered.filter((t) => t.type === "qrcode").reduce((s, t) => s + t.amount, 0);
+    return { totalCash, totalQR, total: totalCash + totalQR };
   }, [filtered]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
@@ -98,8 +96,6 @@ export default function DailyCashReport({ date, transactions = defaultSampleData
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
-
-    if (onExportCSV) onExportCSV(rows);
   }
 
   return (
@@ -145,15 +141,15 @@ export default function DailyCashReport({ date, transactions = defaultSampleData
             <div className="flex flex-row gap-4 w-full md:w-auto justify-between md:justify-start">
               <div className="flex flex-col items-center bg-blue-50 border border-blue-100 rounded-lg px-6 py-4 min-w-[140px]">
                 <span className="text-xs text-blue-700 font-medium uppercase tracking-wide mb-1">Total Cash Payment</span>
-                <span className="text-2xl font-bold text-blue-900">{formatCurrency(totals.totalCash, "NPR")}</span>
+                <span className="text-2xl font-bold text-blue-900">{formatCurrency(totals.totalCash)}</span>
               </div>
               <div className="flex flex-col items-center bg-green-50 border border-green-100 rounded-lg px-6 py-4 min-w-[140px]">
                 <span className="text-xs text-green-700 font-medium uppercase tracking-wide mb-1">Total QR Code Payment</span>
-                <span className="text-2xl font-bold text-green-900">{formatCurrency(totals.totalQR, "NPR")}</span>
+                <span className="text-2xl font-bold text-green-900">{formatCurrency(totals.totalQR)}</span>
               </div>
               <div className="flex flex-col items-center bg-gray-50 border border-gray-100 rounded-lg px-6 py-4 min-w-[140px]">
                 <span className="text-xs text-gray-700 font-medium uppercase tracking-wide mb-1">Total</span>
-                <span className="text-2xl font-bold text-gray-900">{formatCurrency(totals.total, "NPR")}</span>
+                <span className="text-2xl font-bold text-gray-900">{formatCurrency(totals.total)}</span>
               </div>
             </div>
           </div>
@@ -187,7 +183,7 @@ export default function DailyCashReport({ date, transactions = defaultSampleData
                           {t.type === "cash" ? "Cash Payment" : "QR Code Payment"}
                         </span>
                       </TableCell>
-                      <TableCell className="text-right text-sm font-medium text-gray-900">{formatCurrency(t.amount, "NPR")}</TableCell>
+                      <TableCell className="text-right text-sm font-medium text-gray-900">{formatCurrency(t.amount)}</TableCell>
                       <TableCell className="text-sm text-gray-700">{t.cashier}</TableCell>
                       <TableCell className="text-sm text-gray-700">{t.reference}</TableCell>
                     </TableRow>
@@ -208,4 +204,6 @@ export default function DailyCashReport({ date, transactions = defaultSampleData
       </Card>
     </div>
   );
-}
+};
+
+export default DailyCashReportPage;

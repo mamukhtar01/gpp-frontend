@@ -53,11 +53,12 @@ export default function UploadUKTBCasesPage() {
       setLoading(true);
       setUploadResult(null);
       const data = await uploadUKTBCases(excelData.rows as string[][]);
+      if (!data) throw new Error("No data returned");
       setUploadResult({ type: "success", message: "Upload successful!" });
       setExcelData(null); // Clear data after successful upload
     } catch (error) {
-      setUploadResult({ type: "error", message: "Failed to upload data. Please try again." });
-      setError("Failed to upload data. Please try again.");
+      setUploadResult({ type: "error", message: `Failed to upload data. Please try again. ${error}` });
+      setError(`Failed to upload data. Please try again. ${error}`);
     } finally {
       setLoading(false);
     }
