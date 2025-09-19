@@ -134,3 +134,37 @@ export type TPaymentRecord = {
   payerInfo: string | null;
   paidAmount: string | null;
 };
+
+
+
+// userType
+
+
+export type TUser = {
+  id: string
+  first_name: string
+  last_name: string
+  email: string
+  password?: string
+  location?: string | null
+  title?: string | null
+  description?: string | null
+  tags?: string[] | null
+  avatar?: string | null
+  language?: string | null
+  tfa_secret?: string | null
+  status: "active" | "invited" | "suspended"
+  role: string // could be UUID or expanded object if you fetch with fields=role.*
+  token?: string
+  last_access?: string | null // ISO datetime
+  last_page?: string | null
+  provider?: string | null
+  external_identifier?: string | null
+  email_notifications?: boolean
+  appearance?: string | null
+  theme_dark?: string | null
+  theme_light?: string | null
+  Clinic?: string | null
+  Country?: number | null
+  policies?: string[]
+}
