@@ -1,10 +1,8 @@
 "use client";
 import * as React from "react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
+import { UKTBDataDisplay } from "@/components/custom/uktb-data-display";
 import { parseExcelFile } from "@/lib/excel";
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { uploadUKTBCases } from "@/app/server_actions";
 
 export default function UploadUKTBCasesPage() {
@@ -65,7 +63,7 @@ export default function UploadUKTBCasesPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto py-10">
+    <div className="max-w-6xl mx-auto py-10">
       <h1 className="text-3xl sm:text-4xl font-extrabold text-primary mb-6 tracking-tight drop-shadow-sm flex items-center gap-3">
         <span className="inline-block bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">Upload UKTB Cases</span>
         <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
@@ -83,56 +81,14 @@ export default function UploadUKTBCasesPage() {
 
       {/* Table preview after successful Excel parsing */}
       {excelData && (
-        <div className="overflow-x-auto border rounded-xl bg-white shadow mb-8 p-6">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                {excelData.headers.map((header, idx) => (
-                  <TableHead key={idx} className="bg-gray-100 text-gray-800 font-semibold text-base px-4 py-3 border-b border-gray-200 uppercase tracking-wide">
-                    {header}
-                  </TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {excelData.rows.map((row, i) => (
-                <TableRow key={i} className="hover:bg-gray-50">
-                  {excelData.headers.map((_, j) => (
-                    <TableCell key={j} className="px-4 py-2 whitespace-nowrap text-sm border-b border-gray-100">{String(row[j] ?? "")}</TableCell>
-                  ))}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mt-4">
-            {/* Row count */}
-            <span className="text-sm text-gray-600">Rows : <span className="font-semibold">{excelData.rows.length}</span></span>
-            <div className="flex gap-2">
-              {/* Reset button clears preview and error */}
-              <Button variant="outline" onClick={() => { setExcelData(null); setError(null); }}>Reset & Re-upload</Button>
-              {/* Upload confirmation modal trigger */}
-              <Dialog open={open} onOpenChange={setOpen}>
-                <DialogTrigger asChild>
-                  <Button className="">Confirm & Upload</Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Confirm Upload</DialogTitle>
-                  </DialogHeader>
-                  <div className="py-2 text-gray-700">
-                    Are you sure you want to upload <span className="font-semibold">{excelData.rows.length}</span> cases to the database?
-                  </div>
-                  <DialogFooter>
-                    <DialogClose asChild>
-                      <Button variant="outline">Cancel</Button>
-                    </DialogClose>
-                    <Button onClick={async () => { setOpen(false); handleFileUpload(); }}>Yes, Upload</Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            </div>
-          </div>
-        </div>
+        <UKTBDataDisplay
+          excelData={excelData}
+          onReset={() => { setExcelData(null); setError(null); }}
+          onUpload={handleFileUpload}
+          loading={loading}
+          open={open}
+          setOpen={setOpen}
+        />
       )}
 
       {/* Upload result message */}
