@@ -1,14 +1,16 @@
-import { TUser } from "@/app/types";
 import { ProfileAvatarSection } from "@/components/profile/ProfileActionBar";
 import { ProfileActionsBar } from "@/components/profile/ProfileActionsBar";
 import { InfoRow } from "@/components/profile/ProfileInfoRow";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { getUserData } from "@/lib/dal";
+import { TUser } from "@/lib/schema";
 import { MailIcon, PhoneIcon, UserIcon, ShieldIcon } from "lucide-react";
 
 export default async function ProfilePage() {
   const { user, success } = await getUserData();
+
+  console.log("User data:", user, success);
 
   if (!success) {
     return (

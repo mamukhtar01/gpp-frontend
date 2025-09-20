@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { PencilIcon } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { EditImagePopover } from "./edit-popovers/EditImagePopover";
-import { TUser } from "@/app/types";
+import { TUser } from "@/lib/schema";
 
 export function ProfileAvatarSection({ user }: { user: TUser }) {
     

@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { PencilIcon } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { TUser } from "@/app/types";
+import { TUser } from "@/lib/schema";
 import { EditImagePopover } from "./edit-popovers/EditImagePopover";
 
 export function ProfileAvatarSection({ user }: { user: TUser }) {

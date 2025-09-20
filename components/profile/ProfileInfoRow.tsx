@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { PencilIcon } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { TUser } from "@/app/types";
+import { TUser } from "@/lib/schema";
 import { EditPhonePopover } from "./edit-popovers/EditPhonePopover";
 
 export function InfoRow({

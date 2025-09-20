@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { TUser } from "@/app/types";
+import { TUser } from "@/lib/schema";
 
 export function EditImagePopover({
   user,
