@@ -101,7 +101,6 @@ export async function getPaymentsAction() {
   }
 }
 export async function getPaymentByCaseIdAction(id: string) {
-  console.log("Fetching case with ID:", id);
 
   try {
     const data = await client.request(
@@ -118,7 +117,6 @@ export async function getPaymentByCaseIdAction(id: string) {
 }
 
 export async function createPayment(body: TPaymentPayload) {
-  console.log("Received payment data:", body);
 
   // ✅ Validate required fields
   if (!body.case_id || !body.amount_in_local_currency || !body.transaction_id) {
