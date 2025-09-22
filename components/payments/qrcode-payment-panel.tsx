@@ -25,15 +25,16 @@ export function QrCodePaymentPanel() {
     setLoading(true);
     try {
      
-      /*
+      
       // fetch directly here since we are in a client component
-      const res = await fetch("/api/payments/nepalqr", {
+      const res = await fetch("/api/nepalpay/generateQR", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           transactionCurrency: "524",
           transactionAmount: Number(selectedCase?.package_price ?? 0),
-          billNumber: reference,
+          billNumber: selectedCase?.id ?? "",
+          referenceLabel: reference,
           storeLabel: "Store1",
           terminalLabel: "Terminal1",
           purposeOfTransaction: "Bill payment",
@@ -48,21 +49,12 @@ export function QrCodePaymentPanel() {
         throw new Error("Invalid response from QR generation API");
       }
 
-      console.log("QR Generation Response:", json);
-
       const qrString = json.data?.qrString;
       const validationTraceId = json.data?.validationTraceId;
       const timestamp = json?.timestamp;
 
-      */
-      // create sample qrcode data
-      const qrData = {
-        qrString: "00020101021129370016A0000006770101110113006600000000023031343030303030303030303030303030303030303030303030305204000053039865407.005802NP5913GPP TESTING6008Kathmandu61051000162290525Test Reference1236304B14",
-        validationTraceId: "VALIDATION_TRACE_ID",
-        timestamp: new Date().toISOString(),
-      };
-
-      const { qrString, validationTraceId, timestamp } = qrData;
+      
+    
 
 
       // create payment record.
@@ -129,7 +121,7 @@ export function QrCodePaymentPanel() {
           <InputCol
             label="Main Client"
             id="client"
-            value={selectedCase.main_client?.first_name + " " + selectedCase.main_client?.last_name || ""}
+            value={selectedCase.main_client?.first_name || "" + " " + selectedCase.main_client?.last_name || ""}
             placeholder="Main Client"
           />
           <InputCol
