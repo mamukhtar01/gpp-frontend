@@ -12,12 +12,12 @@ const paymentMethods = [
 ];
 
 const reportTypes = [
-  { title: "END-OF-DAY", img: "/calendar.png", value: "Lorem Lipsum", href: "/reports/end-of-day" },
-  { title: "DAILY CASH", img: "/cash.png", value: "Lorem Lipsum", href: "/reports/daily-cash" },
-  { title: "DAILY QR CODE", img: "/qrcode.png", value: "Lorem Lipsum", href: "/reports/daily-qr" },
-  { title: "RECONCILIATION", img: "/report.png", value: "Lorem Lipsum", href: "/reports/reconciliation" },
-  { title: "PLACEHOLDER", img: "/file.svg", value: "Lorem Lipsum", href: "/reports/placeholder-1" },
-  { title: "PLACEHOLDER", img: "/file.svg", value: "Lorem Lipsum", href: "/reports/placeholder-2" },
+  { title: "END-OF-DAY", img: "/calendar.png", value: "Daily Summary", href: "/reports/end-of-day" },
+  { title: "DAILY INCOME", img: "/cash.png", value: "Daily Income Summary", href: "/reports/daily-income" },
+  { title: "DAILY QR CODE", img: "/qrcode.png", value: "Daily QR Code", href: "/reports/daily-qr" },
+  { title: "RECONCILIATION", img: "/report.png", value: "Reconciliation", href: "/reports/reconciliation" },
+  { title: "VACCINATION", img: "/file.svg", value: "Daily Vaccination", href: "/reports/vaccination" },
+  { title: "ADDITIONAL INCOME", img: "/file.svg", value: "Additional Income", href: "/reports/placeholder-2" },
 ];
 
 export default async function Home() {
