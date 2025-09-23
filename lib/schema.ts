@@ -8,6 +8,8 @@ export type DbSchema = {
   directus_roles: TUserRole[];
   Clinic: TClinic[];
   Countries: TCountries[];
+  Fee_Structure: TFeeStructure[];
+  Service_Types: ServiceType[];
 };
 
 type TCase = {
@@ -164,3 +166,39 @@ export type TCountries = {
   country_code: string;
   local_currency: string;
 };
+
+
+export interface TFeeStructure {
+  id: number;
+  sort: number | null;
+  user_created: string;
+  date_created: string; // ISO date string
+  user_updated: string | null;
+  date_updated: string | null;
+  country_id: number;
+  age_bracket_display: string;
+  min_age_months: number | null;
+  max_age_months: number | null;
+  visa_type: string | null;
+  special_case: string | null;
+  fee_amount_usd: string;
+  description: string | null;
+  is_active: boolean;
+  service_type_code: string;
+}
+
+
+export type ServiceCategory = "medical_exam" | "vaccination" | "special_service";
+
+export interface ServiceType {
+  service_code: string;
+  sort: number | null;
+  user_created: string;
+  date_created: string; // ISO date string
+  user_updated: string | null;
+  date_updated: string | null;
+  service_name: string;
+  description: string | null;
+  category: ServiceCategory;
+  is_active: boolean;
+}
