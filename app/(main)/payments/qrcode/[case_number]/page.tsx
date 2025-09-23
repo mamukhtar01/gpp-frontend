@@ -10,13 +10,13 @@ import QRCodeWindows from "@/components/payments/qrcode-windows";
 export default async function NepalQRCodePanel({
   params,
 }: {
-  params: Promise<{ case_id: string }>;
+  params: Promise<{ case_number: string }>;
 }) {
-  const { case_id } = await params;
+  const { case_number } = await params;
 
   // Fetch Payment Data
 
-  const paymentRecord = await getPaymentByCaseIdAction(case_id);
+  const paymentRecord = await getPaymentByCaseIdAction(case_number);
 
   if (!paymentRecord || !paymentRecord.qr_string) {
     return (
@@ -36,7 +36,7 @@ export default async function NepalQRCodePanel({
     <div className="min-w-4xl items-center flex flex-col self-center">
       <div className="flex flex-row items-center justify-between w-full">
         <GoBackBtn />
-        <Link href={`/payments/qrcode/${case_id}/verify`}>
+        <Link href={`/payments/qrcode/${case_number}/verify`}>
           <Button
             className="text-sm text-green-600 hover:cursor-pointer"
             variant="secondary"
@@ -65,7 +65,7 @@ export default async function NepalQRCodePanel({
           </div>
           <div className="text-xs break-all">
             Case Number:{" "}
-            <span className="font-semibold">{paymentRecord.case_id}</span>
+            <span className="font-semibold">{paymentRecord.case_number}</span>
           </div>
         </div>
         <div className="mt-4">
@@ -73,7 +73,7 @@ export default async function NepalQRCodePanel({
             qrValue={qrValue}
             amount={amount}
             payerInfo={paymentRecord.payerInfo}
-            caseId={paymentRecord.case_id}
+            caseId={paymentRecord.case_number}
           />
         </div>
       </div>

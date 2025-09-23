@@ -25,15 +25,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { TPaymentRecord } from "./columns";
 import { useRouter } from "next/navigation";
+import { TPayment } from "@/lib/schema";
 
 export function DataTable({
   data,
   columns,
 }: {
-  data: TPaymentRecord[];
-  columns: ColumnDef<TPaymentRecord>[];
+  data: TPayment[];
+  columns: ColumnDef<TPayment>[];
 }) {
 
 
@@ -70,9 +70,9 @@ export function DataTable({
       <div className="flex items-center py-4 w-80">
         <Input
           placeholder="Filter Payments by Case ..."
-          value={(table.getColumn("case_id")?.getFilterValue() as string) ?? ""}
+          value={(table.getColumn("case_number")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("case_id")?.setFilterValue(event.target.value)
+            table.getColumn("case_number")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />
@@ -104,7 +104,7 @@ export function DataTable({
                   className="hover:cursor-pointer hover:bg-gray-200"
                   onClick={() => {
                     
-                    router.push(`/payments/cash/${row.original.case_id}`);
+                    router.push(`/payments/cash/${row.original.case_number}`);
                   }}
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}

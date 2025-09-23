@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { QrCode } from "lucide-react";
 import { createPayment } from "@/app/server_actions";
 import { useCaseContext } from "@/app/(main)/payments/qrcode/caseContext";
+import { TNewPaymentRecord } from "@/app/types";
 
 
 export function QrCodePaymentPanel() {
@@ -59,8 +60,11 @@ export function QrCodePaymentPanel() {
 
       // create payment record.
 
-      const paymentRecord = {
-        case_id: selectedCase?.id ?? "",
+      const paymentRecord: TNewPaymentRecord = {
+        case_number: selectedCase?.id ?? "",
+        mimosa_case: selectedCase?.id ?? "",
+        case_management_system: 1, // mimosa
+        reference: reference || null,
         amount_in_dollar: (
           Number(selectedCase?.package_price ?? 0) / 132
         ).toFixed(2), // example conversion
@@ -74,11 +78,14 @@ export function QrCodePaymentPanel() {
         qr_timestamp: timestamp ?? "",
         paidAmount: selectedCase?.package_price ?? "0",
         qr_string: qrString,
+        wave: null,
+        clinic: null,
       };
 
       // Create payment record in the database
       const paymentRes = await createPayment(paymentRecord);
  
+      console.log("Payment record created:", paymentRes);
       
       if (!paymentRes) {
         throw new Error("Failed to create payment record");

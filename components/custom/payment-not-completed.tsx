@@ -6,9 +6,10 @@ import { XCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { TPaymentRecord } from "@/app/types";
+import { TPayment } from "@/lib/schema";
+  
 
-export default function PaymentNotCompleted({ caseDetails }: { caseDetails: TPaymentRecord }) {
+export default function PaymentNotCompleted({ caseDetails }: { caseDetails: TPayment}) {
   const payment = caseDetails;
 
   return (
@@ -29,7 +30,7 @@ export default function PaymentNotCompleted({ caseDetails }: { caseDetails: TPay
 
           <div className="flex justify-between text-sm">
             <span className="font-medium">Case Number</span>
-            <span>{payment.case_id}</span>
+            <span>{payment.case_number}</span>
           </div>
 
           <div className="flex justify-between text-sm">

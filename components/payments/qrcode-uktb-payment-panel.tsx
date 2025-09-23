@@ -16,6 +16,7 @@ import { QrCode } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { TUKTB_Cases } from "@/lib/schema";
 import { SearchUKTBCombobox } from "./search-uktbcase-combobox";
+import { TNewPaymentRecord } from "@/app/types";
 
 export function QrCodeUKTBPaymentPanel() {
   const [selectedCase, setSelectedCase] = useState<TUKTB_Cases | null>(null);
@@ -74,8 +75,11 @@ export function QrCodeUKTBPaymentPanel() {
 
       console.log("case to pay:", selectedCase);
 
-      const paymentRecord = {
-        case_id: selectedCase?.id ?? "",
+      const paymentRecord: TNewPaymentRecord = {
+        case_number: selectedCase?.id ?? "",
+        case_management_system: 2, // assuming 2 represents UKTB
+        mimosa_case: null,
+        reference: null,
         amount_in_dollar: totalAmountToPayDollars ?? "0",
         amount_in_local_currency: totalAmountToPayLocalCurrency ?? "0",
         type_of_payment: 2, // assuming 1 represents Nepal QR
@@ -88,10 +92,12 @@ export function QrCodeUKTBPaymentPanel() {
         qr_timestamp: timestamp ?? "",
         paidAmount: selectedCase?.amount ?? "0",
         qr_string: qrString,
+        wave: null,
+        clinic: null,
+      
       };
 
-      console.log("Creating payment record:", paymentRecord);
-
+      
       // Create payment record in the database
       const paymentRes = await createPayment(paymentRecord);
 

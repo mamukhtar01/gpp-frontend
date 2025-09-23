@@ -61,10 +61,10 @@ export type TClient = {
   date_of_birth: string | null;
 } | null;
 
-type TPayment = {
+export type TPayment = {
   id: string;
   user_created: string | null;
-  date_created: string;
+  date_created: string | null;
   user_updated: string | null;
   date_updated: string | null;
 
@@ -75,10 +75,10 @@ type TPayment = {
   amount_in_dollar: number | string | null;
   amount_in_local_currency: number | string | null;
 
-  type_of_payment: number | null;
-  date_of_payment: string | null; // ISO date
+  type_of_payment: number;
+  date_of_payment: string; // ISO date
   transaction_id: string | null;
-  status: number | null;
+  status: number;
 
   wave: string | null;
   Business_Unit_Name_: string | null;

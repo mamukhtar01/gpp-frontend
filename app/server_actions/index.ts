@@ -7,8 +7,8 @@ import {
   TCaseSearchResult,
   TNepalQRPayload,
   TNepalQRResponse,
-  TPaymentPayload,
   TTxnReportResponseFailure,
+  TNewPaymentRecord,
 } from "@/app/types";
 import { mapToUKTBCases } from "@/lib/utils";
 
@@ -116,7 +116,7 @@ export async function getPaymentByCaseIdAction(id: string) {
   }
 }
 
-export async function createPayment(body: TPaymentPayload) {
+export async function createPayment(body: TNewPaymentRecord) {
 
   // ✅ Validate required fields
   if (!body.case_number || !body.amount_in_local_currency || !body.transaction_id) {

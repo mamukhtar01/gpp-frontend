@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 
 type ReceiptShape = {
   payerInfo?: string;
-  case_id?: string;
+  case_number?: string;
   transaction_id?: string;
   paidAmount?: number | string;
   amount_in_local_currency?: number | string;
@@ -39,7 +39,7 @@ export default function ReceiptActions({
     const html = `
       <html>
         <head>
-          <title>Receipt - ${receipt.case_id ?? ""}</title>
+          <title>Receipt - ${receipt.case_number ?? ""}</title>
           <meta charset="utf-8" />
           <style>
             body{font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial; padding:24px; color:#111; background:#fff}
@@ -63,7 +63,7 @@ export default function ReceiptActions({
               <img src="${logo}" class="logo" alt="IOM logo" />
               <div style="flex:1">
                 <h1 class="title">Payment Receipt</h1>
-                <div class="meta">Case: ${receipt.case_id ?? ""} &nbsp; • &nbsp; Transaction: ${receipt.transaction_id ?? ""}</div>
+                <div class="meta">Case: ${receipt.case_number ?? ""} &nbsp; • &nbsp; Transaction: ${receipt.transaction_id ?? ""}</div>
               </div>
               <div style="text-align:right">
                 <div style="font-size:14px">${date}</div>

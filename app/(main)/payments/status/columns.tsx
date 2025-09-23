@@ -14,22 +14,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ColumnDef } from "@tanstack/react-table";
+import { TPayment } from "@/lib/schema";
 
-export type TPaymentRecord = {
-  id: string;
-  date_created: string; // ISO datetime string
-  case_id: string;
-  amount_in_dollar: string; // stored as string
-  amount_in_local_currency: string; // stored as string
-  type_of_payment: number;
-  date_of_payment: string; // datetime string
-  transaction_id: string;
-  status: number;
-  payerInfo: string;
-  paidAmount: string;
-};
 
-export const columns: ColumnDef<TPaymentRecord>[] = [
+
+export const columns: ColumnDef<TPayment>[] = [
   {
     id: "select",    
     enableSorting: false,
@@ -60,10 +49,10 @@ export const columns: ColumnDef<TPaymentRecord>[] = [
     },
   },
   {
-    accessorKey: "case_id",
+    accessorKey: "case_number",
     header: "Case Number",
     cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("case_id")}</div>
+      <div className="capitalize">{row.getValue("case_number")}</div>
     ),
   },
   {
@@ -144,7 +133,7 @@ export const columns: ColumnDef<TPaymentRecord>[] = [
           >
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(payment.case_id)}
+              onClick={() => navigator.clipboard.writeText(payment.case_number)}
             >
               Copy ID
             </DropdownMenuItem>

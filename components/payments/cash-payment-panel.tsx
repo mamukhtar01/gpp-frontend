@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 
 import { Banknote } from "lucide-react";
 import { createPayment, updateCaseStatus } from "@/app/server_actions";
+import { TNewPaymentRecord } from "@/app/types";
 
 export function CashPaymentPanel() {
   const [selectedCase, setSelectedCase] = useState<TCase | null>(null);
@@ -22,7 +23,7 @@ export function CashPaymentPanel() {
     try {
       // create payment record.
 
-      const paymentRecord = {
+      const paymentRecord: TNewPaymentRecord = {
         mimosa_case: selectedCase?.id ?? "",
         case_number: selectedCase?.id ?? "",
         case_management_system: 1, // mimosa
@@ -40,6 +41,8 @@ export function CashPaymentPanel() {
         qr_timestamp: "",
         paidAmount: selectedCase?.package_price ?? "0",
         qr_string: "",
+        wave: null,
+        clinic: null,
       };
 
       const paymentRes = await createPayment(paymentRecord);

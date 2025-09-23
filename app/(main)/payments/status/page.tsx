@@ -1,13 +1,14 @@
 import { getPaymentsAction } from "@/app/server_actions";
-import { columns, TPaymentRecord } from "./columns";
+import { columns } from "./columns";
 import { DataTable } from "./table";
+import { TPayment } from "@/lib/schema";
 
 
 export default async function PaymentStatus() {
 
     // fetch payment data
 
-const payments =  await getPaymentsAction() as TPaymentRecord[] | null;
+const payments =  await getPaymentsAction() as TPayment[] | null;
 
 
 if (!payments) {
