@@ -68,7 +68,10 @@ type TPayment = {
   user_updated: string | null;
   date_updated: string | null;
 
-  case_id: string | null; // FK to cases
+  mimosa_case: string | null; // FK to cases
+  case_management_system: number;
+  case_number: string;
+  reference: string | null;
   amount_in_dollar: number | string | null;
   amount_in_local_currency: number | string | null;
 

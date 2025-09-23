@@ -43,7 +43,10 @@ export type TNepalQRResponse = {
 };
 
 export type TPaymentPayload = {
-  case_id: string;
+  case_number: string;
+  mimosa_case: string;
+  case_management_system: number;
+  reference: string;
   amount_in_dollar: string;
   amount_in_local_currency: string;
   type_of_payment: number;

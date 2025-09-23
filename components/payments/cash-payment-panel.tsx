@@ -23,7 +23,10 @@ export function CashPaymentPanel() {
       // create payment record.
 
       const paymentRecord = {
-        case_id: selectedCase?.id ?? "",
+        mimosa_case: selectedCase?.id ?? "",
+        case_number: selectedCase?.id ?? "",
+        case_management_system: 1, // mimosa
+        reference: reference,
         amount_in_dollar: (
           Number(selectedCase?.package_price ?? 0) / 132
         ).toFixed(2), // example conversion
