@@ -107,6 +107,7 @@ export async function POST(req: NextRequest) {
     const data = await res.json();
 
     if (!res.ok) {
+      console.error("NepalQR request failed:", res.status, data);
       return NextResponse.json(
         { error: "NepalQR request failed", status: res.status, data },
         { status: res.status }

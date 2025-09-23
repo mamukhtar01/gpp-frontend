@@ -105,6 +105,10 @@ export type TUKTB_Cases = {
   location: string;
   Country: number;
   Currency: number;
+  user_created: string | null;
+  date_created: string;
+  user_updated: string | null;
+  date_updated: string | null;
 };
 
 // userType

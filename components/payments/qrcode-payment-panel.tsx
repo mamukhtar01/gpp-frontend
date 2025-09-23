@@ -1,6 +1,6 @@
 "use client";
 import { Input } from "@/components/ui/input";
-import { CaseSearchCombobox, TCase } from "./case-search-combobox";
+import { CaseSearchCombobox, TCase } from "./search-mimosa-combobox";
 import { Label } from "@radix-ui/react-label";
 import { Separator } from "@radix-ui/react-separator";
 import { useState } from "react";
