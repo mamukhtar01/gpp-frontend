@@ -6,7 +6,7 @@ const paymentMethods = [
   { title: "QR PAYMENT", img: "/qrcode.png", value: "Generate QR Payment", href: "/payments/qrcode" },
   { title: "CASH PAYMENT", img: "/cash.png", value: "Create Cash Payment", href: "/payments/cash" },
   { title: "CREDIT PAYMENT", img: "/card.png", value: "Accept Card Payment", href: "/payments/credit-card" },
-  { title: "DPO PAYMENT", img: "/card.png", value: "Accept DPO Payment", href: "/payments/dpo-payment" },
+  { title: "POS PAYMENT", img: "/card.png", value: "Accept POS Payment", href: "/payments/pos-card-payment" },
   { title: "BANK TRANSFER", img: "/bank.png", value: "Record Bank Transfer", href: "/payments/bank-transfer" },
   { title: "MOBILE MONEY", img: "/mobile.png", value: "Generate Mobile Payment", href: "/payments/mobile-money" },
 ];
