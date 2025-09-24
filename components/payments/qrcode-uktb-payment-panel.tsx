@@ -17,6 +17,7 @@ import { useRouter } from "next/navigation";
 import { TUKTB_Cases } from "@/lib/schema";
 import { SearchUKTBCombobox } from "./search-uktbcase-combobox";
 import { TNewPaymentRecord } from "@/app/types";
+import { CalculateAge } from "@/lib/utils";
 
 export function QrCodeUKTBPaymentPanel() {
   const [selectedCase, setSelectedCase] = useState<TUKTB_Cases | null>(null);
@@ -137,6 +138,7 @@ export function QrCodeUKTBPaymentPanel() {
               <TableRow>
                 <TableHead>ID</TableHead>
                 <TableHead>Name</TableHead>
+                <TableHead>Age</TableHead>
                 <TableHead className="text-right">Amount</TableHead>
                 <TableHead className="text-center">Remark</TableHead>
               </TableRow>
@@ -148,6 +150,7 @@ export function QrCodeUKTBPaymentPanel() {
                   <TableCell>
                     {client.First_Name} {client.Last_Name}
                   </TableCell>
+                  <TableCell>{CalculateAge(client.date_of_birth)}</TableCell>
                   <TableCell className="text-right">{client.amount}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end">

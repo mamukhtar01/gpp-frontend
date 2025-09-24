@@ -77,3 +77,27 @@ export function mapToUKTBCases(data: string[][]): TUKTB_Cases[] {
 
   return results;
 }
+
+
+
+// string to age
+export function CalculateAge(dateString: string): number | null {
+  const birthDate = new Date(dateString);
+
+  // Check for invalid date
+  if (isNaN(birthDate.getTime())) {
+    return null;
+  }
+
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+
+  return age;
+}
+
+
