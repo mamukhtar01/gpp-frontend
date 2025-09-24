@@ -181,7 +181,7 @@ export interface TFeeStructure {
   fee_amount_usd: string;
   description: string | null;
   is_active: boolean;
-  service_type_code: string;
+  service_type_code: ServiceType;
 }
 
 

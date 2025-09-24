@@ -2,6 +2,7 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { TUKTB_Cases } from "./schema";
+import { FeeStructure } from "@/app/types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -100,4 +101,22 @@ export function CalculateAge(dateString: string): number | null {
   return age;
 }
 
+
+
+
+// get fee based on age and fee structure
+export function getFeeByAge(
+  feeStructures: FeeStructure[],
+  ageYears: number
+): number | null {
+  const ageMonths = ageYears * 12;
+
+  const fee = feeStructures.find(
+    (f) =>
+      (f.min_age_months === null || ageMonths >= f.min_age_months) &&
+      (f.max_age_months === null || ageMonths <= f.max_age_months)
+  );
+
+  return fee ? parseFloat(fee.fee_amount_usd) : null;
+}
 

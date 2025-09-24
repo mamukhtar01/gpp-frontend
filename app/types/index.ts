@@ -136,5 +136,12 @@ export type TNewPaymentRecord = {
 };
 
 
+export type FeeStructure = {
+  id: number;
+  fee_amount_usd: string; // stored as string
+  min_age_months: number | null;
+  max_age_months: number | null;
+};
+
 
 
