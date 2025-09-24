@@ -210,3 +210,40 @@ export async function verifyPaymentTxn({
     return { error: "Internal Server Error" };
   }
 }
+
+
+
+// Pricing Actions
+export async function getFeeStructures() {
+  try {
+    const data = await client.request(
+      readItems("fee_structures", {
+        fields: [
+          "*",
+          
+        ],
+        sort: ["min_age_months"        ],
+      })
+    );
+    return data ?? null;
+  } catch (error) {
+    console.error("Error fetching fee structures:", error);
+    throw new Error("Failed to fetch fee structures");
+  }
+}
+
+
+export async function getServiceTypes() {
+  try {
+    const data = await client.request(
+      readItems("service_types", {
+        fields: ["*"],
+        sort: ["service_code"],
+      })
+    );
+    return data ?? null;
+  } catch (error) {
+    console.error("Error fetching service types:", error);
+    throw new Error("Failed to fetch service types");
+  } 
+}
