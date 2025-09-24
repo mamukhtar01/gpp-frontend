@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Menu, Upload, FileText, ListChecks, RefreshCcw } from "lucide-react";
+import { Menu, Upload, FileText, ListChecks, RefreshCcw, CurrencyIcon } from "lucide-react";
 import Link from "next/link";
 import {
   Sheet,
@@ -36,6 +36,10 @@ export function SheetSidebarMenu() {
           <Link href="/main/reports" className="flex items-center gap-3 px-4 py-2 rounded transition-colors text-left hover:bg-accent hover:text-accent-foreground group">
             <FileText className="w-5 h-5 text-primary group-hover:text-accent-foreground" />
             <span>Reports</span>
+          </Link>
+            <Link href="/payments/pricing" className="flex items-center gap-3 px-4 py-2 rounded transition-colors text-left hover:bg-accent hover:text-accent-foreground group">
+            <CurrencyIcon className="w-5 h-5 text-primary group-hover:text-accent-foreground" />
+            <span>Pricing Plans</span>
           </Link>
           <Link href="/main/payments/status" className="flex items-center gap-3 px-4 py-2 rounded transition-colors text-left hover:bg-accent hover:text-accent-foreground group">
             <RefreshCcw className="w-5 h-5 text-primary group-hover:text-accent-foreground" />

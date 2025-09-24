@@ -1,0 +1,76 @@
+{
+    "data": [
+        {
+            "id": 15,
+            "status": "draft",
+            "sort": null,
+            "user_created": "8707e57c-1a90-4b6d-a9d5-273aa6d1fe39",
+            "date_created": "2024-08-28T08:29:44.019Z",
+            "user_updated": null,
+            "date_updated": null,
+            "country_code": "NZ",
+            "country": "New Zealand",
+            "local_currency": 553
+        },
+        {
+            "id": 14,
+            "status": "draft",
+            "sort": null,
+            "user_created": "8707e57c-1a90-4b6d-a9d5-273aa6d1fe39",
+            "date_created": "2024-08-28T08:28:39.518Z",
+            "user_updated": "8707e57c-1a90-4b6d-a9d5-273aa6d1fe39",
+            "date_updated": "2024-10-04T07:09:12.331Z",
+            "country_code": "AU",
+            "country": "Australia",
+            "local_currency": 552
+        },
+        {
+            "id": 13,
+            "status": "draft",
+            "sort": null,
+            "user_created": "8707e57c-1a90-4b6d-a9d5-273aa6d1fe39",
+            "date_created": "2024-08-28T07:03:15.543Z",
+            "user_updated": null,
+            "date_updated": null,
+            "country_code": "US",
+            "country": "United States",
+            "local_currency": 1
+        },
+        {
+            "id": 16,
+            "status": "draft",
+            "sort": null,
+            "user_created": "8707e57c-1a90-4b6d-a9d5-273aa6d1fe39",
+            "date_created": "2024-08-28T08:30:32.097Z",
+            "user_updated": "8707e57c-1a90-4b6d-a9d5-273aa6d1fe39",
+            "date_updated": "2024-08-28T08:30:55.475Z",
+            "country_code": "UK",
+            "country": "United Kingdom ",
+            "local_currency": 554
+        },
+        {
+            "id": 12,
+            "status": "draft",
+            "sort": null,
+            "user_created": "8707e57c-1a90-4b6d-a9d5-273aa6d1fe39",
+            "date_created": "2024-07-02T10:48:24.902Z",
+            "user_updated": "8707e57c-1a90-4b6d-a9d5-273aa6d1fe39",
+            "date_updated": "2024-07-24T09:53:47.817Z",
+            "country_code": "CA",
+            "country": "Canada",
+            "local_currency": 1
+        },
+        {
+            "id": 29,
+            "status": "published",
+            "sort": null,
+            "user_created": "e9f6d011-9912-40e9-a289-68e2f51370f5",
+            "date_created": "2025-09-23T11:27:46.610Z",
+            "user_updated": null,
+            "date_updated": null,
+            "country_code": "JP",
+            "country": "Japan",
+            "local_currency": 475
+        }
+    ]
+}
