@@ -8,8 +8,8 @@ export type DbSchema = {
   directus_roles: TUserRole[];
   Clinic: TClinic[];
   Countries: TCountries[];
-  Fee_Structure: TFeeStructure[];
-  Service_Types: ServiceType[];
+  fee_structures: TFeeStructure[];
+  service_types: ServiceType[];
 };
 
 type TCase = {
