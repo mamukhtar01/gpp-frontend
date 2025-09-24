@@ -6,12 +6,12 @@ export async function GET(res: NextRequest, { params }: { params: Promise<{ id: 
 ) {
     const { id } = await params;
 
-  console.log("Fetching case with ID:", id);
+  console.log("Fetching case with number:", id);
 
   try {
     const data = await client.request(
       readItems("Payments", {
-        filter: { case_id: { _eq: id } }
+        filter: { case_number: { _eq: id } }
       })
     );
 
