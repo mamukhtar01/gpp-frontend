@@ -1,9 +1,9 @@
 "use client"
 
 import * as React from "react"
-import { Check, ChevronsUpDown } from "lucide-react"
+import { Check, ListPlusIcon } from "lucide-react"
 
-import { cn } from "@/lib/utils"
+import { CalculateAge, cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
   Command,
@@ -93,7 +93,10 @@ export  function SearchUKTBCombobox({ setSelectedCase }: { setSelectedCase: (c: 
           {value
             ? cases.find((caseItem) => caseItem.id === value)?.id
             : "Search Case Number..."}
-          <ChevronsUpDown className="opacity-50" />
+            <div className="flex items-center gap-2">
+              <span>Add Case</span>
+              <ListPlusIcon className="opacity-50 " />
+            </div>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[400px] p-0 bg-gray-100 text-gray-800">
@@ -135,7 +138,8 @@ export  function SearchUKTBCombobox({ setSelectedCase }: { setSelectedCase: (c: 
                     setOpen(false)
                   }}
                 >
-                  {caseItem.id}
+                  {caseItem.id}  - 
+                  <span className="text-xs font-light"> {caseItem.First_Name} yrs</span> - <span className="text-xs font-light"> {CalculateAge(caseItem.date_of_birth)} yrs</span>
                   <Check
                     className={cn(
                       "ml-auto",

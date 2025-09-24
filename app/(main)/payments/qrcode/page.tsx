@@ -1,8 +1,17 @@
+import { getUKFeeStructures } from "@/app/server_actions/pricing";
 import { QrCodePaymentPanel } from "@/components/payments/qrcode-payment-panel";
 import { QrCodeUKTBPaymentPanel } from "@/components/payments/qrcode-uktb-payment-panel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default async function PaymentsPage() {
+
+
+   const ukFees = await getUKFeeStructures();
+
+  if (!ukFees) {
+    throw new Error("Failed to fetch UK fee structures");
+  }
+
 
 
   return (
@@ -18,7 +27,7 @@ export default async function PaymentsPage() {
           <QrCodePaymentPanel />
         </TabsContent>
         <TabsContent value="uktb">
-        <QrCodeUKTBPaymentPanel />
+        <QrCodeUKTBPaymentPanel ukFees={ukFees} />
         </TabsContent>
         <TabsContent value="jims">
         <QrCodePaymentPanel />

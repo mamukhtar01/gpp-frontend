@@ -4,29 +4,16 @@ import client from "@/lib/directus";
 import { createItem, readItems, updateItem } from "@directus/sdk";
 import {
   TTxnReportResponseSuccess,
-  TCaseSearchResult,
-  TNepalQRPayload,
-  TNepalQRResponse,
   TTxnReportResponseFailure,
   TNewPaymentRecord,
 } from "@/app/types";
 import { mapToUKTBCases } from "@/lib/utils";
 
-
 // Case Actions
-
-// Fetch case list on the server (replace with your data source)
-export async function getCases(): Promise<TCaseSearchResult[]> {
-  // Example: fetch from DB or API
-  const res = await fetch("https://your-api/cases");
-  if (!res.ok) throw new Error("Failed to fetch cases");
-  return res.json();
-}
 
 export async function updateCaseStatus({
   caseId,
   case_status,
- 
 }: {
   caseId: string;
   case_status: number;
@@ -44,43 +31,26 @@ export async function updateCaseStatus({
   }
 }
 
-
 // create a function to upload UKTB cases from excel file
 export async function uploadUKTBCases(data: string[][]) {
-
   if (data.length === 0 || data[0].length === 0) {
     throw new Error("No data to upload");
   }
 
   try {
-  const cases = mapToUKTBCases(data);
-
+    const cases = mapToUKTBCases(data);
 
     // Create each case individually because createItem expects a single item
     const responses = await Promise.all(
-      cases.map((caseItem) => client.request(createItem("UKTB_Cases", caseItem)))
+      cases.map((caseItem) =>
+        client.request(createItem("UKTB_Cases", caseItem))
+      )
     );
     return responses;
   } catch (error) {
     console.error("Error uploading UKTB cases:", error);
     throw new Error("Failed to upload UKTB cases");
   }
-}
-
-// QR Code Actions
-
-// Generate QR on the server
-export async function generateQr(
-  payload: TNepalQRPayload
-): Promise<TNepalQRResponse> {
-  const res = await fetch("https://your-api/payments/nepalqr", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  const json = await res.json();
-  if (!res.ok) throw new Error(JSON.stringify(json));
-  return json.data ?? json;
 }
 
 // Payment Actions
@@ -101,7 +71,6 @@ export async function getPaymentsAction() {
   }
 }
 export async function getPaymentByCaseIdAction(id: string) {
-
   try {
     const data = await client.request(
       readItems("Payments", {
@@ -117,9 +86,12 @@ export async function getPaymentByCaseIdAction(id: string) {
 }
 
 export async function createPayment(body: TNewPaymentRecord) {
-
   // ✅ Validate required fields
-  if (!body.case_number || !body.amount_in_local_currency || !body.transaction_id) {
+  if (
+    !body.case_number ||
+    !body.amount_in_local_currency ||
+    !body.transaction_id
+  ) {
     throw new Error("Missing required fields");
   }
 
@@ -137,10 +109,10 @@ export async function createPayment(body: TNewPaymentRecord) {
 export async function updatePaymentStatus({
   paymentId,
   status,
-  payerInfo
+  payerInfo,
 }: {
   paymentId: string;
-  payerInfo:  string;
+  payerInfo: string;
   status: number;
 }) {
   console.log("Updating payment status:", { paymentId, status });
@@ -211,18 +183,13 @@ export async function verifyPaymentTxn({
   }
 }
 
-
-
 // Pricing Actions
 export async function getFeeStructures() {
   try {
     const data = await client.request(
       readItems("fee_structures", {
-        fields: [
-          "*",
-          
-        ],
-        sort: ["min_age_months"        ],
+        fields: ["*"],
+        sort: ["min_age_months"],
       })
     );
     return data ?? null;
@@ -231,7 +198,6 @@ export async function getFeeStructures() {
     throw new Error("Failed to fetch fee structures");
   }
 }
-
 
 export async function getServiceTypes() {
   try {
@@ -245,5 +211,5 @@ export async function getServiceTypes() {
   } catch (error) {
     console.error("Error fetching service types:", error);
     throw new Error("Failed to fetch service types");
-  } 
+  }
 }

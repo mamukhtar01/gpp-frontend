@@ -16,16 +16,16 @@ import { QrCode } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { TUKTB_Cases } from "@/lib/schema";
 import { SearchUKTBCombobox } from "./search-uktbcase-combobox";
-import { TNewPaymentRecord } from "@/app/types";
-import { CalculateAge } from "@/lib/utils";
+import { FeeStructure, TNewPaymentRecord } from "@/app/types";
+import { CalculateAge, getFeeByAge } from "@/lib/utils";
 
-export function QrCodeUKTBPaymentPanel() {
+export function QrCodeUKTBPaymentPanel({ukFees}: {ukFees: FeeStructure[]}) {
   const [selectedCase, setSelectedCase] = useState<TUKTB_Cases | null>(null);
   const [ukTBCases, setUkCases] = useState<TUKTB_Cases[]>([]);
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
-
-  //
+ 
+  const router = useRouter();  
+  
 
   async function handleQRGenerateAndCreatePayment() {
     setLoading(true);
@@ -122,6 +122,11 @@ export function QrCodeUKTBPaymentPanel() {
       console.log("Selected case:", selectedCase);
       const exists = ukTBCases.find((c) => c.id === selectedCase.id);
       if (!exists) {
+        // calculate the fee based on age and set to amount field
+        const age = CalculateAge(selectedCase.date_of_birth);
+        const fee = getFeeByAge(ukFees, age ?? 0);       
+        selectedCase.amount = fee ? `$${fee.toFixed(2)}` : "$0.00";
+
         setUkCases((prev) => [...prev, selectedCase]);
       }
     }
@@ -151,7 +156,9 @@ export function QrCodeUKTBPaymentPanel() {
                     {client.First_Name} {client.Last_Name}
                   </TableCell>
                   <TableCell>{CalculateAge(client.date_of_birth)}</TableCell>
-                  <TableCell className="text-right">{client.amount}</TableCell>
+                  <TableCell className="text-right">
+                    ${getFeeByAge(ukFees, CalculateAge(client.date_of_birth) ?? 0)?.toFixed(2) ?? "0.00"}
+                  </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end">
                       <Input
@@ -184,7 +191,7 @@ export function QrCodeUKTBPaymentPanel() {
             {ukTBCases.length > 0 && (
               <>
                 <TableCaption className="mt-8 font-bold text-right">
-                  Total Amount to Pay (NPR):{" "}
+                  Total Amount to Pay (USD):{" "}
                   {ukTBCases
                     .reduce(
                       (acc, client) =>
