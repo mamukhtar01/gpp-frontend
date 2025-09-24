@@ -1,6 +1,5 @@
 "use client";
 import { Input } from "@/components/ui/input";
-import { CaseSearchCombobox, TCase } from "./case-search-combobox";
 import { Separator } from "@radix-ui/react-separator";
 import { useEffect, useState } from "react";
 import { createPayment } from "@/app/server_actions";
@@ -15,41 +14,29 @@ import {
 } from "../ui/table";
 import { QrCode } from "lucide-react";
 import { useRouter } from "next/navigation";
-
-export interface TUKTBCase {
-  id: string;
-  main_client: {
-    id: string;
-    first_name: string;
-    last_name: string;
-  };
-  amountToPayDollars: string | "";
-  amountToPayLocalCurrency: string | "";
-  localCurrency: string | "";
-  remark: string;
-}
+import { TUKTB_Cases } from "@/lib/schema";
+import { SearchUKTBCombobox } from "./search-uktbcase-combobox";
+import { TNewPaymentRecord } from "@/app/types";
 
 export function QrCodeUKTBPaymentPanel() {
-  const [selectedCase, setSelectedCase] = useState<TCase | null>(null);
-  const [ukTBCases, setUkCases] = useState<TUKTBCase[]>([]);
+  const [selectedCase, setSelectedCase] = useState<TUKTB_Cases | null>(null);
+  const [ukTBCases, setUkCases] = useState<TUKTB_Cases[]>([]);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-
 
   //
 
   async function handleQRGenerateAndCreatePayment() {
     setLoading(true);
     try {
-      /*
       // fetch directly here since we are in a client component
-      const res = await fetch("/api/payments/nepalqr", {
+      const res = await fetch("/api/nepalpay/generateQR", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           transactionCurrency: "524",
-          transactionAmount: Number(selectedCase?.package_price ?? 0),
-          billNumber: reference,
+          transactionAmount: Number(selectedCase?.amount ?? 0),
+          billNumber: selectedCase?.id ?? "N/A",
           storeLabel: "Store1",
           terminalLabel: "Terminal1",
           purposeOfTransaction: "Bill payment",
@@ -70,41 +57,29 @@ export function QrCodeUKTBPaymentPanel() {
       const validationTraceId = json.data?.validationTraceId;
       const timestamp = json?.timestamp;
 
-      */
-      // create sample qrcode data
-      const qrData = {
-        qrString:
-          "00020101021129370016A0000006770101110113006600000000023031343030303030303030303030303030303030303030303030305204000053039865407.005802NP5913GPP TESTING6008Kathmandu61051000162290525Test Reference1236304B14",
-        validationTraceId: "VALIDATION_TRACE_ID",
-        timestamp: new Date().toISOString(),
-      };
-
-      const { qrString, validationTraceId, timestamp } = qrData;
-
-        // Total Amounts to pay
+      // Total Amounts to pay
       const totalAmountToPayDollars = ukTBCases
         .reduce(
-          (acc, client) => 
-            acc + Number(client.amountToPayDollars.replace(/[$,]/g, "")),
+          (acc, client) => acc + Number(client.amount.replace(/[$,]/g, "")),
           0
         )
         .toFixed(2);
       const totalAmountToPayLocalCurrency = ukTBCases
         .reduce(
-          (acc, client) =>
-            acc + Number(client.amountToPayLocalCurrency.replace(/[$,]/g, "")),
+          (acc, client) => acc + Number(client.amount.replace(/[$,]/g, "")),
           0
         )
         .toFixed(2);
 
-      const payerInfo = ukTBCases[0]?.main_client?.first_name || "" + " " + ukTBCases[0]?.main_client?.last_name || "";
-
-
-
       // create payment record.
 
-      const paymentRecord = {
-        case_id: selectedCase?.id ?? "",
+      console.log("case to pay:", selectedCase);
+
+      const paymentRecord: TNewPaymentRecord = {
+        case_number: selectedCase?.id ?? "",
+        case_management_system: 2, // assuming 2 represents UKTB
+        mimosa_case: null,
+        reference: null,
         amount_in_dollar: totalAmountToPayDollars ?? "0",
         amount_in_local_currency: totalAmountToPayLocalCurrency ?? "0",
         type_of_payment: 2, // assuming 1 represents Nepal QR
@@ -112,12 +87,17 @@ export function QrCodeUKTBPaymentPanel() {
         transaction_id: `TXN-${Date.now()}`, // example transaction ID
         status: 1, // initial status (e.g., payment initiated)
         validationTraceId: validationTraceId ?? "",
-        payerInfo: payerInfo,
+        payerInfo:
+          selectedCase?.First_Name || "" + " " + selectedCase?.Last_Name || "",
         qr_timestamp: timestamp ?? "",
-        paidAmount: selectedCase?.package_price ?? "0",
+        paidAmount: selectedCase?.amount ?? "0",
         qr_string: qrString,
+        wave: null,
+        clinic: null,
+      
       };
 
+      
       // Create payment record in the database
       const paymentRes = await createPayment(paymentRecord);
 
@@ -141,29 +121,14 @@ export function QrCodeUKTBPaymentPanel() {
       console.log("Selected case:", selectedCase);
       const exists = ukTBCases.find((c) => c.id === selectedCase.id);
       if (!exists) {
-        setUkCases((prev) => [
-          ...prev,
-          {
-            id: selectedCase.id,
-            main_client: selectedCase.main_client,
-            amountToPayDollars: (
-              selectedCase.amount_to_pay_in_dollar ?? ""
-            ).toString(),
-            amountToPayLocalCurrency: (
-              selectedCase.amount_to_pay_in_local_currency ?? ""
-            ).toString(),
-            localCurrency: (selectedCase.local_currency ?? "").toString(),
-            remark: "",
-          },
-        ]);
+        setUkCases((prev) => [...prev, selectedCase]);
       }
     }
-   
   }, [selectedCase]);
 
   return (
     <div className="p-8 bg-white rounded shadow w-full max-w-3xl min-h-[470px]">
-      <CaseSearchCombobox setSelectedCase={setSelectedCase} type="uktb" />
+      <SearchUKTBCombobox setSelectedCase={setSelectedCase} />
       <Separator className="my-8" />
       {selectedCase && (
         <>
@@ -181,12 +146,9 @@ export function QrCodeUKTBPaymentPanel() {
                 <TableRow key={client.id}>
                   <TableCell className="font-medium">{client.id}</TableCell>
                   <TableCell>
-                    {client.main_client.first_name}{" "}
-                    {client.main_client.last_name}
+                    {client.First_Name} {client.Last_Name}
                   </TableCell>
-                  <TableCell className="text-right">
-                    {client.amountToPayDollars}
-                  </TableCell>
+                  <TableCell className="text-right">{client.amount}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end">
                       <Input
@@ -219,57 +181,39 @@ export function QrCodeUKTBPaymentPanel() {
             {ukTBCases.length > 0 && (
               <>
                 <TableCaption className="mt-8 font-bold text-right">
-                  Total Amount to Pay (USD):{" "}
+                  Total Amount to Pay (NPR):{" "}
                   {ukTBCases
                     .reduce(
                       (acc, client) =>
-                        acc +
-                        Number(client.amountToPayDollars.replace(/[$,]/g, "")),
+                        acc + Number(client.amount.replace(/[$,]/g, "")),
                       0
                     )
                     .toFixed(2)}{" "}
                 </TableCaption>
-                <TableCaption className="mt-8 text-gray-500 text-right">
-                  Total Amount in Local Currency:{" "}
-                  <span className="font-bold text-gray-600">
-                    {ukTBCases
-                      .reduce(
-                        (acc, client) =>
-                          acc +
-                          Number(
-                            client.amountToPayLocalCurrency.replace(/[$,]/g, "")
-                          ),
-                        0
-                      )
-                      .toFixed(2)}{" "}
-                  </span>
-                </TableCaption>
-                <TableCaption className="  mt-auto text-gray-500 text-right italic text-xs">
-                  Nepalese Rupee (NPR)
-                </TableCaption>
+                
               </>
             )}
           </Table>
           <Separator className="my-16" />
-                <div className="flex gap-6 mt-2 justify-between">
-                  <button
-                    onClick={handleQRGenerateAndCreatePayment}
-                    disabled={loading}
-                    className="flex items-center justify-center h-12 w-[220px] rounded-md bg-brand-500 text-white font-bold text-base shadow-sm hover:bg-brand-600 hover:cursor-pointer transition disabled:opacity-60"
-                  >
-                    {loading ? "GENERATING..." : "GENERATE NEPAL QR"}
-                    <QrCode className="ml-2 w-5 h-5" />
-                  </button>
+          <div className="flex gap-6 mt-2 justify-between">
+            <button
+              onClick={handleQRGenerateAndCreatePayment}
+              disabled={loading}
+              className="flex items-center justify-center h-12 w-[220px] rounded-md bg-brand-500 text-white font-bold text-base shadow-sm hover:bg-brand-600 hover:cursor-pointer transition disabled:opacity-60"
+            >
+              {loading ? "GENERATING..." : "GENERATE NEPAL QR"}
+              <QrCode className="ml-2 w-5 h-5" />
+            </button>
 
-                  <button
-                    onClick={() => {
-                      setSelectedCase(null);                    
-                    }}
-                    className="flex items-center justify-center h-12 w-[140px] rounded-md border border-brand-700 text-brand-500 font-bold text-base bg-white hover:cursor-pointer hover:bg-blue-50 transition"
-                  >
-                    RESET FIELD
-                  </button>
-                </div>
+            <button
+              onClick={() => {
+                setSelectedCase(null);
+              }}
+              className="flex items-center justify-center h-12 w-[140px] rounded-md border border-brand-700 text-brand-500 font-bold text-base bg-white hover:cursor-pointer hover:bg-blue-50 transition"
+            >
+              RESET FIELD
+            </button>
+          </div>
         </>
       )}
     </div>

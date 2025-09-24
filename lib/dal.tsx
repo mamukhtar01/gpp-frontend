@@ -10,15 +10,30 @@ export async function getUserData() {
     const token = tokenData.data.access_token;
     //const refreshToken = tokenData.data.refresh_token;
 
-
     if (!token) {
       redirect("/login"); // Redirect if unauthorized
     }
 
-    
-
     client.setToken(token);
-    const user = await client.request(readMe());
+    const user = await client.request(
+      readMe({
+        fields: [
+          "id",
+          "email",
+          "first_name",
+          "last_name",
+          {
+            role: ["id", "name", "description"],
+          },
+          {
+            Clinic: ["id", "Name", "City", "Country"],
+          },
+          {
+            Country: ["id", "country", "country_code", "local_currency"],
+          },
+        ],
+      })
+    );
 
     return { success: true, user };
   } catch (error) {
@@ -26,5 +41,3 @@ export async function getUserData() {
     redirect("/login"); // Redirect if unauthorized
   }
 }
-
-

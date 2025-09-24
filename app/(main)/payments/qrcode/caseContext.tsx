@@ -1,6 +1,6 @@
 // context/AppContext.tsx
 "use client";
-import { TCase } from "@/components/payments/case-search-combobox";
+import { TCase } from "@/components/payments/search-mimosa-combobox";
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 
 

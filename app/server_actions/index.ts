@@ -7,8 +7,8 @@ import {
   TCaseSearchResult,
   TNepalQRPayload,
   TNepalQRResponse,
-  TPaymentPayload,
   TTxnReportResponseFailure,
+  TNewPaymentRecord,
 } from "@/app/types";
 import { mapToUKTBCases } from "@/lib/utils";
 
@@ -101,12 +101,11 @@ export async function getPaymentsAction() {
   }
 }
 export async function getPaymentByCaseIdAction(id: string) {
-  console.log("Fetching case with ID:", id);
 
   try {
     const data = await client.request(
       readItems("Payments", {
-        filter: { case_id: { _eq: id } },
+        filter: { case_number: { _eq: id } },
       })
     );
 
@@ -117,11 +116,10 @@ export async function getPaymentByCaseIdAction(id: string) {
   }
 }
 
-export async function createPayment(body: TPaymentPayload) {
-  console.log("Received payment data:", body);
+export async function createPayment(body: TNewPaymentRecord) {
 
   // ✅ Validate required fields
-  if (!body.case_id || !body.amount_in_local_currency || !body.transaction_id) {
+  if (!body.case_number || !body.amount_in_local_currency || !body.transaction_id) {
     throw new Error("Missing required fields");
   }
 
@@ -211,4 +209,41 @@ export async function verifyPaymentTxn({
     console.error("Error verifying QR:", error);
     return { error: "Internal Server Error" };
   }
+}
+
+
+
+// Pricing Actions
+export async function getFeeStructures() {
+  try {
+    const data = await client.request(
+      readItems("fee_structures", {
+        fields: [
+          "*",
+          
+        ],
+        sort: ["min_age_months"        ],
+      })
+    );
+    return data ?? null;
+  } catch (error) {
+    console.error("Error fetching fee structures:", error);
+    throw new Error("Failed to fetch fee structures");
+  }
+}
+
+
+export async function getServiceTypes() {
+  try {
+    const data = await client.request(
+      readItems("service_types", {
+        fields: ["*"],
+        sort: ["service_code"],
+      })
+    );
+    return data ?? null;
+  } catch (error) {
+    console.error("Error fetching service types:", error);
+    throw new Error("Failed to fetch service types");
+  } 
 }

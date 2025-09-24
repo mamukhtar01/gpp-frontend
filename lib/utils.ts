@@ -66,7 +66,8 @@ export function mapToUKTBCases(data: string[][]): TUKTB_Cases[] {
         appointment_time,
         location,
         Country: 4,
-        Currency: 5
+        Currency: 5,
+        date_created: new Date().toISOString(),
       });
     } catch (err) {
       console.error(`❌ Error processing row ${index}:`, (err as Error).message);

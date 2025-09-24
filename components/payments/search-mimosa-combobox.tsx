@@ -46,6 +46,10 @@ export  function CaseSearchCombobox({ setSelectedCase, type }: { setSelectedCase
   const [search, setSearch] = React.useState("")
   const [loading, setLoading] = React.useState(false)
 
+
+  // search mimosa cases or uktb cases based on type prop
+
+
   // replaced fetchCases + effect with a debounced search effect
 
   React.useEffect(() => {
@@ -63,7 +67,7 @@ export  function CaseSearchCombobox({ setSelectedCase, type }: { setSelectedCase
 
      
       try {
-        const res = await fetch(`/api/cases?search=${encodeURIComponent(search)}&case_type=${type}`, {
+        const res = await fetch(`/api/cases/mimosa?search=${encodeURIComponent(search)}&case_type=${type}`, {
           signal: controller.signal,
         })
         if (!res.ok) {

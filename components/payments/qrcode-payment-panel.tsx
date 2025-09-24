@@ -1,6 +1,6 @@
 "use client";
 import { Input } from "@/components/ui/input";
-import { CaseSearchCombobox, TCase } from "./case-search-combobox";
+import { CaseSearchCombobox, TCase } from "./search-mimosa-combobox";
 import { Label } from "@radix-ui/react-label";
 import { Separator } from "@radix-ui/react-separator";
 import { useState } from "react";
@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { QrCode } from "lucide-react";
 import { createPayment } from "@/app/server_actions";
 import { useCaseContext } from "@/app/(main)/payments/qrcode/caseContext";
+import { TNewPaymentRecord } from "@/app/types";
 
 
 export function QrCodePaymentPanel() {
@@ -25,15 +26,16 @@ export function QrCodePaymentPanel() {
     setLoading(true);
     try {
      
-      /*
+      
       // fetch directly here since we are in a client component
-      const res = await fetch("/api/payments/nepalqr", {
+      const res = await fetch("/api/nepalpay/generateQR", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           transactionCurrency: "524",
           transactionAmount: Number(selectedCase?.package_price ?? 0),
-          billNumber: reference,
+          billNumber: selectedCase?.id ?? "",
+          referenceLabel: reference,
           storeLabel: "Store1",
           terminalLabel: "Terminal1",
           purposeOfTransaction: "Bill payment",
@@ -48,27 +50,21 @@ export function QrCodePaymentPanel() {
         throw new Error("Invalid response from QR generation API");
       }
 
-      console.log("QR Generation Response:", json);
-
       const qrString = json.data?.qrString;
       const validationTraceId = json.data?.validationTraceId;
       const timestamp = json?.timestamp;
 
-      */
-      // create sample qrcode data
-      const qrData = {
-        qrString: "00020101021129370016A0000006770101110113006600000000023031343030303030303030303030303030303030303030303030305204000053039865407.005802NP5913GPP TESTING6008Kathmandu61051000162290525Test Reference1236304B14",
-        validationTraceId: "VALIDATION_TRACE_ID",
-        timestamp: new Date().toISOString(),
-      };
-
-      const { qrString, validationTraceId, timestamp } = qrData;
+      
+    
 
 
       // create payment record.
 
-      const paymentRecord = {
-        case_id: selectedCase?.id ?? "",
+      const paymentRecord: TNewPaymentRecord = {
+        case_number: selectedCase?.id ?? "",
+        mimosa_case: selectedCase?.id ?? "",
+        case_management_system: 1, // mimosa
+        reference: reference || null,
         amount_in_dollar: (
           Number(selectedCase?.package_price ?? 0) / 132
         ).toFixed(2), // example conversion
@@ -82,11 +78,14 @@ export function QrCodePaymentPanel() {
         qr_timestamp: timestamp ?? "",
         paidAmount: selectedCase?.package_price ?? "0",
         qr_string: qrString,
+        wave: null,
+        clinic: null,
       };
 
       // Create payment record in the database
       const paymentRes = await createPayment(paymentRecord);
  
+      console.log("Payment record created:", paymentRes);
       
       if (!paymentRes) {
         throw new Error("Failed to create payment record");
@@ -129,7 +128,7 @@ export function QrCodePaymentPanel() {
           <InputCol
             label="Main Client"
             id="client"
-            value={selectedCase.main_client?.first_name + " " + selectedCase.main_client?.last_name || ""}
+            value={selectedCase.main_client?.first_name || "" + " " + selectedCase.main_client?.last_name || ""}
             placeholder="Main Client"
           />
           <InputCol

@@ -1,5 +1,5 @@
 import { updatePaymentStatus, verifyPaymentTxn } from "@/app/server_actions";
-import { TPaymentRecord, TTxnReportResponseFailure } from "@/app/types";
+import { TTxnReportResponseFailure } from "@/app/types";
 import client from "@/lib/directus";
 import { readItems } from "@directus/sdk";
 
@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 
 import { TransactionNotCompleted } from "./failed";
+import { TPayment } from "@/lib/schema";
 
 
 
@@ -23,13 +24,14 @@ export default async function PaymentConfirmationPage({
 
 
   // Fetch payment record by case_id to get validationTraceId
-  const response = await client.request<TPaymentRecord[]>(
+  const response = await client.request<TPayment[]>(
     readItems("Payments", {
-      filter: { case_id: { _eq: case_id } },
+      filter: { case_number: { _eq: case_id } },
     })
   );
 
   const validationTraceId = response[0].validationTraceId;
+  const paymentStatus = response[0].status;
 
   if (!validationTraceId) {
     throw new Error("No validationTraceId found for this payment.");
@@ -45,7 +47,7 @@ export default async function PaymentConfirmationPage({
     throw new Error(transactionReport.error);
   }
 
-  console.log("Transaction Report:", transactionReport);
+
   if (transactionReport.responseCode !== "200") {
     return <TransactionNotCompleted transactionReport={transactionReport as TTxnReportResponseFailure} />
   }
@@ -67,16 +69,24 @@ const txn = transactionReport.responseBody[0];
   const payerInfo = txn.payerName;
   if(!paymentId) throw new Error("No payment ID found for this payment.");
 
+
+  // Only update if status is not already completed
+
+  if(paymentStatus !== 2){
+
    const result =   await updatePaymentStatus({
     paymentId: paymentId!,
     status: 2,
     payerInfo
    });
 
-   console.log("Payment status updated:", result);
+   if(!result) {
+    throw new Error("Failed to update payment status.");
+   }
+  }
+ 
 
- }
-
+}
 
 
   return (

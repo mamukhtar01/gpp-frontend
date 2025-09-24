@@ -6,28 +6,28 @@ import { readItems } from "@directus/sdk";
 import { CheckCircle2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { TPaymentRecord } from "@/app/types";
+import { TPayment } from "@/lib/schema";
 import ReceiptActions from "@/components/custom/receipt-actions";
 import PaymentNotCompleted from "@/components/custom/payment-not-completed";
 
 export default async function PaymentConfirmationPage({
   params,
 }: {
-  params: Promise<{ case_id: string }>;
+  params: Promise<{ case_number: string }>;
 }) {
 
-  // Extract case_id from params
-  const { case_id } = await params;
+  // Extract case_number from params
+  const { case_number } = await params;
 
-  // Fetch payment record by case_id to get validationTraceId
-  const response = await client.request<TPaymentRecord[]>(
+  // Fetch payment record by case_number to get validationTraceId
+  const response = await client.request<TPayment[]>(
     readItems("Payments", {
-      filter: { case_id: { _eq: case_id } },
+      filter: { case_number: { _eq: case_number } },
     })
   );
 
   if (response.length === 0) {
-    throw new Error("No payment record found for this case_id.");
+    throw new Error("No payment record found for this case_number.");
   }
 
   if (response[0].status !== 2) {
@@ -58,7 +58,7 @@ export default async function PaymentConfirmationPage({
           </div>
           <div className="flex justify-between text-sm">
             <span className="font-medium">Case Number</span>
-            <span>{payment.case_id}</span>
+            <span>{payment.case_number}</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="font-medium">Type of Payment</span>
@@ -83,12 +83,12 @@ export default async function PaymentConfirmationPage({
           <ReceiptActions
             receipt={{
               payerInfo: payment.payerInfo ?? undefined,
-              case_id: payment.case_id ?? undefined,
+              case_number: payment.case_number ?? undefined,
               transaction_id: payment.transaction_id ?? undefined,
               paidAmount: payment.paidAmount ?? undefined,
               amount_in_local_currency:
                 payment.amount_in_local_currency ?? undefined,
-              date_of_payment: payment.date_of_payment ?? undefined,
+              date_of_payment: payment.date_of_payment,
             }}
           />
         </CardContent>

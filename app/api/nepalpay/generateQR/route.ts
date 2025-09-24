@@ -15,12 +15,10 @@ export async function POST(req: NextRequest) {
       transactionCurrency, // e.g. 524
       transactionAmount,
       billNumber,
-      referenceLabel,
-      mobileNo,
+      referenceLabel,    
       storeLabel,
       terminalLabel,
-      purposeOfTransaction,
-      loyaltyNumber,
+      purposeOfTransaction,      
     } = await req.json();
 
     // api static values
@@ -79,12 +77,10 @@ export async function POST(req: NextRequest) {
       transactionCurrency,
       transactionAmount: formatAmount2(transactionAmount ?? "0.00"),
       billNumber,
-      referenceLabel: referenceLabel ?? null,
-      mobileNo: mobileNo ?? null,
+      referenceLabel: referenceLabel ?? null,      
       storeLabel,
       terminalLabel,
       purposeOfTransaction,      
-      loyaltyNumber: loyaltyNumber ?? null,
       token,
     };
 
@@ -93,6 +89,7 @@ export async function POST(req: NextRequest) {
     Object.keys(payload).forEach(
       (k) => payload[k] === undefined && delete payload[k]
     );
+
 
     // 4) Call Nepal API
     const host = process.env.NEPALQR_URL!;
@@ -110,6 +107,7 @@ export async function POST(req: NextRequest) {
     const data = await res.json();
 
     if (!res.ok) {
+      console.error("NepalQR request failed:", res.status, data);
       return NextResponse.json(
         { error: "NepalQR request failed", status: res.status, data },
         { status: res.status }

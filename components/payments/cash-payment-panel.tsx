@@ -1,6 +1,6 @@
 "use client";
 import { Input } from "@/components/ui/input";
-import { CaseSearchCombobox, TCase } from "./case-search-combobox";
+import { CaseSearchCombobox, TCase } from "./search-mimosa-combobox";
 import { Label } from "@radix-ui/react-label";
 import { Separator } from "@radix-ui/react-separator";
 import { useState } from "react";
@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 
 import { Banknote } from "lucide-react";
 import { createPayment, updateCaseStatus } from "@/app/server_actions";
+import { TNewPaymentRecord } from "@/app/types";
 
 export function CashPaymentPanel() {
   const [selectedCase, setSelectedCase] = useState<TCase | null>(null);
@@ -22,8 +23,11 @@ export function CashPaymentPanel() {
     try {
       // create payment record.
 
-      const paymentRecord = {
-        case_id: selectedCase?.id ?? "",
+      const paymentRecord: TNewPaymentRecord = {
+        mimosa_case: selectedCase?.id ?? "",
+        case_number: selectedCase?.id ?? "",
+        case_management_system: 1, // mimosa
+        reference: reference,
         amount_in_dollar: (
           Number(selectedCase?.package_price ?? 0) / 132
         ).toFixed(2), // example conversion
@@ -37,6 +41,8 @@ export function CashPaymentPanel() {
         qr_timestamp: "",
         paidAmount: selectedCase?.package_price ?? "0",
         qr_string: "",
+        wave: null,
+        clinic: null,
       };
 
       const paymentRes = await createPayment(paymentRecord);
