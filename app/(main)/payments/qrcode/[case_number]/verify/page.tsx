@@ -17,21 +17,22 @@ import { TPayment } from "@/lib/schema";
 export default async function PaymentConfirmationPage({
   params,
 }: {
-  params: Promise<{ case_id: string }>;
+  params: Promise<{ case_number: string }>;
 }) {
-  const { case_id } = await params;
+  const { case_number } = await params;
 
 
 
-  // Fetch payment record by case_id to get validationTraceId
+  // Fetch payment record by case_number to get validationTraceId
   const response = await client.request<TPayment[]>(
     readItems("Payments", {
-      filter: { case_number: { _eq: case_id } },
+      filter: { case_number: { _eq: case_number } },
     })
   );
 
   const validationTraceId = response[0].validationTraceId;
   const paymentStatus = response[0].status;
+  const qrCode = response[0].qr_string;
 
   if (!validationTraceId) {
     throw new Error("No validationTraceId found for this payment.");
@@ -49,7 +50,7 @@ export default async function PaymentConfirmationPage({
 
 
   if (transactionReport.responseCode !== "200") {
-    return <TransactionNotCompleted transactionReport={transactionReport as TTxnReportResponseFailure} />
+    return <TransactionNotCompleted qrCode={qrCode} transactionReport={transactionReport as TTxnReportResponseFailure} />
   }
 
   // Success case
