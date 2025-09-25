@@ -19,24 +19,37 @@ import { SearchUKTBCombobox } from "./search-uktbcase-combobox";
 import { FeeStructure, TNewPaymentRecord } from "@/app/types";
 import { CalculateAge, getFeeByAge } from "@/lib/utils";
 
-export function QrCodeUKTBPaymentPanel({ukFees}: {ukFees: FeeStructure[]}) {
+export function QrCodeUKTBPaymentPanel({ ukFees }: { ukFees: FeeStructure[] }) {
   const [selectedCase, setSelectedCase] = useState<TUKTB_Cases | null>(null);
   const [ukTBCases, setUkCases] = useState<TUKTB_Cases[]>([]);
   const [loading, setLoading] = useState(false);
- 
-  const router = useRouter();  
-  
+
+  const router = useRouter();
 
   async function handleQRGenerateAndCreatePayment() {
     setLoading(true);
     try {
+      // Total Amounts to pay
+      const totalAmountToPayDollars = ukTBCases
+        .reduce(
+          (acc, client) => acc + Number(client.amount.replace(/[$,]/g, "")),
+          0
+        )
+        .toFixed(2);
+      const totalAmountToPayLocalCurrency = ukTBCases
+        .reduce(
+          (acc, client) => acc + Number(client.amount.replace(/[$,]/g, "")),
+          0
+        )
+        .toFixed(2);
+
       // fetch directly here since we are in a client component
       const res = await fetch("/api/nepalpay/generateQR", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           transactionCurrency: "524",
-          transactionAmount: Number(selectedCase?.amount ?? 0),
+          transactionAmount: Number(totalAmountToPayDollars ?? 0),
           billNumber: selectedCase?.id ?? "N/A",
           storeLabel: "Store1",
           terminalLabel: "Terminal1",
@@ -57,20 +70,6 @@ export function QrCodeUKTBPaymentPanel({ukFees}: {ukFees: FeeStructure[]}) {
       const qrString = json.data?.qrString;
       const validationTraceId = json.data?.validationTraceId;
       const timestamp = json?.timestamp;
-
-      // Total Amounts to pay
-      const totalAmountToPayDollars = ukTBCases
-        .reduce(
-          (acc, client) => acc + Number(client.amount.replace(/[$,]/g, "")),
-          0
-        )
-        .toFixed(2);
-      const totalAmountToPayLocalCurrency = ukTBCases
-        .reduce(
-          (acc, client) => acc + Number(client.amount.replace(/[$,]/g, "")),
-          0
-        )
-        .toFixed(2);
 
       // create payment record.
 
@@ -95,10 +94,8 @@ export function QrCodeUKTBPaymentPanel({ukFees}: {ukFees: FeeStructure[]}) {
         qr_string: qrString,
         wave: null,
         clinic: null,
-      
       };
 
-      
       // Create payment record in the database
       const paymentRes = await createPayment(paymentRecord);
 
@@ -116,25 +113,11 @@ export function QrCodeUKTBPaymentPanel({ukFees}: {ukFees: FeeStructure[]}) {
     }
   }
 
-  // update UKTBCase state when case is selected
-  useEffect(() => {
-    if (selectedCase) {
-      console.log("Selected case:", selectedCase);
-      const exists = ukTBCases.find((c) => c.id === selectedCase.id);
-      if (!exists) {
-        // calculate the fee based on age and set to amount field
-        const age = CalculateAge(selectedCase.date_of_birth);
-        const fee = getFeeByAge(ukFees, age ?? 0);       
-        selectedCase.amount = fee ? `$${fee.toFixed(2)}` : "$0.00";
 
-        setUkCases((prev) => [...prev, selectedCase]);
-      }
-    }
-  }, [selectedCase]);
 
   return (
     <div className="p-8 bg-white rounded shadow w-full max-w-3xl min-h-[470px]">
-      <SearchUKTBCombobox setSelectedCase={setSelectedCase} />
+      <SearchUKTBCombobox setSelectedCase={setSelectedCase} setUkCases={setUkCases} ukFees={ukFees} />
       <Separator className="my-8" />
       {selectedCase && (
         <>
@@ -157,7 +140,11 @@ export function QrCodeUKTBPaymentPanel({ukFees}: {ukFees: FeeStructure[]}) {
                   </TableCell>
                   <TableCell>{CalculateAge(client.date_of_birth)}</TableCell>
                   <TableCell className="text-right">
-                    ${getFeeByAge(ukFees, CalculateAge(client.date_of_birth) ?? 0)?.toFixed(2) ?? "0.00"}
+                    $
+                    {getFeeByAge(
+                      ukFees,
+                      CalculateAge(client.date_of_birth) ?? 0
+                    )?.toFixed(2) ?? "0.00"}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end">
@@ -200,7 +187,6 @@ export function QrCodeUKTBPaymentPanel({ukFees}: {ukFees: FeeStructure[]}) {
                     )
                     .toFixed(2)}{" "}
                 </TableCaption>
-                
               </>
             )}
           </Table>
