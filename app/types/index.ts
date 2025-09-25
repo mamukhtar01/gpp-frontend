@@ -132,7 +132,15 @@ export type TNewPaymentRecord = {
   qr_timestamp: string | null;
   qr_string: string | null;
   wave: string | null;
-  clinic: number | null;
+  clinic: string | null;
+  clients: TClientBasicInfo[] | null;
+};
+
+export type TClientBasicInfo = {
+  id: string;
+  name: string;
+  age: number;
+  amount: string;
 };
 
 

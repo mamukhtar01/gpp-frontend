@@ -1,7 +1,7 @@
 "use client";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@radix-ui/react-separator";
-import { useEffect, useState } from "react";
+import {  useState } from "react";
 import { createPayment } from "@/app/server_actions";
 import {
   Table,
@@ -16,7 +16,7 @@ import { QrCode } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { TUKTB_Cases } from "@/lib/schema";
 import { SearchUKTBCombobox } from "./search-uktbcase-combobox";
-import { FeeStructure, TNewPaymentRecord } from "@/app/types";
+import { FeeStructure, TClientBasicInfo, TNewPaymentRecord } from "@/app/types";
 import { CalculateAge, getFeeByAge } from "@/lib/utils";
 
 export function QrCodeUKTBPaymentPanel({ ukFees }: { ukFees: FeeStructure[] }) {
@@ -75,6 +75,14 @@ export function QrCodeUKTBPaymentPanel({ ukFees }: { ukFees: FeeStructure[] }) {
 
       console.log("case to pay:", selectedCase);
 
+      // pick basic client info to store in payment record
+      const clientsInfo = ukTBCases.map((client) => ({
+        id: client.id,
+        name: `${client.First_Name} ${client.Last_Name}`,
+        age: CalculateAge(client.date_of_birth),
+        amount: getFeeByAge(ukFees, CalculateAge(client.date_of_birth) ?? 0)?.toFixed(2) ?? "0.00",
+      }));
+
       const paymentRecord: TNewPaymentRecord = {
         case_number: selectedCase?.id ?? "",
         case_management_system: 2, // assuming 2 represents UKTB
@@ -94,6 +102,7 @@ export function QrCodeUKTBPaymentPanel({ ukFees }: { ukFees: FeeStructure[] }) {
         qr_string: qrString,
         wave: null,
         clinic: null,
+        clients: clientsInfo as TClientBasicInfo[] || [], // store selected clients as JSON
       };
 
       // Create payment record in the database

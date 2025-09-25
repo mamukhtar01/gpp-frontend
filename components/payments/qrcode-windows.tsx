@@ -46,7 +46,7 @@ export default function QRCodeWindows({ qrValue, amount, payerInfo, caseId }: Pr
 
   return (
     <div className="flex flex-col items-center">
-      <Button onClick={sendViaWhatsApp} variant="outline" className="mt-4 text-xs text-brand-600">
+      <Button onClick={sendViaWhatsApp} variant="link" className="mt-2 text-xs hover:cursor-pointer text-green-600">
         Send via WhatsApp or Email
       </Button>
     </div>

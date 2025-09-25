@@ -1,3 +1,5 @@
+import { TClientBasicInfo } from "@/app/types";
+
 export type DbSchema = {
   Cases: TCase[];
 
@@ -91,6 +93,8 @@ export type TPayment = {
   qr_string: string | null;
   qr_timestamp: string | null;
   paidAmount: number | string | null;
+  clinic: string | null;
+  clients: TClientBasicInfo[] | null; // JSON string of client info
 };
 
 export type TUKTB_Cases = {
