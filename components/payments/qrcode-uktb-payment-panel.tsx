@@ -28,7 +28,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { QrCode, PlusCircle, X } from "lucide-react";
+import { QrCode, PlusCircle, X, TrashIcon, Trash2, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { TUKTB_Cases } from "@/lib/schema";
 import { SearchUKTBCombobox } from "./search-uktbcase-combobox";
@@ -73,7 +73,9 @@ export function QrCodeUKTBPaymentPanel({
   const [addedServices, setAddedServices] = useState<AddedServicesState>({});
   const [isServiceDialogOpen, setIsServiceDialogOpen] = useState(false);
   const [activeClientId, setActiveClientId] = useState<string | null>(null);
-  const [selectedServiceId, setSelectedServiceId] = useState<number | null>(null);
+  const [selectedServiceId, setSelectedServiceId] = useState<number | null>(
+    null
+  );
 
   /* ---------------- Helpers ---------------- */
 
@@ -237,11 +239,10 @@ export function QrCodeUKTBPaymentPanel({
             </TableHeader>
             <TableBody>
               {ukTBCases.map((client) => {
-                const age = CalculateAge(client.date_of_birth);               
+                const age = CalculateAge(client.date_of_birth);
                 const clientTotal = getClientTotal(client);
 
                 return (
-                  
                   <React.Fragment key={client.id}>
                     <TableRow>
                       <TableCell className="font-medium">{client.id}</TableCell>
@@ -260,30 +261,32 @@ export function QrCodeUKTBPaymentPanel({
                             type="text"
                             placeholder="add remark"
                           />
-                        
                         </div>
                       </TableCell>
-                      <TableCell className="flex justify-center">
-                          <Button
-                            variant="outline"
-                            className=" flex-2 border-gray-200"
-                            size="sm"
-                            onClick={() => {
-                              setActiveClientId(client.id);
-                              setIsServiceDialogOpen(true);
-                            }}
-                            title="Add additional service"
-                          >
-                            <PlusCircle className="h-8 w-8 text-green-600" />
-                          </Button>
-                          <button
-                            onClick={() => removeClient(client.id)}
-                            className="text-red-500 hover:text-red-600 p-1 flex-1"
-                            title="Remove client"
-                          >
-                            ❌
-                          </button>
-                        </TableCell>
+                      <TableCell className="flex justify-around">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1"
+                          onClick={() => {
+                            setActiveClientId(client.id);
+                            setIsServiceDialogOpen(true);
+                          }}
+                        >
+                          <Plus className="h-4 w-4" />
+                          <span className="hidden sm:inline">Additional Service</span>
+                        </Button>
+
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-500 hover:text-red-600 "
+                          onClick={() => removeClient(client.id)}
+                          title="Remove client"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
                     </TableRow>
 
                     {(addedServices[client.id]?.length ?? 0) > 0 && (
