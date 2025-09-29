@@ -4,7 +4,7 @@ import client from "@/lib/directus";
 import { readItems } from "@directus/sdk";
 
 // Pricing Actions
-export async function getUKFeeStructures() {
+export async function getFeeStructures({countryCode, type}: {countryCode: number, type: "medical_exam" | "vaccination" | "special_service"}) {
   try {
     const data = await client.request(
       readItems("fee_structures", {
@@ -18,9 +18,9 @@ export async function getUKFeeStructures() {
           }, // include related category in response
         ],
         filter: {
-          country_id: { _eq: 16 },
+          country_id: { _eq: countryCode },
           service_type_code: {
-            category: { _eq: "medical_exam" },
+            category: { _eq: type},
           },
           is_active: { _eq: true },
         },
@@ -34,3 +34,5 @@ export async function getUKFeeStructures() {
     throw new Error("Failed to fetch fee structures");
   }
 }
+
+

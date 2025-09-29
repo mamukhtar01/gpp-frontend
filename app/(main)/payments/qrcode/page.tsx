@@ -1,22 +1,30 @@
-import { getUKFeeStructures } from "@/app/server_actions/pricing";
+import { getFeeStructures } from "@/app/server_actions/pricing";
 import { QrCodePaymentPanel } from "@/components/payments/qrcode-payment-panel";
 import { QrCodeUKTBPaymentPanel } from "@/components/payments/qrcode-uktb-payment-panel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default async function PaymentsPage() {
-
-
-   const ukFees = await getUKFeeStructures();
+  const ukFees = await getFeeStructures({
+    countryCode: 16,
+    type: "medical_exam",
+  });
 
   if (!ukFees) {
     throw new Error("Failed to fetch UK fee structures");
   }
 
+  const additionalServicesList = await getFeeStructures({
+    countryCode: 16,
+    type: "special_service",
+  });
 
+  if (!additionalServicesList) {
+    throw new Error("Failed to fetch additional services");
+  }
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <Tabs defaultValue="mimosa" className="min-w-[800px]">
+    <div className="mx-auto">
+      <Tabs defaultValue="mimosa" className="min-w-6xl">
         <TabsList className="w-full flex justify-start gap-4 mb-6">
           <TabsTrigger value="mimosa">MiMOSA</TabsTrigger>
           <TabsTrigger value="uktb">UKTB</TabsTrigger>
@@ -27,13 +35,15 @@ export default async function PaymentsPage() {
           <QrCodePaymentPanel />
         </TabsContent>
         <TabsContent value="uktb">
-        <QrCodeUKTBPaymentPanel ukFees={ukFees} />
+          <QrCodeUKTBPaymentPanel
+            ukFees={ukFees}
+            additionalServicesList={additionalServicesList}
+          />
         </TabsContent>
         <TabsContent value="jims">
-        <QrCodePaymentPanel />
+          <QrCodePaymentPanel />
         </TabsContent>
       </Tabs>
-     
     </div>
   );
 }
