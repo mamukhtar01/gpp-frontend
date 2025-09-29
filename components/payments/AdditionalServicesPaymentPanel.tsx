@@ -570,16 +570,8 @@ export function AdditionalServicesPaymentPanel({
                 </p>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={loading}
-                  onClick={resetAll}
-                  className="sm:min-w-[120px]"
-                >
-                  Reset
-                </Button>
+              <div className="flex flex-col sm:flex-row gap-8 sm:gap-4 justify-between items-center flex-1">
+              
                 <Button
                   type="button"
                   onClick={handleCreatePayment}
@@ -601,8 +593,18 @@ export function AdditionalServicesPaymentPanel({
                                bg-[radial-gradient(circle_at_30%_30%,rgba(255,255,255,0.25),transparent_60%)]"
                   />
                 </Button>
+                  <Button
+                  type="button"
+                  variant="outline"
+                  disabled={loading}
+                  onClick={resetAll}
+                  className="sm:min-w-[120px]"
+                >
+                  Reset
+                </Button>
               </div>
             </div>
+            
           </div>
         </>
       ) : (
