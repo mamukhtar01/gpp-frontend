@@ -184,20 +184,6 @@ export async function verifyPaymentTxn({
 }
 
 // Pricing Actions
-export async function getFeeStructures() {
-  try {
-    const data = await client.request(
-      readItems("fee_structures", {
-        fields: ["*"],
-        sort: ["min_age_months"],
-      })
-    );
-    return data ?? null;
-  } catch (error) {
-    console.error("Error fetching fee structures:", error);
-    throw new Error("Failed to fetch fee structures");
-  }
-}
 
 export async function getServiceTypes() {
   try {

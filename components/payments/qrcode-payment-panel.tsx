@@ -80,6 +80,7 @@ export function QrCodePaymentPanel() {
         qr_string: qrString,
         wave: null,
         clinic: null,
+        clients: null,
       };
 
       // Create payment record in the database
@@ -114,7 +115,7 @@ export function QrCodePaymentPanel() {
   }
 
   return (
-    <div className="p-8 bg-white rounded shadow w-full max-w-3xl min-h-[470px]">
+    <div className="p-8 bg-white rounded shadow w-full max-w-6xl min-h-[470px]">
       <CaseSearchCombobox setSelectedCase={setSelectedCase} type="mimosa" />
       <Separator className="my-8" />
       {selectedCase && (
