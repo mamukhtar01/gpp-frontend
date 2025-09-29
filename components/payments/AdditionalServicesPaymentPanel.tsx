@@ -252,6 +252,7 @@ export function AdditionalServicesPaymentPanel({
         wave: null,
         clinic: null,
         clients: clientsInfo as TClientBasicInfo[],
+        service_type: "special_service",
       };
 
       await createPayment(paymentRecord);

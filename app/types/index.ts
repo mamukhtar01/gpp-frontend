@@ -134,6 +134,7 @@ export type TNewPaymentRecord = {
   wave: string | null;
   clinic: string | null;
   clients: TClientBasicInfo[] | null;
+  service_type?: string | null; // e.g., "special_service"
 };
 
 export type TClientBasicInfo = {
