@@ -95,6 +95,7 @@ export type TPayment = {
   paidAmount: number | string | null;
   clinic: string | null;
   clients: TClientBasicInfo[] | null; // JSON string of client info
+  service_type: string | null; // JSON string of service types
 };
 
 export type TUKTB_Cases = {
