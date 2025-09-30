@@ -141,7 +141,7 @@ export function DataTable({
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
-                      className="px-6 py-4 text-base align-middle"
+                      className="px-6 py-4 text-sm align-middle"
                     >
                       {flexRender(
                         cell.column.columnDef.cell,

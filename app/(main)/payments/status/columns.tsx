@@ -83,6 +83,14 @@ export const columns: ColumnDef<TPayment>[] = [
       return <div className="text-right font-medium">{formatted}</div>;
     },
   },
+    {
+    accessorKey: "type_of_payment",
+    header: () => <div className="text-right">Type</div>,
+    cell: ({ row }) => {
+      const paymentType = row.getValue("type_of_payment");
+      return <div className="font-mono text-xs">{paymentType === 2 ? "QRCode" : paymentType === 3 ? "Cash" : "Unknown"}</div>;
+    },
+  },
   {
     id: "date_of_payment",
     accessorKey: "date_of_payment",
