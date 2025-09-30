@@ -113,13 +113,26 @@ export function DataTable({
                   className="hover:bg-gray-100 transition-all h-14 hover:cursor-pointer"
                   // Navigate to payment details page on row click
                   onClick={() => {
-                    if (row.original.status === 1) {
+                    // nepal qrcode payment and status is registered, go to payment page
+                    if (
+                      row.original.status === 1 &&
+                      row.original.type_of_payment === 2
+                    ) {
                       router.push(
                         `/payments/qrcode/${row.original.case_number}?case_type=${row.original.case_management_system}`
                       );
-                    } else {
+                    } else if (
+                      row.original.status === 2 &&
+                      row.original.type_of_payment === 2
+                    ) {
                       router.push(
                         `/payments/qrcode/${row.original.case_number}/verify?case_type=${row.original.case_management_system}`
+                      );
+                    }
+                    // cash payment, go to cash payment details page
+                    else if (row.original.type_of_payment === 3) {
+                      router.push(
+                        `/payments/cash/${row.original.case_number}?case_type=${row.original.case_management_system}`
                       );
                     }
                   }}

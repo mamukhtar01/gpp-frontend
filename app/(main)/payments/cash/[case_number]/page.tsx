@@ -6,7 +6,6 @@ import { readItems } from "@directus/sdk";
 import { CheckCircle2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { TPayment } from "@/lib/schema";
 import ReceiptActions from "@/components/custom/receipt-actions";
 import PaymentNotCompleted from "@/components/custom/payment-not-completed";
 
@@ -19,14 +18,21 @@ export default async function PaymentConfirmationPage({
   // Extract case_number from params
   const { case_number } = await params;
 
-  // Fetch payment record by case_number to get validationTraceId
-  const response = await client.request<TPayment[]>(
-    readItems("Payments", {
-      filter: { case_number: { _eq: case_number } },
-    })
-  );
+ 
 
-  if (response.length === 0) {
+  // Fetch payment record by case_number to get validationTraceId
+ const response = await client.request(
+  readItems('Payments', {
+    filter: {
+      case_number: { _eq: case_number }
+    },
+    fields: ['*']
+  })
+);
+
+  console.log(response);
+
+  if (!response || response.length === 0) {
     throw new Error("No payment record found for this case_number.");
   }
 
