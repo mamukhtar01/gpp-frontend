@@ -16,9 +16,19 @@ const router = useRouter();
     const fetchUserInfo = async () => {
       try {
         const response = await client.request(readMe());
-        console.log("User info:", response);
+
+        // redirect to home if user info is fetched successfully
+     if (response) {
+          router.push("/");
+        } else {
+          console.log("User info:", response);
+          router.push("/login?error=invalid_token");
+        }
+
+
       } catch (error) {
         console.error("Error fetching user info:", error);
+        router.push("/login?error=fetch_error");
       }
     };
  
