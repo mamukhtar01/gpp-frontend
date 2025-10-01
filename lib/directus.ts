@@ -1,5 +1,5 @@
-import  { authentication, createDirectus, rest } from '@directus/sdk';
-import {DbSchema} from './schema';
+import { authentication, createDirectus, rest } from "@directus/sdk";
+import { DbSchema } from "./schema";
 
 // const url = process.env.DIRECTUS_URL ?? process.env.NEXT_PUBLIC_DIRECTUS_URL
 
@@ -8,10 +8,10 @@ import {DbSchema} from './schema';
 // }
 
 const client = createDirectus<DbSchema>("https://iom-ppo-directus-dev.iom.int")
-  .with(rest())
-  .with(authentication("cookie", { credentials: "include" }));
+  .with(authentication("cookie", { credentials: "include" }))
+  .with(rest({ credentials: "include" }));
 
-  // set token for requests
-  client.setToken(process.env.DIRECTUS_ACCESS_TOKEN!);
+// set token for requests
+client.setToken(process.env.DIRECTUS_ACCESS_TOKEN!);
 
 export default client;

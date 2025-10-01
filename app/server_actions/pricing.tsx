@@ -1,10 +1,34 @@
+"use server";
 // Get UK fee structures and service types from Directus
 
 import client from "@/lib/directus";
 import { readItems } from "@directus/sdk";
 
 // Pricing Actions
-export async function getFeeStructures({countryCode, type}: {countryCode: number, type: "medical_exam" | "vaccination" | "special_service"}) {
+
+export async function getServiceTypes() {
+  try {
+    const data = await client.request(
+      readItems("service_types", {
+        fields: ["*"],
+        sort: ["service_code"],
+      })
+    );
+    return data ?? null;
+  } catch (error) {
+    console.error("Error fetching service types:", error);
+    throw new Error("Failed to fetch service types");
+  }
+}
+
+// Pricing Actions
+export async function getFeeStructures({
+  countryCode,
+  type,
+}: {
+  countryCode: number;
+  type: "medical_exam" | "vaccination" | "special_service";
+}) {
   try {
     const data = await client.request(
       readItems("fee_structures", {
@@ -20,7 +44,7 @@ export async function getFeeStructures({countryCode, type}: {countryCode: number
         filter: {
           country_id: { _eq: countryCode },
           service_type_code: {
-            category: { _eq: type},
+            category: { _eq: type },
           },
           is_active: { _eq: true },
         },
@@ -35,4 +59,19 @@ export async function getFeeStructures({countryCode, type}: {countryCode: number
   }
 }
 
+export async function getAllFeeStructures() {
+  try {
+    const data = await client.request(
+      readItems("fee_structures", {
+         fields: ["*"],
 
+        sort: ["min_age_months"],
+      })
+    );
+
+    return data ?? null;
+  } catch (error) {
+    console.error("Error fetching fee structures:", error);
+    throw new Error("Failed to fetch fee structures");
+  }
+}

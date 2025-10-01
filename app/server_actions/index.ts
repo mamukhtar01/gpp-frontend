@@ -183,19 +183,3 @@ export async function verifyPaymentTxn({
   }
 }
 
-// Pricing Actions
-
-export async function getServiceTypes() {
-  try {
-    const data = await client.request(
-      readItems("service_types", {
-        fields: ["*"],
-        sort: ["service_code"],
-      })
-    );
-    return data ?? null;
-  } catch (error) {
-    console.error("Error fetching service types:", error);
-    throw new Error("Failed to fetch service types");
-  }
-}

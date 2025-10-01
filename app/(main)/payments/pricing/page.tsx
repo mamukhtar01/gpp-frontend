@@ -1,6 +1,7 @@
+import { getAllFeeStructures,  getServiceTypes } from "@/app/server_actions/pricing";
 import countriesRaw from "./countries.json";
 import PricingTabs from "./PricingTabs";
-import { getFeeStructures, getServiceTypes } from "@/app/server_actions";
+
 
 // ---- Types ----
 export type Country = {
@@ -21,7 +22,7 @@ export type ServiceType = {
 export type FeeStructure = {
   id: number;
   country_id: number | null;
-  service_type_code: string | null;
+  service_type_code: string;
   age_bracket_display: string | null;
   min_age_months: number | null;
   max_age_months: number | null;
@@ -40,7 +41,7 @@ export default async function PricingPage() {
 
   // Fee structure server action 
 
-  const feeStructureData =  await getFeeStructures();
+  const feeStructureData =  await getAllFeeStructures() as FeeStructure[] | null;
   const servicesData = await getServiceTypes();
   if (!feeStructureData || !servicesData) {
     throw new Error("Failed to load pricing data");
@@ -50,6 +51,7 @@ export default async function PricingPage() {
 
   const allFees: FeeStructure[] = feeStructureData;
   const allServices: ServiceType[] = servicesData;
+
 
 
  
