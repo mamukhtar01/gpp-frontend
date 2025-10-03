@@ -28,13 +28,15 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { QrCode, PlusCircle, X, TrashIcon, Trash2, Plus } from "lucide-react";
+import { QrCode, Trash2, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { TUKTB_Cases } from "@/lib/schema";
 import { SearchUKTBCombobox } from "./search-uktbcase-combobox";
 import { FeeStructure, TClientBasicInfo, TNewPaymentRecord } from "@/app/types";
 import { CalculateAge, getFeeByAge } from "@/lib/utils";
 import React from "react";
+import { useExchangeRate } from "@/app/(main)/payments/exchangeRateContext";
+import { ExchangeRateWidget } from "../exchangeRateWidget";
 
 /* ---------------- Types ---------------- */
 
@@ -73,9 +75,10 @@ export function QrCodeUKTBPaymentPanel({
   const [addedServices, setAddedServices] = useState<AddedServicesState>({});
   const [isServiceDialogOpen, setIsServiceDialogOpen] = useState(false);
   const [activeClientId, setActiveClientId] = useState<string | null>(null);
-  const [selectedServiceId, setSelectedServiceId] = useState<number | null>(
-    null
-  );
+  const [selectedServiceId, setSelectedServiceId] = useState<number | null>(null);
+
+  // Exchange Rate Context (local currency per 1 USD)
+  const exchangeRate = useExchangeRate(); // e.g. 133.5
 
   /* ---------------- Helpers ---------------- */
 
@@ -90,10 +93,15 @@ export function QrCodeUKTBPaymentPanel({
     return getBaseFee(client) + adds;
   };
 
-  const grandTotal = useMemo(
+  const grandTotalUSD = useMemo(
     () => ukTBCases.reduce((sum, c) => sum + getClientTotal(c), 0),
     [ukTBCases, addedServices]
   );
+
+  const grandTotalLocal = useMemo(() => {
+    if (!exchangeRate) return null;
+    return grandTotalUSD * exchangeRate;
+  }, [grandTotalUSD, exchangeRate]);
 
   const availableServicesForActiveClient = useMemo(() => {
     if (!activeClientId) return additionalServicesList;
@@ -144,15 +152,17 @@ export function QrCodeUKTBPaymentPanel({
     if (!selectedCase) return;
     setLoading(true);
     try {
-      const totalAmountToPayDollars = grandTotal.toFixed(2);
-      const totalAmountToPayLocalCurrency = totalAmountToPayDollars;
+      const totalAmountToPayDollars = grandTotalUSD.toFixed(2);
+      const totalAmountToPayLocalCurrency = grandTotalLocal
+        ? grandTotalLocal.toFixed(2)
+        : totalAmountToPayDollars;
 
       const res = await fetch("/api/nepalpay/generateQR", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           transactionCurrency: "524",
-          transactionAmount: Number(totalAmountToPayDollars),
+          transactionAmount: Number(totalAmountToPayLocalCurrency),
           billNumber: selectedCase.id ?? "N/A",
           storeLabel: "Store1",
           terminalLabel: "Terminal1",
@@ -196,7 +206,7 @@ export function QrCodeUKTBPaymentPanel({
           selectedCase.Last_Name || ""
         }`.trim(),
         qr_timestamp: timestamp ?? "",
-        paidAmount: totalAmountToPayDollars,
+        paidAmount: totalAmountToPayLocalCurrency,
         qr_string: qrString,
         wave: null,
         clinic: null,
@@ -218,6 +228,7 @@ export function QrCodeUKTBPaymentPanel({
 
   return (
     <div className="p-8 bg-white rounded shadow w-full max-w-6xl min-h-[470px]">
+         <ExchangeRateWidget exchangeRate={exchangeRate} />
       <SearchUKTBCombobox
         setSelectedCase={setSelectedCase}
         setUkCases={setUkCases}
@@ -232,7 +243,7 @@ export function QrCodeUKTBPaymentPanel({
                 <TableHead>ID</TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Age</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
+                <TableHead className="text-right">Amount (USD)</TableHead>
                 <TableHead className="text-center">Remark</TableHead>
                 <TableHead className="text-center">Actions</TableHead>
               </TableRow>
@@ -290,9 +301,8 @@ export function QrCodeUKTBPaymentPanel({
                     </TableRow>
 
                     {(addedServices[client.id]?.length ?? 0) > 0 && (
-                      // NOTE: Inner row has its own key only for React’s diff clarity (optional)
                       <TableRow key={`services-${client.id}`}>
-                        <TableCell colSpan={5} className="pt-2 pb-3">
+                        <TableCell colSpan={6} className="pt-2 pb-3">
                           <div className="flex flex-wrap gap-2 pl-2">
                             <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs text-slate-600">
                               Services:
@@ -326,7 +336,15 @@ export function QrCodeUKTBPaymentPanel({
             </TableBody>
             {ukTBCases.length > 0 && (
               <TableCaption className="mt-8 font-bold text-right">
-                Total Amount to Pay (USD): {grandTotal.toFixed(2)}
+                Total Amount to Pay:
+                <span className="ml-2 text-blue-700">
+                  USD ${grandTotalUSD.toFixed(2)}
+                </span>
+                {exchangeRate && (
+                  <span className="ml-2 text-green-700">
+                    | NPR {grandTotalLocal?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  </span>
+                )}
               </TableCaption>
             )}
           </Table>
@@ -392,7 +410,7 @@ export function QrCodeUKTBPaymentPanel({
           <div className="flex gap-6 mt-2 justify-between">
             <button
               onClick={handleQRGenerateAndCreatePayment}
-              disabled={loading || grandTotal <= 0}
+              disabled={loading || grandTotalUSD <= 0 || !exchangeRate}
               className="flex items-center justify-center h-12 w-[240px] rounded-md bg-brand-500 text-white font-bold text-base shadow-sm hover:bg-brand-600 hover:cursor-pointer transition disabled:opacity-60"
             >
               {loading ? "GENERATING..." : "GENERATE NEPAL QR"}
