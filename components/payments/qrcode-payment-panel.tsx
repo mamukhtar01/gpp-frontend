@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Separator } from "@radix-ui/react-separator";
 import { createPayment } from "@/app/server_actions";
 import {
@@ -16,9 +16,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { QrCode, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCaseContext } from "@/app/(main)/payments/qrcode/caseContext";
 import { TNewPaymentRecord } from "@/app/types";
 import { CaseMember, CaseMemberSummarySearch } from "./search-mimosa-combobox";
+import { getExchangeRate } from "@/app/server_actions/pricing";
 
 // Age-based fee calculation
 function getAmountByAge(age: number) {
@@ -42,17 +42,38 @@ function calculateAge(birthDate: string) {
 export function QrCodePaymentPanel() {
   const [caseMembers, setCaseMembers] = useState<CaseMember[] | null>(null);
   const [reference, setReference] = useState<string>("");
+  const [exchangeRate, setExchangeRate] = useState<number | null>(null);
+  const [exchangeRateFetchedAt, setExchangeRateFetchedAt] = useState<Date | null>(null);
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const { setCaseData, setQrData } = useCaseContext();
+ 
 
   // Remove a member from the table
   const handleRemoveMember = (id: number) => {
     setCaseMembers((prev) => (prev ? prev.filter((m) => m.CaseMemberID !== id) : prev));
   };
 
-  // Total calculation
-  const grandTotal = useMemo(() => {
+  // Fetch exchange rate on mount (run only once)
+  useEffect(() => {
+    async function fetchExchangeRate() {
+      try {
+        const rate = await getExchangeRate({ CurrencyId: 4 }); // 4 is NPR
+        if (rate && rate.length > 0) {
+          setExchangeRate(parseFloat(rate[0].value));
+          setExchangeRateFetchedAt(new Date());
+        } else {
+          setExchangeRate(null);
+        }
+      } catch (e) {
+        console.error("Failed to fetch exchange rate:", e);
+        setExchangeRate(null);
+      }
+    }
+    fetchExchangeRate();
+  }, []);
+
+  // Total calculation (in USD)
+  const grandTotalUSD = useMemo(() => {
     if (!caseMembers) return 0;
     return caseMembers.reduce((sum, member) => {
       const age = calculateAge(member.BirthDate);
@@ -60,10 +81,17 @@ export function QrCodePaymentPanel() {
     }, 0);
   }, [caseMembers]);
 
+  // Total calculation (in local currency)
+  const grandTotalNPR = useMemo(() => {
+    if (!exchangeRate) return null;
+    return grandTotalUSD * exchangeRate;
+  }, [grandTotalUSD, exchangeRate]);
+
   async function handleQRGenerateAndCreatePayment() {
     setLoading(true);
     try {
       if (!caseMembers || caseMembers.length === 0) throw new Error("No case members selected.");
+      if (!exchangeRate) throw new Error("Exchange rate is not available.");
 
       // Use the CaseNo from the first member, adjust if needed
       const caseNo = caseMembers[0].CaseNo;
@@ -73,7 +101,7 @@ export function QrCodePaymentPanel() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           transactionCurrency: "524",
-          transactionAmount: grandTotal,
+          transactionAmount: grandTotalNPR,
           billNumber: caseNo,
           referenceLabel: reference,
           storeLabel: "Store1",
@@ -98,8 +126,8 @@ export function QrCodePaymentPanel() {
         mimosa_case: null, // cases table
         case_management_system: 1, // or adjust as needed
         reference: reference || null,
-        amount_in_dollar: (grandTotal / 132).toFixed(2),
-        amount_in_local_currency: grandTotal.toString(),
+        amount_in_dollar: grandTotalUSD.toFixed(2),
+        amount_in_local_currency: grandTotalNPR ? grandTotalNPR.toFixed(2) : "",
         type_of_payment: 2,
         date_of_payment: new Date().toISOString(),
         transaction_id: `TXN-${Date.now()}`,
@@ -107,7 +135,7 @@ export function QrCodePaymentPanel() {
         validationTraceId: validationTraceId ?? "",
         payerInfo: caseMembers.map(m => m.FullName).join(", "),
         qr_timestamp: timestamp ?? "",
-        paidAmount: grandTotal.toString(),
+        paidAmount: grandTotalNPR ? grandTotalNPR.toFixed(2) : "",
         qr_string: qrString,
         wave: null,
         clinic: null,
@@ -120,10 +148,7 @@ export function QrCodePaymentPanel() {
       };
 
       const paymentRes = await createPayment(paymentRecord);
-      if (!paymentRes) throw new Error("Failed to create payment record");
-
-      setCaseData(caseMembers);
-      setQrData({ qrString, validationTraceId });
+      if (!paymentRes) throw new Error("Failed to create payment record");     
 
       router.push(`/payments/qrcode/${caseNo}`);
     } catch (e: unknown) {
@@ -138,6 +163,25 @@ export function QrCodePaymentPanel() {
       <CaseMemberSummarySearch setSelectedSummary={setCaseMembers} />
       <Separator className="my-8" />
 
+      {/* Exchange Rate Display */}
+      <div className="mb-4 text-sm font-medium text-gray-700 flex items-center gap-2">
+        {exchangeRate === null ? (
+          <span className="text-red-500">Exchange rate (USD → NPR) unavailable.</span>
+        ) : (
+          <>
+            <span>
+              <span className="font-semibold">Exchange Rate:</span> 1 USD ={" "}
+              <span className="font-bold">{exchangeRate}</span> NPR
+            </span>
+            {exchangeRateFetchedAt && (
+              <span className="text-xs text-gray-400 ml-2">
+                (as of {exchangeRateFetchedAt.toLocaleString()})
+              </span>
+            )}
+          </>
+        )}
+      </div>
+
       {caseMembers && caseMembers.length > 0 && (
         <>
           <Table>
@@ -149,7 +193,7 @@ export function QrCodePaymentPanel() {
                 <TableHead>Gender</TableHead>
                 <TableHead>Birth Date</TableHead>
                 <TableHead>Age</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
+                <TableHead className="text-right">Amount (USD)</TableHead>
                 <TableHead className="text-center">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -175,6 +219,7 @@ export function QrCodePaymentPanel() {
                         className="text-red-500 hover:text-red-600"
                         onClick={() => handleRemoveMember(member.CaseMemberID)}
                         title="Remove member"
+                        aria-label="Remove member"
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -184,16 +229,26 @@ export function QrCodePaymentPanel() {
               })}
             </TableBody>
             <TableCaption className="mt-8 font-bold text-right">
-              Total Amount to Pay (USD): {grandTotal.toFixed(2)}
+              Total Amount to Pay:
+              <span className="ml-2">
+                <span className="text-blue-700">USD ${grandTotalUSD.toFixed(2)}</span>
+                {exchangeRate && (
+                  <>
+                    {" "}
+                    | <span className="text-green-700">NPR {grandTotalNPR?.toLocaleString(undefined, {minimumFractionDigits:2})}</span>
+                  </>
+                )}
+              </span>
             </TableCaption>
           </Table>
           <Separator className="my-8" />
           <InputCol
-            label="Reference"
-            id="reference"
+            label="Remarks: "
+            id="remarks"
             value={reference}
             isDisabled={false}
-            placeholder="Reference"
+            placeholder="Remarks"
+            className="w-full"
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setReference(e.target.value)
             }
@@ -202,7 +257,7 @@ export function QrCodePaymentPanel() {
           <div className="flex gap-6 mt-2 justify-between">
             <button
               onClick={handleQRGenerateAndCreatePayment}
-              disabled={loading || grandTotal <= 0}
+              disabled={loading || grandTotalUSD <= 0 || !exchangeRate}
               className="flex items-center justify-center h-12 w-[220px] rounded-md bg-brand-500 text-white font-bold text-base shadow-sm hover:bg-brand-600 hover:cursor-pointer transition disabled:opacity-60"
             >
               {loading ? "GENERATING..." : "GENERATE NEPAL QR"}
@@ -241,7 +296,7 @@ function InputCol({
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 } & React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className="grid grid-cols-2  w-full max-w-sm items-center my-6">
+    <div className="flex  gap-4 w-full max-w-sm my-6">
       <label htmlFor={id} className="font-medium">
         {label}
       </label>
