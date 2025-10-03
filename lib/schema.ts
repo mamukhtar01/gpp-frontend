@@ -12,6 +12,7 @@ export type DbSchema = {
   Countries: TCountries[];
   fee_structures: TFeeStructure[];
   service_types: ServiceType[];
+  ExchangeRates: TExchangeRate[];
 };
 
 type TCase = {
@@ -115,7 +116,7 @@ export type TUKTB_Cases = {
   location: string;
   Country: number;
   Currency: number;
-  date_created: string; 
+  date_created: string;
 };
 
 // userType
@@ -169,7 +170,6 @@ export type TCountries = {
   local_currency: string;
 };
 
-
 export interface TFeeStructure {
   id: number;
   sort: number | null;
@@ -189,8 +189,10 @@ export interface TFeeStructure {
   service_type_code: ServiceType | string;
 }
 
-
-export type ServiceCategory = "medical_exam" | "vaccination" | "special_service";
+export type ServiceCategory =
+  | "medical_exam"
+  | "vaccination"
+  | "special_service";
 
 export interface ServiceType {
   service_code: string;
@@ -204,3 +206,15 @@ export interface ServiceType {
   category: ServiceCategory;
   is_active: boolean;
 }
+
+export interface TExchangeRate {
+  currency: TCurrency;
+  date_updated: string; // ISO date string
+  value: string;
+}
+
+export type TCurrency = {
+  id: number;
+  name: string;
+  currency: string;
+};
