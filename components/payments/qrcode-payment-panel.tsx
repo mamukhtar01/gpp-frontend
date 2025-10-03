@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 import { TNewPaymentRecord } from "@/app/types";
 import { CaseMember, CaseMemberSummarySearch } from "./search-mimosa-combobox";
 import { useExchangeRate } from "@/app/(main)/payments/exchangeRateContext";
+import { ExchangeRateWidget } from "../exchangeRateWidget";
 
 // Age-based fee calculation
 function getAmountByAge(age: number) {
@@ -145,29 +146,12 @@ export function QrCodePaymentPanel() {
 
   return (
     <div className="p-8 bg-white rounded shadow w-full max-w-6xl min-h-[470px]">
+      
+
+   <ExchangeRateWidget exchangeRate={exchangeRate} />
+
       <CaseMemberSummarySearch setSelectedSummary={setCaseMembers} />
       <Separator className="my-8" />
-
-      {/* Exchange Rate Display */}
-      <div className="mb-4 text-sm font-medium text-gray-700 flex items-center gap-2">
-        {exchangeRate === null ? (
-          <span className="text-red-500">
-            Exchange rate (USD → NPR) unavailable.
-          </span>
-        ) : (
-          <>
-            <span>
-              <span className="font-semibold">Exchange Rate:</span> 1 USD ={" "}
-              <span className="font-bold">{exchangeRate}</span> NPR
-            </span>
-            {exchangeRate && (
-              <span className="text-xs text-gray-400 ml-2">
-                (as of {exchangeRate.toLocaleString()})
-              </span>
-            )}
-          </>
-        )}
-      </div>
 
       {caseMembers && caseMembers.length > 0 && (
         <>
