@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Separator } from "@radix-ui/react-separator";
 import { createPayment } from "@/app/server_actions";
 import {
@@ -18,7 +18,7 @@ import { QrCode, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { TNewPaymentRecord } from "@/app/types";
 import { CaseMember, CaseMemberSummarySearch } from "./search-mimosa-combobox";
-import { getExchangeRate } from "@/app/server_actions/pricing";
+import { useExchangeRate } from "@/app/(main)/payments/exchangeRateContext";
 
 // Age-based fee calculation
 function getAmountByAge(age: number) {
@@ -42,35 +42,19 @@ function calculateAge(birthDate: string) {
 export function QrCodePaymentPanel() {
   const [caseMembers, setCaseMembers] = useState<CaseMember[] | null>(null);
   const [reference, setReference] = useState<string>("");
-  const [exchangeRate, setExchangeRate] = useState<number | null>(null);
-  const [exchangeRateFetchedAt, setExchangeRateFetchedAt] = useState<Date | null>(null);
+
+  // Exchange rate state Context
+  const exchangeRate = useExchangeRate();
+
   const router = useRouter();
   const [loading, setLoading] = useState(false);
- 
 
   // Remove a member from the table
   const handleRemoveMember = (id: number) => {
-    setCaseMembers((prev) => (prev ? prev.filter((m) => m.CaseMemberID !== id) : prev));
+    setCaseMembers((prev) =>
+      prev ? prev.filter((m) => m.CaseMemberID !== id) : prev
+    );
   };
-
-  // Fetch exchange rate on mount (run only once)
-  useEffect(() => {
-    async function fetchExchangeRate() {
-      try {
-        const rate = await getExchangeRate({ CurrencyId: 4 }); // 4 is NPR
-        if (rate && rate.length > 0) {
-          setExchangeRate(parseFloat(rate[0].value));
-          setExchangeRateFetchedAt(new Date());
-        } else {
-          setExchangeRate(null);
-        }
-      } catch (e) {
-        console.error("Failed to fetch exchange rate:", e);
-        setExchangeRate(null);
-      }
-    }
-    fetchExchangeRate();
-  }, []);
 
   // Total calculation (in USD)
   const grandTotalUSD = useMemo(() => {
@@ -90,7 +74,8 @@ export function QrCodePaymentPanel() {
   async function handleQRGenerateAndCreatePayment() {
     setLoading(true);
     try {
-      if (!caseMembers || caseMembers.length === 0) throw new Error("No case members selected.");
+      if (!caseMembers || caseMembers.length === 0)
+        throw new Error("No case members selected.");
       if (!exchangeRate) throw new Error("Exchange rate is not available.");
 
       // Use the CaseNo from the first member, adjust if needed
@@ -133,13 +118,13 @@ export function QrCodePaymentPanel() {
         transaction_id: `TXN-${Date.now()}`,
         status: 1,
         validationTraceId: validationTraceId ?? "",
-        payerInfo: caseMembers.map(m => m.FullName).join(", "),
+        payerInfo: caseMembers.map((m) => m.FullName).join(", "),
         qr_timestamp: timestamp ?? "",
         paidAmount: grandTotalNPR ? grandTotalNPR.toFixed(2) : "",
         qr_string: qrString,
         wave: null,
         clinic: null,
-        clients: caseMembers.map(m => ({
+        clients: caseMembers.map((m) => ({
           id: m.CaseMemberID.toString(),
           name: m.FullName,
           age: calculateAge(m.BirthDate),
@@ -148,7 +133,7 @@ export function QrCodePaymentPanel() {
       };
 
       const paymentRes = await createPayment(paymentRecord);
-      if (!paymentRes) throw new Error("Failed to create payment record");     
+      if (!paymentRes) throw new Error("Failed to create payment record");
 
       router.push(`/payments/qrcode/${caseNo}`);
     } catch (e: unknown) {
@@ -166,16 +151,18 @@ export function QrCodePaymentPanel() {
       {/* Exchange Rate Display */}
       <div className="mb-4 text-sm font-medium text-gray-700 flex items-center gap-2">
         {exchangeRate === null ? (
-          <span className="text-red-500">Exchange rate (USD → NPR) unavailable.</span>
+          <span className="text-red-500">
+            Exchange rate (USD → NPR) unavailable.
+          </span>
         ) : (
           <>
             <span>
               <span className="font-semibold">Exchange Rate:</span> 1 USD ={" "}
               <span className="font-bold">{exchangeRate}</span> NPR
             </span>
-            {exchangeRateFetchedAt && (
+            {exchangeRate && (
               <span className="text-xs text-gray-400 ml-2">
-                (as of {exchangeRateFetchedAt.toLocaleString()})
+                (as of {exchangeRate.toLocaleString()})
               </span>
             )}
           </>
@@ -210,7 +197,9 @@ export function QrCodePaymentPanel() {
                     <TableCell>{member.Gender}</TableCell>
                     <TableCell>{member.BirthDate?.slice(0, 10)}</TableCell>
                     <TableCell>{age}</TableCell>
-                    <TableCell className="text-right">${amount.toFixed(2)}</TableCell>
+                    <TableCell className="text-right">
+                      ${amount.toFixed(2)}
+                    </TableCell>
                     <TableCell className="flex justify-center">
                       <Button
                         type="button"
@@ -231,11 +220,19 @@ export function QrCodePaymentPanel() {
             <TableCaption className="mt-8 font-bold text-right">
               Total Amount to Pay:
               <span className="ml-2">
-                <span className="text-blue-700">USD ${grandTotalUSD.toFixed(2)}</span>
+                <span className="text-blue-700">
+                  USD ${grandTotalUSD.toFixed(2)}
+                </span>
                 {exchangeRate && (
                   <>
                     {" "}
-                    | <span className="text-green-700">NPR {grandTotalNPR?.toLocaleString(undefined, {minimumFractionDigits:2})}</span>
+                    |{" "}
+                    <span className="text-green-700">
+                      NPR{" "}
+                      {grandTotalNPR?.toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                      })}
+                    </span>
                   </>
                 )}
               </span>
