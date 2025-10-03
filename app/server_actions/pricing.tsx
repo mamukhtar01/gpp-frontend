@@ -75,3 +75,26 @@ export async function getAllFeeStructures() {
     throw new Error("Failed to fetch fee structures");
   }
 }
+
+
+
+// Get Exchange Rate
+export async function getExchangeRate({CurrencyId}: {CurrencyId: number}) {
+  try {
+    const data = await client.request(
+      readItems("ExchangeRates", {
+        fields: ["*"],
+        filter: {
+         currency: { _eq: CurrencyId } ,
+        },
+        limit: 1,
+      })
+    );
+
+    return data ?? null;
+  } catch (error) {
+    console.error("Error fetching exchange rate:", error);
+    throw new Error("Failed to fetch exchange rate");
+  }
+}
+     

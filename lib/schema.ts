@@ -208,7 +208,7 @@ export interface ServiceType {
 }
 
 export interface TExchangeRate {
-  currency: TCurrency;
+  currency: TCurrency | number; // FK to TCurrency
   date_updated: string; // ISO date string
   value: string;
 }
