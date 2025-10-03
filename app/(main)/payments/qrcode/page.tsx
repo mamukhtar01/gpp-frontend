@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 
-
 export default async function PaymentsPage() {
   const ukFees = await getFeeStructures({
     countryCode: 16,
@@ -32,11 +31,24 @@ export default async function PaymentsPage() {
           <TabsTrigger value="mimosa">MiMOSA</TabsTrigger>
           <TabsTrigger value="uktb">UKTB</TabsTrigger>
           <TabsTrigger value="jims">JIMS</TabsTrigger>
-          <Link href="/payments/qrcode/additional-services" className=" ml-auto ">
-            <Button className="text-brand-500 hover:cursor-pointer" variant={"outline"}>
-              Create Additional Services
-            </Button>
-          </Link>
+          <div className=" ml-auto flex gap-4">
+            <Link href="/payments/qrcode/vaccination-payment">
+              <Button
+                className="text-brand-500 hover:cursor-pointer"
+                variant={"outline"}
+              >
+                Vaccination Payment
+              </Button>
+            </Link>
+            <Link href="/payments/qrcode/additional-services">
+              <Button
+                className="text-brand-500 hover:cursor-pointer"
+                variant={"outline"}
+              >
+                Additional Payment
+              </Button>
+            </Link>
+          </div>
         </TabsList>
         <TabsContent value="mimosa">
           {/* MiMOSA Payment Case Search Panel */}

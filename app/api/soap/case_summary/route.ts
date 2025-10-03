@@ -25,6 +25,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   </soapenv:Body>
 </soapenv:Envelope>`;
 
+// todo. only authenticated users should call the api. 
+
     const response = await fetch("https://k-apiqaz.iom.int/mwebsvc/CaseManagementService.svc", {
       method: "POST",
       headers: {

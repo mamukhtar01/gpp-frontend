@@ -64,7 +64,6 @@ type RemarksState = Record<string, string>;
 
 interface AdditionalServicesPaymentPanelProps {
   additionalServices: AdditionalServiceFromDB[];
-  ukFees: FeeStructure[]; // kept for parity / future validations
 }
 
 /* =========================================================
@@ -572,7 +571,6 @@ export function AdditionalServicesPaymentPanel({
               </div>
 
               <div className="flex flex-col sm:flex-row gap-8 sm:gap-4 justify-between items-center flex-1">
-              
                 <Button
                   type="button"
                   onClick={handleCreatePayment}
@@ -594,7 +592,7 @@ export function AdditionalServicesPaymentPanel({
                                bg-[radial-gradient(circle_at_30%_30%,rgba(255,255,255,0.25),transparent_60%)]"
                   />
                 </Button>
-                  <Button
+                <Button
                   type="button"
                   variant="outline"
                   disabled={loading}
@@ -605,7 +603,6 @@ export function AdditionalServicesPaymentPanel({
                 </Button>
               </div>
             </div>
-            
           </div>
         </>
       ) : (
