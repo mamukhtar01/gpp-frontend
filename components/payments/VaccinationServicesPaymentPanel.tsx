@@ -200,7 +200,7 @@ export function VaccinationServicesPaymentPanel({ additionalServices }: Props) {
         wave: null,
         clinic: null,
         clients: clientsInfo as TClientBasicInfo[],
-        service_type: "vaccination_service",
+        service_type: "vaccination",
       };
 
       await createPayment(paymentRecord);
@@ -216,7 +216,7 @@ export function VaccinationServicesPaymentPanel({ additionalServices }: Props) {
     <div className="relative w-full bg-white p-6 md:p-8 rounded-xl shadow-sm ring-1 ring-slate-100 max-w-6xl">
       <div className="mb-6">
         <h1 className="text-xl md:text-2xl font-semibold tracking-tight">
-          Vaccination Services Payment
+          Vaccination Payment <span className="font-light font-mono ml-10">(US)</span>
         </h1>
         <p className="text-sm text-muted-foreground mt-2">
           <b>Instructions:</b> Search and select case members, add vaccination
