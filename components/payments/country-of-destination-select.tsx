@@ -1,35 +1,51 @@
 import * as React from "react";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 
-export type CountryKey = "US" | "UK" | "JAPAN" | "AUSTRALIA" | "NEWZEALAND" | "CANADA";
+export type TCountryKey = 12 | 13 | 14 | 15 | 16 | 29;
 
-export const COUNTRY_OPTIONS: { key: CountryKey; label: string }[] = [
-  { key: "US", label: "United States" },
-  { key: "UK", label: "United Kingdom" },
-  { key: "JAPAN", label: "Japan" },
-  { key: "AUSTRALIA", label: "Australia" },
-  { key: "NEWZEALAND", label: "New Zealand" },
-  { key: "CANADA", label: "Canada" },
+export const COUNTRY_OPTIONS: { key: TCountryKey; label: string }[] = [
+  { key: 12, label: "Canada" },
+  { key: 13, label: "United States" },
+  { key: 14, label: "Australia" },
+  { key: 15, label: "New Zealand" },
+  { key: 16, label: "United Kingdom" },
+  { key: 29, label: "Japan" },
 ];
 
 interface CountryOfDestinationProps {
-  value: CountryKey;
-  onChange: (key: CountryKey) => void;
+  value: TCountryKey;
+  onChange: (key: TCountryKey) => void;
   className?: string;
   label?: string;
 }
 
-export function CountryOfDestination({ value, onChange, className = "", label = "Country/Case Type:" }: CountryOfDestinationProps) {
+export function CountryOfDestination({
+  value,
+  onChange,
+  className = "",
+  label = "Destination Country:",
+}: CountryOfDestinationProps) {
   return (
-    <div className={`flex flex-col sm:flex-row sm:items-center gap-4 ${className}`}>
-      <label className="font-semibold text-base">{label}</label>
-      <Select value={value} onValueChange={(val) => onChange(val as CountryKey)}>
+    <div
+      className={`flex flex-col sm:flex-row sm:items-center gap-4 ${className}`}
+    >
+      <label className="font-light text-base">{label}</label>
+      <Select
+        value={String(value)}
+        onValueChange={(val) => onChange(Number(val) as TCountryKey)}
+      >
         <SelectTrigger className="w-[220px]">
           <SelectValue placeholder="Select country..." />
         </SelectTrigger>
         <SelectContent>
-          {COUNTRY_OPTIONS.map(opt => (
-            <SelectItem key={opt.key} value={opt.key}>
+          {COUNTRY_OPTIONS.map((opt) => (
+            <SelectItem key={opt.key} value={String(opt.key)}>
               {opt.label}
             </SelectItem>
           ))}
