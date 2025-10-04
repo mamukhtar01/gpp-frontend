@@ -14,33 +14,19 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { QrCode, X } from "lucide-react";
+import { QrCode, X, Loader2, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { TNewPaymentRecord } from "@/app/types";
 import { CaseMember, CaseMemberSummarySearch } from "./search-mimosa-combobox";
 import { useExchangeRate } from "@/app/(main)/payments/exchangeRateContext";
 import { ExchangeRateWidget } from "../exchangeRateWidget";
-
-// Age-based fee calculation
-function getAmountByAge(age: number) {
-  // Example: Under 5 = $20, 5-15 = $30, above 15 = $50
-  if (age < 5) return 20;
-  if (age <= 15) return 30;
-  return 50;
-}
-
-// Utility to calculate age from BirthDate (YYYY-MM-DD or ISO)
-function calculateAge(birthDate: string) {
-  const d = new Date(birthDate);
-  if (Number.isNaN(d.getTime())) return 0;
-  const today = new Date();
-  let age = today.getFullYear() - d.getFullYear();
-  const m = today.getMonth() - d.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < d.getDate())) age--;
-  return age;
-}
+import { CountryOfDestination, TCountryKey } from "./country-of-destination-select";
+import { calculateAge, getAustraliaAgeBasedFee, getCanadaAgeBasedFee, getJapanAgeBasedFee, getNewZealandAgeBasedFee, getUKAgeBasedFee, getUSAgeBasedFee } from "@/lib/fee-utils";
 
 export function QrCodePaymentPanel() {
+  // Use the first country as default
+  const [country, setCountry] = useState<TCountryKey>(13); // Default to US
+
   const [caseMembers, setCaseMembers] = useState<CaseMember[] | null>(null);
   const [reference, setReference] = useState<string>("");
 
@@ -57,14 +43,25 @@ export function QrCodePaymentPanel() {
     );
   };
 
+  // Country-specific fee calculation
+  function getCountrySpecificFee(age: number, specialType?: string) {
+    if (country === 12) return getUSAgeBasedFee(age);
+    if (country === 13) return getUKAgeBasedFee(age);
+    if (country === 14) return getJapanAgeBasedFee(age);
+    if (country === 15) return getAustraliaAgeBasedFee(age, specialType);
+    if (country === 16) return getNewZealandAgeBasedFee(age);
+    if (country === 29) return getCanadaAgeBasedFee(age);
+    return 0;
+  }
+
   // Total calculation (in USD)
   const grandTotalUSD = useMemo(() => {
     if (!caseMembers) return 0;
     return caseMembers.reduce((sum, member) => {
       const age = calculateAge(member.BirthDate);
-      return sum + getAmountByAge(age);
+      return sum + getCountrySpecificFee(age);
     }, 0);
-  }, [caseMembers]);
+  }, [caseMembers, country]);
 
   // Total calculation (in local currency)
   const grandTotalNPR = useMemo(() => {
@@ -125,11 +122,13 @@ export function QrCodePaymentPanel() {
         qr_string: qrString,
         wave: null,
         clinic: null,
+        destination_country: country,
+        exchange_rate: exchangeRate,
         clients: caseMembers.map((m) => ({
           id: m.CaseMemberID.toString(),
           name: m.FullName,
           age: calculateAge(m.BirthDate),
-          amount: getAmountByAge(calculateAge(m.BirthDate)).toFixed(2),
+          amount: getCountrySpecificFee(calculateAge(m.BirthDate)).toFixed(2),
         })),
       };
 
@@ -146,82 +145,87 @@ export function QrCodePaymentPanel() {
 
   return (
     <div className="p-8 bg-white rounded shadow w-full max-w-6xl min-h-[470px]">
-      
-
-   <ExchangeRateWidget exchangeRate={exchangeRate} />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
+        <ExchangeRateWidget exchangeRate={exchangeRate} />
+        <CountryOfDestination value={country} onChange={setCountry} />
+      </div>
 
       <CaseMemberSummarySearch setSelectedSummary={setCaseMembers} />
       <Separator className="my-8" />
 
       {caseMembers && caseMembers.length > 0 && (
         <>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Relation</TableHead>
-                <TableHead>Gender</TableHead>
-                <TableHead>Birth Date</TableHead>
-                <TableHead>Age</TableHead>
-                <TableHead className="text-right">Amount (USD)</TableHead>
-                <TableHead className="text-center">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {caseMembers.map((member) => {
-                const age = calculateAge(member.BirthDate);
-                const amount = getAmountByAge(age);
+          <div className="rounded-lg border border-slate-200 overflow-hidden">
+            <Table>
+              <TableHeader className="bg-slate-50/60">
+                <TableRow>
+                  <TableHead className="w-[8%]">ID</TableHead>
+                  <TableHead className="w-[18%]">Name</TableHead>
+                  <TableHead className="w-[12%]">Relation</TableHead>
+                  <TableHead className="w-[8%]">Gender</TableHead>
+                  <TableHead className="w-[14%]">Birth Date</TableHead>
+                  <TableHead className="w-[8%]">Age</TableHead>
+                  <TableHead className="w-[14%] text-right">Amount (USD)</TableHead>
+                  <TableHead className="w-[10%] text-center">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {caseMembers.map((member) => {
+                  const age = calculateAge(member.BirthDate);
+                  const amount = getCountrySpecificFee(age);
 
-                return (
-                  <TableRow key={member.CaseMemberID}>
-                    <TableCell>{member.CaseMemberID}</TableCell>
-                    <TableCell>{member.FullName}</TableCell>
-                    <TableCell>{member.RelationtoPA}</TableCell>
-                    <TableCell>{member.Gender}</TableCell>
-                    <TableCell>{member.BirthDate?.slice(0, 10)}</TableCell>
-                    <TableCell>{age}</TableCell>
-                    <TableCell className="text-right">
-                      ${amount.toFixed(2)}
-                    </TableCell>
-                    <TableCell className="flex justify-center">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="text-red-500 hover:text-red-600"
-                        onClick={() => handleRemoveMember(member.CaseMemberID)}
-                        title="Remove member"
-                        aria-label="Remove member"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-            <TableCaption className="mt-8 font-bold text-right">
-              Total Amount to Pay:
-              <span className="ml-2">
-                <span className="text-blue-700">
+                  return (
+                    <TableRow key={member.CaseMemberID}>
+                      <TableCell className="font-mono text-[11px]">
+                        {member.CaseMemberID}
+                      </TableCell>
+                      <TableCell>
+                        {member.FullName}
+                      </TableCell>
+                      <TableCell>
+                        {member.RelationtoPA}
+                      </TableCell>
+                      <TableCell>
+                        {member.Gender}
+                      </TableCell>
+                      <TableCell>
+                        {member.BirthDate?.slice(0, 10)}
+                      </TableCell>
+                      <TableCell>
+                        {age}
+                      </TableCell>
+                      <TableCell className="text-right font-semibold font-mono">
+                        ${amount.toFixed(2)}
+                      </TableCell>
+                      <TableCell className="flex justify-center">
+                      
+                         <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-500 hover:text-red-600 "
+                         onClick={() => handleRemoveMember(member.CaseMemberID)}
+                          title="Remove client"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+              <TableCaption className="mt-8 font-bold text-right">
+                Total Amount to Pay:
+                <span className="ml-2 text-blue-700">
                   USD ${grandTotalUSD.toFixed(2)}
                 </span>
                 {exchangeRate && (
-                  <>
-                    {" "}
-                    |{" "}
-                    <span className="text-green-700">
-                      NPR{" "}
-                      {grandTotalNPR?.toLocaleString(undefined, {
-                        minimumFractionDigits: 2,
-                      })}
-                    </span>
-                  </>
+                  <span className="ml-2 text-green-700">
+                    | NPR {grandTotalNPR?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  </span>
                 )}
-              </span>
-            </TableCaption>
-          </Table>
+              </TableCaption>
+            </Table>
+          </div>
           <Separator className="my-8" />
           <InputCol
             label="Remarks: "
@@ -241,8 +245,17 @@ export function QrCodePaymentPanel() {
               disabled={loading || grandTotalUSD <= 0 || !exchangeRate}
               className="flex items-center justify-center h-12 w-[220px] rounded-md bg-brand-500 text-white font-bold text-base shadow-sm hover:bg-brand-600 hover:cursor-pointer transition disabled:opacity-60"
             >
-              {loading ? "GENERATING..." : "GENERATE NEPAL QR"}
-              <QrCode className="ml-2 w-5 h-5" />
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  GENERATING...
+                </>
+              ) : (
+                <>
+                  GENERATE NEPAL QR
+                  <QrCode className="ml-2 w-5 h-5" />
+                </>
+              )}
             </button>
             <button
               onClick={() => {

@@ -228,7 +228,7 @@ export function QrCodeUKTBPaymentPanel({
 
   return (
     <div className="p-8 bg-white rounded shadow w-full max-w-6xl min-h-[470px]">
-         <ExchangeRateWidget exchangeRate={exchangeRate} />
+      <ExchangeRateWidget exchangeRate={exchangeRate} className="mb-4" />
       <SearchUKTBCombobox
         setSelectedCase={setSelectedCase}
         setUkCases={setUkCases}
