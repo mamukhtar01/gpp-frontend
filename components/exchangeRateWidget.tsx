@@ -3,7 +3,7 @@ export function ExchangeRateWidget({ exchangeRate }: { exchangeRate: number | nu
     return (
       <>
            {/* Exchange Rate Display */}
-      <div className="mb-6 text-sm font-medium text-gray-700 flex items-center gap-2">
+      <div className="text-sm font-medium text-gray-700 flex items-center gap-2">
         {exchangeRate === null ? (
           <span className="text-red-500">
             Exchange rate (USD → NPR) unavailable.
@@ -11,7 +11,7 @@ export function ExchangeRateWidget({ exchangeRate }: { exchangeRate: number | nu
         ) : (
           <>
             <span>
-              <span className="font-semibold">Exchange Rate:</span> 1 USD ={" "}
+              <span className="font-light">Exchange Rate:</span> 1 USD ={" "}
               <span className="font-bold">{exchangeRate}</span> NPR
             </span>
             {exchangeRate && (

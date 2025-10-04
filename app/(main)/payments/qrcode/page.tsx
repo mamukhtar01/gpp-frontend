@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 
-export default async function PaymentsPage() {
+export default async function QRCodePaymentsPage() {
   const ukFees = await getFeeStructures({
     countryCode: 16,
     type: "medical_exam",
@@ -26,6 +26,8 @@ export default async function PaymentsPage() {
 
   return (
     <div className="mx-auto">
+      <h1 className="text-xl text-brand-300 font-bold">QRCode Payments</h1>
+      <hr className="mb-6 mt-2 text-brand-100" />
       <Tabs defaultValue="mimosa" className="min-w-6xl">
         <TabsList className="w-full flex justify-start gap-4 mb-6">
           <TabsTrigger value="mimosa">MiMOSA</TabsTrigger>
