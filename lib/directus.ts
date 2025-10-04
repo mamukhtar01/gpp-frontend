@@ -8,7 +8,7 @@ import { DbSchema } from "./schema";
 // }
 
 const client = createDirectus<DbSchema>("https://iom-ppo-directus-dev.iom.int")
-  .with(authentication("cookie", { credentials: "include" }))
+  .with(authentication("session", { credentials: "include" }))
   .with(rest({ credentials: "include" }));
 
 // set token for requests

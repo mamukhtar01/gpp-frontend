@@ -120,3 +120,40 @@ export function getFeeByAge(
   return fee ? parseFloat(fee.fee_amount_usd) : null;
 }
 
+
+
+/** Reusable QR code generation function */
+export async function generateQRCodeNPR({
+  nprAmount,
+  caseNo,
+  purpose,
+  reference,
+}: {
+  nprAmount: number | string;
+  caseNo: string | number;
+  purpose?: string;
+  reference?: string | null;
+}) {
+  const res = await fetch("/api/nepalpay/generateQR", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      transactionCurrency: "524", // NPR
+      transactionAmount: Number(nprAmount),
+      billNumber: caseNo,
+      referenceLabel: reference,
+      storeLabel: "Store1",
+      terminalLabel: "Terminal1",
+      purposeOfTransaction: purpose || "Bill payment",
+    }),
+  });
+  const json = await res.json();
+  if (!res.ok || !json?.data?.qrString || !json?.data?.validationTraceId) {
+    throw new Error("QR generation failed");
+  }
+  return {
+    qrString: json.data.qrString,
+    validationTraceId: json.data.validationTraceId,
+    timestamp: json.data.timestamp,
+  };
+}
