@@ -35,7 +35,7 @@ export default async function CashPaymentsPage() {
           <TabsTrigger value="uktb">UKTB</TabsTrigger>
           <TabsTrigger value="jims">JIMS</TabsTrigger>
           <div className=" ml-auto flex gap-4">
-            <Link href="/payments/qrcode/vaccination-payment">
+            <Link href="/payments/cash/vaccination-payment">
               <Button
                 className="text-brand-500 hover:cursor-pointer"
                 variant={"outline"}
@@ -43,7 +43,7 @@ export default async function CashPaymentsPage() {
                 Vaccination Payment
               </Button>
             </Link>
-            <Link href="/payments/qrcode/additional-services">
+            <Link href="/payments/cash/additional-services">
               <Button
                 className="text-brand-500 hover:cursor-pointer"
                 variant={"outline"}
