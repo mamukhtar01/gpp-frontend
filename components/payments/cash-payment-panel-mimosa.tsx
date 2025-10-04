@@ -23,66 +23,8 @@ import {
   CountryOfDestination,
   TCountryKey,
 } from "./country-of-destination-select";
-// US: Default Fee Table (your previous table)
-function getUSFee(age: number) {
-  if (age < 2) return 65;
-  if (age >= 2 && age <= 14) return 130;
-  if (age >= 15 && age <= 17) return 138;
-  if (age >= 18 && age <= 24) return 173;
-  if (age >= 25 && age <= 44) return 143;
-  return 138; // 45+
-}
+import { calculateAge, getAustraliaAgeBasedFee, getCanadaAgeBasedFee, getJapanAgeBasedFee, getNewZealandAgeBasedFee, getUKAgeBasedFee, getUSAgeBasedFee } from "@/lib/fee-utils";
 
-// UK Fee Table
-function getUKFee(age: number) {
-  if (age < 11) return 40;
-  return 60;
-}
-
-// Japan Fee Table
-function getJapanFee(age: number) {
-  if (age < 5) return 68;
-  return 45;
-}
-
-// Australia Fee Table
-function getAustraliaFee(age: number, specialType?: string) {
-  if (specialType === "Aged Visitor") return 44;
-  if (specialType === "Health Care Worker") return 49;
-  if (age < 2) return 45;
-  if (age < 5) return 45;
-  if (age < 11) return 45;
-  if (age < 15) return 43;
-  if (specialType === "Health Care Worker") return 49;
-  return 43;
-}
-
-// New Zealand Fee Table
-function getNewZealandFee(age: number) {
-  if (age < 5) return 40;
-  if (age < 11) return 40;
-  if (age < 15) return 40;
-  return 50;
-}
-
-// Canada Fee Table
-function getCanadaFee(age: number) {
-  if (age < 2) return 35;
-  if (age < 11) return 35;
-  if (age < 15) return 40;
-  return 40;
-}
-
-// Utility to calculate age from BirthDate (YYYY-MM-DD or ISO)
-function calculateAge(birthDate: string) {
-  const d = new Date(birthDate);
-  if (Number.isNaN(d.getTime())) return 0;
-  const today = new Date();
-  let age = today.getFullYear() - d.getFullYear();
-  const m = today.getMonth() - d.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < d.getDate())) age--;
-  return age;
-}
 
 export function CashPaymentPanelMimosa() {
   const [country, setCountry] = useState<TCountryKey>(13);
@@ -100,13 +42,13 @@ export function CashPaymentPanelMimosa() {
   };
 
   // Country-specific fee calculation
-  function getFee(age: number, specialType?: string) {
-    if (country === 13) return getUSFee(age);
-    if (country === 16) return getUKFee(age);
-    if (country === 29) return getJapanFee(age);
-    if (country === 14) return getAustraliaFee(age, specialType);
-    if (country === 15) return getNewZealandFee(age);
-    if (country === 12) return getCanadaFee(age);
+  function getCountrySpecificFee(age: number, specialType?: string) {
+    if (country === 12) return getCanadaAgeBasedFee(age);
+    if (country === 13) return getUSAgeBasedFee(age);
+    if (country === 14) return getAustraliaAgeBasedFee(age, specialType);
+    if (country === 15) return getNewZealandAgeBasedFee(age);
+    if (country === 16) return getUKAgeBasedFee(age);
+    if (country === 29) return getJapanAgeBasedFee(age);
     return 0;
   }
 
@@ -115,8 +57,10 @@ export function CashPaymentPanelMimosa() {
     if (!caseMembers) return 0;
     return caseMembers.reduce((sum, member) => {
       const age = calculateAge(member.BirthDate);
-      return sum + getFee(age);
+      return sum + getCountrySpecificFee(age);
     }, 0);
+    
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [caseMembers, country]);
 
   // Total calculation (NPR)
@@ -152,10 +96,12 @@ export function CashPaymentPanelMimosa() {
         qr_string: "",
         wave: null,
         clinic: null,
+        exchange_rate: exchangeRate,
+        destination_country: country,
         service_type: "medical_exam",
         clients: caseMembers.map((m) => {
           const age = calculateAge(m.BirthDate);
-          const feeUSD = getFee(age);
+          const feeUSD = getCountrySpecificFee(age);
           return {
             id: m.CaseMemberID.toString(),
             name: m.FullName,
@@ -208,7 +154,7 @@ export function CashPaymentPanelMimosa() {
             <TableBody>
               {caseMembers.map((member) => {
                 const age = calculateAge(member.BirthDate);
-                const amountUSD = getFee(age);
+                const amountUSD = getCountrySpecificFee(age);
                 const amountNPR = exchangeRate ? amountUSD * exchangeRate : 0;
 
                 return (

@@ -1,3 +1,4 @@
+
 export interface TCaseSearchResult {
   case_id: string | null;
   case_status: number;
@@ -135,6 +136,8 @@ export type TNewPaymentRecord = {
   clinic: string | null;
   clients: TClientBasicInfo[] | null;
   service_type?: string | null; // e.g., "special_service"
+  exchange_rate?: number | null;
+  destination_country?: number | null;
 };
 
 export type TClientBasicInfo = {
