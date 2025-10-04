@@ -1,3 +1,4 @@
+import { ServiceCategory } from "@/lib/schema";
 
 export interface TCaseSearchResult {
   case_id: string | null;
@@ -135,7 +136,7 @@ export type TNewPaymentRecord = {
   wave: string | null;
   clinic: string | null;
   clients: TClientBasicInfo[] | null;
-  service_type?: string | null; // e.g., "special_service"
+  service_type?: ServiceCategory | null; // e.g., "special_service"
   exchange_rate?: number | null;
   destination_country?: number | null;
 };

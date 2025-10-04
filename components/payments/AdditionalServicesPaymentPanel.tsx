@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { QrCode, Plus, X, Trash2 } from "lucide-react";
+import { QrCode, Plus, X, Trash2, Loader2 } from "lucide-react";
 import { Separator } from "@radix-ui/react-separator";
-
 import {
   Table,
   TableBody,
@@ -14,7 +13,6 @@ import {
   TableRow,
   TableCaption,
 } from "@/components/ui/table";
-
 import {
   Dialog,
   DialogContent,
@@ -22,7 +20,6 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-
 import {
   Select,
   SelectTrigger,
@@ -30,15 +27,19 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
 import { SearchUKTBCombobox } from "./search-uktbcase-combobox";
 import { TUKTB_Cases } from "@/lib/schema";
-import { FeeStructure, TClientBasicInfo, TNewPaymentRecord } from "@/app/types";
+import { TClientBasicInfo, TNewPaymentRecord } from "@/app/types";
 import { CalculateAge } from "@/lib/utils";
 import { createPayment } from "@/app/server_actions";
+import { useExchangeRate } from "@/app/(main)/payments/exchangeRateContext";
+import {
+  CountryOfDestination,
+  TCountryKey,
+  COUNTRY_OPTIONS,
+} from "./country-of-destination-select";
 
 /* =========================================================
    TYPES
@@ -62,18 +63,17 @@ interface AddedServiceInstance extends AdditionalServiceFromDB {
 type AddedServicesState = Record<string, AddedServiceInstance[]>;
 type RemarksState = Record<string, string>;
 
-interface AdditionalServicesPaymentPanelProps {
-  additionalServices: AdditionalServiceFromDB[];
-}
-
-/* =========================================================
-   COMPONENT
-========================================================= */
-
-export function AdditionalServicesPaymentPanel({
-  additionalServices,
-}: AdditionalServicesPaymentPanelProps) {
+export function AdditionalServicesPaymentPanel() {
   const router = useRouter();
+
+  // Country selection
+  const [country, setCountry] = useState<TCountryKey>(COUNTRY_OPTIONS[0].key);
+
+  // Additional services state from API
+  const [additionalServices, setAdditionalServices] = useState<
+    AdditionalServiceFromDB[]
+  >([]);
+  const [servicesLoading, setServicesLoading] = useState(false);
 
   // Case & clients
   const [selectedCase, setSelectedCase] = useState<TUKTB_Cases | null>(null);
@@ -91,6 +91,29 @@ export function AdditionalServicesPaymentPanel({
   // Loading
   const [loading, setLoading] = useState(false);
 
+  // Exchange rate
+  const exchangeRate = useExchangeRate();
+
+  // Fetch additional services when country changes
+  useEffect(() => {
+    async function fetchServices() {
+      setServicesLoading(true);
+      try {
+        const res = await fetch(
+          `/api/fee-structures?countryCode=${country}&serviceType=excluded_med_exam`
+        );
+        if (!res.ok) throw new Error("Failed to fetch additional services");
+        const data = await res.json();
+        setAdditionalServices(data ?? []);
+      } catch (e) {
+        setAdditionalServices([]);
+      } finally {
+        setServicesLoading(false);
+      }
+    }
+    fetchServices();
+  }, [country]);
+
   /* =========================================================
      HELPERS
   ========================================================= */
@@ -103,6 +126,7 @@ export function AdditionalServicesPaymentPanel({
     return additionalServices.filter((s) => !used.has(s.id));
   }, [activeClientId, addedServices, additionalServices]);
 
+  // Only sum up additional services, no age-based fee
   const getClientTotal = (clientId: string) =>
     (addedServices[clientId] || []).reduce(
       (sum, svc) => sum + parseFloat(svc.fee_amount_usd),
@@ -112,6 +136,11 @@ export function AdditionalServicesPaymentPanel({
   const grandTotal = useMemo(
     () => ukTBCases.reduce((sum, c) => sum + getClientTotal(c.id), 0),
     [ukTBCases, addedServices]
+  );
+
+  const grandTotalLocal = useMemo(
+    () => (exchangeRate ? grandTotal * exchangeRate : null),
+    [grandTotal, exchangeRate]
   );
 
   const hasAnyServiceSelected = useMemo(
@@ -192,12 +221,17 @@ export function AdditionalServicesPaymentPanel({
     try {
       const totalAmount = grandTotal.toFixed(2);
 
+      // Use local currency if exchange rate is available
+      const amountInLocal = exchangeRate
+        ? (grandTotal * exchangeRate).toFixed(2)
+        : totalAmount;
+
       const qrRes = await fetch("/api/nepalpay/generateQR", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           transactionCurrency: "524",
-          transactionAmount: Number(totalAmount),
+          transactionAmount: Number(amountInLocal),
           billNumber: selectedCase.id,
           storeLabel: "Store1",
           terminalLabel: "Terminal1",
@@ -236,7 +270,7 @@ export function AdditionalServicesPaymentPanel({
         mimosa_case: null,
         reference: null,
         amount_in_dollar: totalAmount,
-        amount_in_local_currency: totalAmount,
+        amount_in_local_currency: amountInLocal,
         type_of_payment: 2,
         date_of_payment: new Date().toISOString(),
         transaction_id: `TXN-${Date.now()}`,
@@ -246,12 +280,14 @@ export function AdditionalServicesPaymentPanel({
           selectedCase.Last_Name || ""
         }`.trim(),
         qr_timestamp: timestamp ?? "",
-        paidAmount: totalAmount,
+        paidAmount: amountInLocal,
         qr_string: qrString,
         wave: null,
         clinic: null,
         clients: clientsInfo as TClientBasicInfo[],
         service_type: "special_service",
+        destination_country: country,
+        exchange_rate: exchangeRate,
       };
 
       await createPayment(paymentRecord);
@@ -314,29 +350,19 @@ export function AdditionalServicesPaymentPanel({
           <h1 className="text-xl md:text-2xl font-semibold tracking-tight">
             Additional Services Payment
           </h1>
-          <p className="text-xs md:text-sm text-muted-foreground mt-1">
-            Create an itemized payment containing only billable additional
-            services.
-          </p>
         </div>
-        {grandTotal > 0 && (
-          <div className="hidden md:flex flex-col items-end">
-            <span className="text-xs uppercase tracking-wide text-slate-500">
-              Grand Total
-            </span>
-            <span className="text-2xl font-bold text-slate-800">
-              ${grandTotal.toFixed(2)}
-            </span>
-          </div>
-        )}
+   
       </div>
 
-      {/* Steps */}
-      <div className="flex flex-wrap gap-2 mb-6">
-        <StepChip step={1} label="Search Case" />
-        <StepChip step={2} label="Select Clients" />
-        <StepChip step={3} label="Add Services" />
-        <StepChip step={4} label="Generate QR" />
+      <div className="my-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        {/* Steps */}
+        <div className="flex flex-wrap gap-2 mb-6">
+          <StepChip step={1} label="Search Case" />
+          <StepChip step={2} label="Select Clients" />
+          <StepChip step={3} label="Add Services" />
+          <StepChip step={4} label="Generate QR" />
+        </div>
+        <CountryOfDestination value={country} onChange={setCountry} />
       </div>
 
       <SearchUKTBCombobox
@@ -352,12 +378,14 @@ export function AdditionalServicesPaymentPanel({
           <div className="rounded-lg border border-slate-200 overflow-hidden">
             <Table>
               <TableHeader className="bg-slate-50/60">
-                <TableRow className="hover:bg-slate-50">
+                <TableRow>
                   <TableHead className="w-[18%]">Client ID</TableHead>
                   <TableHead className="w-[22%]">Name</TableHead>
-                  <TableHead className="w-[8%]">Age</TableHead>
+                  <TableHead className="w-[12%]">Age</TableHead>
                   <TableHead className="w-[32%]">Additional Services</TableHead>
-                  <TableHead className="text-right w-[10%]">Total</TableHead>
+                  <TableHead className="text-right w-[10%]">
+                    Total (USD)
+                  </TableHead>
                   <TableHead className="text-center w-[10%]">Remark</TableHead>
                   <TableHead className="text-center w-[10%]">Actions</TableHead>
                 </TableRow>
@@ -366,7 +394,7 @@ export function AdditionalServicesPaymentPanel({
                 {ukTBCases.length === 0 && (
                   <TableRow>
                     <TableCell
-                      colSpan={6}
+                      colSpan={7}
                       className="text-center py-12 text-sm text-muted-foreground"
                     >
                       No clients selected yet. Use the case selector above.
@@ -473,6 +501,17 @@ export function AdditionalServicesPaymentPanel({
                     <span className="text-xl font-bold">
                       ${grandTotal.toFixed(2)}
                     </span>
+                    {exchangeRate && (
+                      <span className="text-xs tracking-wide text-green-700 mt-1">
+                        Total (NPR)
+                        <span className="text-xl font-bold text-green-700 ml-2">
+                          NPR{" "}
+                          {grandTotalLocal?.toLocaleString(undefined, {
+                            minimumFractionDigits: 2,
+                          })}
+                        </span>
+                      </span>
+                    )}
                   </div>
                 </TableCaption>
               )}
@@ -490,7 +529,7 @@ export function AdditionalServicesPaymentPanel({
               setIsDialogOpen(open);
             }}
           >
-            <DialogContent className="sm:max-w-[460px]">
+            <DialogContent className="sm:max-w-[460px] bg-white">
               <DialogHeader>
                 <DialogTitle className="text-base font-semibold">
                   Add Additional Service
@@ -508,29 +547,41 @@ export function AdditionalServicesPaymentPanel({
                 <Select
                   value={serviceSelectId ? String(serviceSelectId) : undefined}
                   onValueChange={(val) => setServiceSelectId(Number(val))}
+                  disabled={servicesLoading}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a service" />
+                    <SelectValue
+                      placeholder={
+                        servicesLoading ? "Loading..." : "Select a service"
+                      }
+                    />
                   </SelectTrigger>
-                  <SelectContent>
-                    {availableServicesForClient.length === 0 && (
+                  <SelectContent className="bg-gray-50">
+                    {servicesLoading ? (
+                      <div className="px-3 py-2 text-xs text-muted-foreground">
+                        Loading services...
+                      </div>
+                    ) : availableServicesForClient.length === 0 ? (
                       <div className="px-3 py-2 text-xs text-muted-foreground">
                         No remaining services available.
                       </div>
+                    ) : (
+                      availableServicesForClient.map((svc) => (
+                        <SelectItem key={svc.id} value={String(svc.id)}>
+                          {svc.service_type_code.service_name} • $
+                          {parseFloat(svc.fee_amount_usd).toFixed(2)}
+                        </SelectItem>
+                      ))
                     )}
-                    {availableServicesForClient.map((svc) => (
-                      <SelectItem key={svc.id} value={String(svc.id)}>
-                        {svc.service_type_code.service_name} • $
-                        {parseFloat(svc.fee_amount_usd).toFixed(2)}
-                      </SelectItem>
-                    ))}
                   </SelectContent>
                 </Select>
               </div>
               <DialogFooter>
                 <Button
                   onClick={confirmAddService}
-                  disabled={!serviceSelectId || !activeClientId}
+                  disabled={
+                    !serviceSelectId || !activeClientId || servicesLoading
+                  }
                   className="min-w-[140px]"
                 >
                   Add Service
@@ -562,6 +613,14 @@ export function AdditionalServicesPaymentPanel({
                   <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 font-medium text-slate-600">
                     Total: ${grandTotal.toFixed(2)}
                   </span>
+                  {exchangeRate && (
+                    <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-1 font-medium text-green-700">
+                      Total NPR{" "}
+                      {grandTotalLocal?.toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                      })}
+                    </span>
+                  )}
                 </div>
                 <p className="mt-2 text-xs text-slate-500 leading-relaxed max-w-md">
                   {hasAnyServiceSelected
@@ -584,8 +643,17 @@ export function AdditionalServicesPaymentPanel({
                   ].join(" ")}
                 >
                   <span className="relative z-10 flex items-center gap-2">
-                    {loading ? "Generating QR..." : "Generate QR & Pay"}
-                    <QrCode className="h-5 w-5" />
+                    {loading ? (
+                      <>
+                        <Loader2 className="h-5 w-5 animate-spin" /> Generating
+                        QR...
+                      </>
+                    ) : (
+                      <>
+                        Generate QR & Pay
+                        <QrCode className="h-5 w-5" />
+                      </>
+                    )}
                   </span>
                   <span
                     className="absolute inset-0 opacity-0 group-hover:opacity-100 transition

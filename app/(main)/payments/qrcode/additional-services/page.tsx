@@ -1,17 +1,9 @@
-import { getFeeStructures } from "@/app/server_actions/pricing";
-import { AdditionalServicesPaymentPanel } from "@/components/payments/AdditionalServicesPaymentPanel copy";
+import { AdditionalServicesPaymentPanel } from "@/components/payments/AdditionalServicesPaymentPanel";
 
 export default async function AdditionalServicesPaymentPage() {
-
-  // Server-side fetch
-  const additionalServices = await getFeeStructures({
-    countryCode: 29,
-    type: "special_service",
-  }); 
-
   return (
     <div className="w-full flex justify-center px-4 py-10">
-      <AdditionalServicesPaymentPanel additionalServices={additionalServices} />
+      <AdditionalServicesPaymentPanel />
     </div>
   );
 }
