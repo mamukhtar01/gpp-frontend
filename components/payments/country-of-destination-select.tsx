@@ -43,7 +43,7 @@ export function CountryOfDestination({
         <SelectTrigger className="w-[220px]">
           <SelectValue placeholder="Select country..." />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="max-h-60 bg-gray-50">
           {COUNTRY_OPTIONS.map((opt) => (
             <SelectItem key={opt.key} value={String(opt.key)}>
               {opt.label}
