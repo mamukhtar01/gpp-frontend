@@ -100,12 +100,13 @@ export function AdditionalServicesCashPaymentPanel() {
       setServicesLoading(true);
       try {
         const res = await fetch(
-          `/api/fee-structures?countryCode=${country}&serviceType=special_service`
+          `/api/payments/fee-structures?countryCode=${country}&serviceType=special_service`
         );
         if (!res.ok) throw new Error("Failed to fetch additional services");
         const data = await res.json();
         setAdditionalServices(data ?? []);
       } catch (e) {
+        console.error(e);
         setAdditionalServices([]);
       } finally {
         setServicesLoading(false);
@@ -135,6 +136,7 @@ export function AdditionalServicesCashPaymentPanel() {
 
   const grandTotal = useMemo(
     () => ukTBCases.reduce((sum, c) => sum + getClientTotal(c.id), 0),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [ukTBCases, addedServices]
   );
 
@@ -194,10 +196,12 @@ export function AdditionalServicesCashPaymentPanel() {
   function removeClient(clientId: string) {
     setUkTBCases((prev) => prev.filter((c) => c.id !== clientId));
     setAddedServices((prev) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { [clientId]: _, ...rest } = prev;
       return rest;
     });
     setRemarks((prev) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { [clientId]: __, ...rest } = prev;
       return rest;
     });

@@ -100,7 +100,7 @@ export function AdditionalServicesPaymentPanel() {
       setServicesLoading(true);
       try {
         const res = await fetch(
-          `/api/fee-structures?countryCode=${country}&serviceType=excluded_med_exam`
+          `/api/payments/fee-structures?countryCode=${country}&serviceType=excluded_med_exam`
         );
         if (!res.ok) throw new Error("Failed to fetch additional services");
         const data = await res.json();
