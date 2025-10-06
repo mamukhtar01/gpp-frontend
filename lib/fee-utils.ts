@@ -20,8 +20,8 @@ export function getUKAgeBasedFee(age: number) {
 
 // Japan Fee Table
 export function getJapanAgeBasedFee(age: number) {
-  if (age < 5) return 68;
-  return 45;
+  if (age < 5) return 45;
+  return 68;
 }
 
 // Australia Fee Table
