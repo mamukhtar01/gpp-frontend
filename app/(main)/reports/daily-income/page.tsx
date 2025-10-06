@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import IncomeReport, { IncomeReportRow } from "@/components/reports/income";
+
 
 const LOCATIONS = [
   { label: "MHAC Kathmandu", value: "MH.0087.NP10.04.01.001" },
@@ -9,32 +10,13 @@ const LOCATIONS = [
   { label: "MHAC Biratnagar", value: "MH.0087.NP10.04.01.003" },
 ];
 
-const initialRows: IncomeReportRow[] = [
-  {
-    type: "Aus. Service Fee",
-    billNo: 258322,
-    billDate: "05-Sep-2025",
-    paFullName: "PANERU, Aanaya",
-    amount: "$45.00",
-    nprAmount: "6,305.00",
-    gl: "407020",
-  },
-  {
-    type: "Aus. Service Fee",
-    billNo: 258323,
-    billDate: "05-Sep-2025",
-    paFullName: "KHATIWADA, Dipen",
-    amount: "$90.00",
-    nprAmount: "12,610.00",
-    gl: "407020",
-  },
-];
 
 export default function ReportPage() {
   // State for filters
-  const [fromDate, setFromDate] = useState("2025-09-05");
-  const [toDate, setToDate] = useState("2025-09-05");
+  const [fromDate, setFromDate] = useState(new Date(Date.now() -  24 * 60 * 60 * 1000).toISOString().split("T")[0]);
+  const [toDate, setToDate] = useState(new Date().toISOString().split("T")[0]);
   const [location, setLocation] = useState(LOCATIONS[0].value);
+  const [paymentData, setPaymentData] = useState<IncomeReportRow[]>([]);
 
   // Format date range for display
   const dateRange =
@@ -42,11 +24,35 @@ export default function ReportPage() {
       ? `${new Date(fromDate).toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" })} To ${new Date(toDate).toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" })}`
       : "";
 
-  // Get location label for display
-  //const locationLabel = LOCATIONS.find((loc) => loc.value === location)?.label || "";
+
+
+
+  useEffect(() => {
+    // Fetch or filter payment data based on fromDate, toDate, and location
+    const fetchPaymentData = async () => {
+      // Example fetch call (replace with actual API endpoint)
+
+      const response = await fetch(`/api/payments?fromDate=${fromDate}&toDate=${toDate}&location=${location}`);
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Fetched payment data:", data);
+        setPaymentData(data);
+      } else {
+        console.error("Failed to fetch payment data");
+      }
+    };
+
+    fetchPaymentData();
+    
+  }, [fromDate, location, toDate]);
+
 
   // Example: Could filter rows based on date/location if data set allows
-  const rows = initialRows; // Replace with filtered/fetched rows as needed
+  const rows = paymentData; // Replace with filtered/fetched rows as needed
+
+  const totalUsd = rows.reduce((sum, row) => sum + parseFloat(row.amount_in_dollar || "0"), 0).toFixed(2);
+  const totalNpr = rows.reduce((sum, row) => sum + parseFloat(row.amount_in_local_currency || "0"), 0).toFixed(2);
 
   return (
     <div className="mx-auto my-8 w-full max-w-6xl">
@@ -105,11 +111,11 @@ export default function ReportPage() {
         }
         wbsCountry={location}
         rows={rows}
-        totalUsd="$135.00"
-        totalNpr="18,915.00"
-        cashierName="Ansu PAL"
-        exchangeRate="141.21"
+        totalUsd={totalUsd}
+        totalNpr={totalNpr}
+        cashierName="Ansu PAL"       
       />
     </div>
   );
 }
+

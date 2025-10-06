@@ -3,15 +3,18 @@
 import React, { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { formatReadableDate } from "@/lib/utils";
+import { formatCurrency } from "@/lib/fee-utils";
+import { useExchangeRate } from "@/app/(main)/payments/exchangeRateContext";
 
 export type IncomeReportRow = {
-  type: string;
+  service_type: string;
   billNo: string | number;
-  billDate: string;
-  paFullName: string;
-  amount: string;
-  nprAmount: string;
-  gl: string | number;
+  amount_in_dollar?: string;
+  date_of_payment: string;
+  payerInfo: string;
+  paidAmount: string;
+  amount_in_local_currency: string;
 };
 
 export type IncomeReportProps = {
@@ -27,7 +30,7 @@ export type IncomeReportProps = {
   totalUsd: string;
   totalNpr: string;
   cashierName: string;
-  exchangeRate: string;
+  loading?: boolean;
 };
 
 export function IncomeReport({
@@ -43,9 +46,12 @@ export function IncomeReport({
   totalUsd,
   totalNpr,
   cashierName,
-  exchangeRate,
+  loading,
 }: IncomeReportProps) {
   const reportRef = useRef<HTMLDivElement>(null);
+
+ // Exchange rate state Context
+  const exchangeRate = useExchangeRate();
 
   // Print
   const handlePrint = () => {
@@ -76,6 +82,9 @@ export function IncomeReport({
             @media print {
               body { margin: 0; }
               .no-print { display: none !important; }
+              table { border-collapse: collapse; width: 100%; }
+              th, td { border: 1px solid #1e40af; padding: 4px 8px; }
+              th { background: #f1f5f9; }
             }
           </style>
         </head>
@@ -131,46 +140,68 @@ export function IncomeReport({
           <span>NPR Income at MHAC Date Range:</span>
           <span className="font-semibold">{dateRange}</span>
         </div>
-        {/* Table Header */}
-        <div className="border-y-2 border-blue-900 py-2 font-semibold text-blue-900 grid grid-cols-8 gap-2 text-sm">
-          <div className="col-span-2">BillDate by Day</div>
-          <div>Type</div>
-          <div>BillNo</div>
-          <div>BillDate</div>
-          <div className="col-span-2">PA_FullName</div>
-          <div>Amount</div>
-          <div>NPR Amount</div>
-          <div>GL</div>
-        </div>
-        {/* Table Data */}
-        <div className="py-2 grid grid-cols-8 gap-2 text-sm text-gray-900 border-b border-blue-900">
-          <div className="col-span-8 font-semibold text-lg py-1">
-            {reportDate}
-          </div>
-          {wbsCountry && (
-            <div className="col-span-8 font-medium text-blue-900">
-              WBS / Country: {wbsCountry}
-            </div>
-          )}
-          {rows.map((row, idx) => (
-            <React.Fragment key={idx}>
-              <div></div>
-              <div>{row.billNo}</div>
-              <div>{row.billDate}</div>
-              <div className="col-span-2">{row.paFullName}</div>
-              <div>{row.amount}</div>
-              <div>{row.nprAmount}</div>
-              <div>{row.gl}</div>
-            </React.Fragment>
-          ))}
+        {/* Table */}
+        <div className="overflow-x-auto ">
+          <table className="min-w-full border border-blue-900 text-sm">
+            <thead className="">
+              <tr className="bg-blue-50 text-blue-900 px-3-2 border-b border-blue-900">
+                <th>Type</th>
+                <th>BillNo</th>
+                <th>BillDate</th>
+                <th>PA_FullName</th>
+                <th>Amount</th>
+                <th className="text-right px-2">NPR Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colSpan={7} className="text-left font-semibold py-2">
+                  {reportDate}
+                </td>
+              </tr>
+              {wbsCountry && (
+                <tr>
+                  <td colSpan={7} className=" text-blue-900 font-bold py-2">
+                    WBS / Country: {wbsCountry}
+                  </td>
+                </tr>
+              )}
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="text-center py-4">
+                    Loading...
+                  </td>
+                </tr>
+              ) : rows.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="text-center py-4">
+                    No data available
+                  </td>
+                </tr>
+              ) : (
+                rows.map((row, idx) => (
+                  <tr key={idx} className="even:bg-slate-50">
+                    <td className="pl-3">{row.service_type}</td>
+                    <td>{row.billNo}</td>
+                    <td>{formatReadableDate(row.date_of_payment)}</td>
+                    <td>{row.payerInfo}</td>
+                    <td className="text-right">${row.amount_in_dollar}</td>
+                    <td className="text-right pr-3">
+                      {row.amount_in_local_currency}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
         {/* Totals */}
         <div className="flex justify-end border-t-2 border-blue-900 py-2 mt-2">
           <div className="flex flex-col items-end space-y-1">
             <div className="text-blue-900 font-bold text-base">
               Total Collection:
-              <span className="ml-4 text-black font-semibold">{totalUsd}</span>
-              <span className="ml-4 text-black font-semibold">{totalNpr}</span>
+              <span className="ml-4 text-black font-semibold">{formatCurrency(totalUsd, "USD")}</span>
+              <span className="ml-4 font-semibold text-green-600">{formatCurrency(totalNpr, "NPR")}</span>
             </div>
           </div>
         </div>
