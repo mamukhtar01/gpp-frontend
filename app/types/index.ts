@@ -158,3 +158,9 @@ export type FeeStructure = {
 
 
 
+export enum TPaymentType {
+  bankDeposit = 1,
+  QR = 2,
+  Cash = 3,
+  Other = "Other",
+}

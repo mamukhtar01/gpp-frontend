@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import ReceiptActions from "@/components/custom/receipt-actions";
 import PaymentNotCompleted from "@/components/custom/payment-not-completed";
+import { TPaymentType } from "@/app/types";
 
 export default async function PaymentConfirmationPage({
   params,
@@ -24,7 +25,8 @@ export default async function PaymentConfirmationPage({
  const response = await client.request(
   readItems('Payments', {
     filter: {
-      case_number: { _eq: case_number }
+      case_number: { _eq: case_number },
+      type_of_payment: { _eq: TPaymentType.Cash  } // Ensure it's a cash payment
     },
     fields: ['*']
   })

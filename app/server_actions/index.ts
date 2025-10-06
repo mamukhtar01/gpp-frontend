@@ -6,6 +6,7 @@ import {
   TTxnReportResponseSuccess,
   TTxnReportResponseFailure,
   TNewPaymentRecord,
+  PaymentType,
 } from "@/app/types";
 import { mapToUKTBCases } from "@/lib/utils";
 
@@ -70,11 +71,15 @@ export async function getPaymentsAction() {
     throw new Error("Failed to fetch payment");
   }
 }
-export async function getPaymentByCaseIdAction(id: string) {
+
+export async function getPaymentByCaseIdAction(id: string, type: PaymentType) {
   try {
     const data = await client.request(
       readItems("Payments", {
-        filter: { case_number: { _eq: id } },
+        filter: {
+          case_number: { _eq: id },
+          type_of_payment: { _eq: type as number },
+        },
       })
     );
 
@@ -182,4 +187,3 @@ export async function verifyPaymentTxn({
     return { error: "Internal Server Error" };
   }
 }
-

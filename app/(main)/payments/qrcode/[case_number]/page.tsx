@@ -5,7 +5,7 @@ import { getPaymentByCaseIdAction } from "@/app/server_actions";
 import GoBackBtn from "@/components/custom/gobackbtn";
 import Link from "next/link";
 import QRCodeWindows from "@/components/payments/qrcode-windows";
-
+import { TPaymentType } from "@/app/types";
 
 export default async function VerifyPaymentPageByCaseNumber({
   params,
@@ -15,8 +15,9 @@ export default async function VerifyPaymentPageByCaseNumber({
   const { case_number } = await params;
 
   // Fetch Payment Data
-  const paymentRecord  = await getPaymentByCaseIdAction(
-    case_number
+  const paymentRecord = await getPaymentByCaseIdAction(
+    case_number,
+    TPaymentType.QR
   );
 
   if (!paymentRecord || !paymentRecord.qr_string) {
