@@ -157,3 +157,18 @@ export async function generateQRCodeNPR({
     timestamp: json.data.timestamp,
   };
 }
+
+
+// Utility to format date to YYYY-MM-DD
+export function formatReadableDate(dateString: string): string {
+  // Handles ISO string like "2025-10-06T05:25:00"
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return dateString; // fallback for invalid
+  // Example output: "06-Oct-2025"
+  return date.toLocaleDateString(undefined, {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
