@@ -65,8 +65,8 @@ export default async function VerifyPaymentPageByCaseNumber({
           <Separator className="my-8 border-b h-0.5 border-gray-200 w-full" />
           <div className="w-full max-w-md">
             <div className="text-md">
-              Total Amount to Pay (USD):{" "}
-              <span className="font-semibold">${amount.toFixed(2)}</span>
+              Total Amount to Pay (NPR):{" "}
+              <span className="font-semibold">{amount.toFixed(2)}</span>
             </div>
             <div className="text-md">
               Case Number:{" "}
@@ -93,7 +93,7 @@ export default async function VerifyPaymentPageByCaseNumber({
                           <td className="px-2 py-1">{index + 1}</td>
                           <td className="px-2 py-1">{client.name}</td>
                           <td className="px-2 py-1">{client.age}</td>
-                          <td className="px-2 py-1">{client.amount}</td>
+                          <td className="px-2 py-1">${client.amount}</td>
                         </tr>
                       ))}
                     </tbody>

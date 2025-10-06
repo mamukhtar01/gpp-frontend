@@ -77,12 +77,12 @@ export default async function PaymentConfirmationPage({
           <div className="flex justify-between text-sm">
             <span className="font-medium">Amount:</span>
             <span className="font-semibold text-green-600">
-              ${payment.paidAmount}
+              {payment.paidAmount}
             </span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="font-medium">Amount is local currency</span>
-            <span>{payment.amount_in_local_currency}</span>
+            <span className="font-medium">Amount (USD)</span>
+            <span>${payment.amount_in_dollar}</span>
           </div>
           {/* Receipt action buttons (client component) */}
           <Separator className="my-8 border-dashed border-gray-300 border-b-2" />

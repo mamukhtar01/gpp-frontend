@@ -45,12 +45,12 @@ export function QrCodePaymentPanel() {
 
   // Country-specific fee calculation
   function getCountrySpecificFee(age: number, specialType?: string) {
-    if (country === 12) return getUSAgeBasedFee(age);
-    if (country === 13) return getUKAgeBasedFee(age);
-    if (country === 14) return getJapanAgeBasedFee(age);
-    if (country === 15) return getAustraliaAgeBasedFee(age, specialType);
-    if (country === 16) return getNewZealandAgeBasedFee(age);
-    if (country === 29) return getCanadaAgeBasedFee(age);
+    if (country === 12) return getCanadaAgeBasedFee(age);
+    if (country === 13) return getUSAgeBasedFee(age);
+    if (country === 14) return getAustraliaAgeBasedFee(age, specialType);
+    if (country === 15) return getNewZealandAgeBasedFee(age);
+    if (country === 16) return getUKAgeBasedFee(age);
+    if (country === 29) return getJapanAgeBasedFee(age);
     return 0;
   }
 
@@ -142,6 +142,8 @@ export function QrCodePaymentPanel() {
       setLoading(false);
     }
   }
+
+  console.log("Rendering QrCodePaymentPanel with country:", country);
 
   return (
     <div className="p-8 bg-white rounded shadow w-full max-w-6xl min-h-[470px]">

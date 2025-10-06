@@ -77,7 +77,7 @@ export const columns: ColumnDef<TPayment>[] = [
       );
       const formatted = new Intl.NumberFormat("en-US", {
         style: "currency",
-        currency: "USD",
+        currency: "NPR",
       }).format(isFinite(amount) ? amount : 0);
 
       return <div className="text-right font-medium">{formatted}</div>;
