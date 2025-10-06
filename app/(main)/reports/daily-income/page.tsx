@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import IncomeReport, { IncomeReportRow } from "@/components/reports/income";
+import { useUserData } from "@/app/context/UserContext";
 
 
 const LOCATIONS = [
@@ -17,6 +18,7 @@ export default function ReportPage() {
   const [toDate, setToDate] = useState(new Date().toISOString().split("T")[0]);
   const [location, setLocation] = useState(LOCATIONS[0].value);
   const [paymentData, setPaymentData] = useState<IncomeReportRow[]>([]);
+  const userData = useUserData();
 
   // Format date range for display
   const dateRange =
@@ -113,7 +115,7 @@ export default function ReportPage() {
         rows={rows}
         totalUsd={totalUsd}
         totalNpr={totalNpr}
-        cashierName="Ansu PAL"       
+        cashierName= {userData.user ? `${userData.user.first_name || ""} ${userData.user.last_name || ""}` : "N/A"}       
       />
     </div>
   );

@@ -1,4 +1,4 @@
-import "server-only";
+//import "server-only";
 import client from "@/lib/directus";
 import { readMe } from "@directus/sdk";
 import { redirect } from "next/navigation";
@@ -12,6 +12,7 @@ export async function getUserData() {
           "email",
           "first_name",
           "last_name",
+          "status",
           {
             role: ["id", "name", "description"],
           },
