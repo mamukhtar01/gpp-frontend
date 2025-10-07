@@ -162,7 +162,7 @@ export function IncomeReport({
               {wbsCountry && (
                 <tr>
                   <td colSpan={7} className=" text-blue-900 font-bold py-2">
-                    WBS / Country: {wbsCountry}
+                    WBS : {wbsCountry}
                   </td>
                 </tr>
               )}

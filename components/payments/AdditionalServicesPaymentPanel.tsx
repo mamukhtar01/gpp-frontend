@@ -232,10 +232,10 @@ export function AdditionalServicesPaymentPanel() {
         body: JSON.stringify({
           transactionCurrency: "524",
           transactionAmount: Number(amountInLocal),
-          billNumber: selectedCase.id,
+          billNumber: selectedCase.id ?? "N/A",
           storeLabel: "Store1",
           terminalLabel: "Terminal1",
-          purposeOfTransaction: "Bill payment - Additional Services",
+          purposeOfTransaction: "Bill payment",
         }),
       });
 

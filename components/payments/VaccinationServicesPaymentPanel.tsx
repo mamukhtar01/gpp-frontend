@@ -163,8 +163,8 @@ export function VaccinationServicesPaymentPanel({ additionalServices }: Props) {
       const { qrString, validationTraceId, timestamp } =
         await generateQRCodeNPR({
           nprAmount: totalAmountLocal,
-          caseNo,
-          purpose: "Bill payment - Vaccination Services",
+          caseNo: caseNo ?? "N/A",
+          purpose: "Bill payment",
         });
 
       const clientsInfo = caseMembers.map((m) => ({
