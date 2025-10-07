@@ -119,20 +119,20 @@ export function DataTable({
                       row.original.type_of_payment === 2
                     ) {
                       router.push(
-                        `/payments/qrcode/${row.original.case_number}?case_type=${row.original.case_management_system}`
+                        `/payments/qrcode/${row.original.case_number}?paymentId=${row.original.id}&case_type=${row.original.case_management_system}`
                       );
                     } else if (
                       row.original.status === 2 &&
                       row.original.type_of_payment === 2
                     ) {
                       router.push(
-                        `/payments/qrcode/${row.original.case_number}/verify?case_type=${row.original.case_management_system}`
+                        `/payments/qrcode/${row.original.case_number}/verify?paymentId=${row.original.id}&case_type=${row.original.case_management_system}`
                       );
                     }
                     // cash payment, go to cash payment details page
                     else if (row.original.type_of_payment === 3) {
                       router.push(
-                        `/payments/cash/${row.original.case_number}?case_type=${row.original.case_management_system}`
+                        `/payments/cash/${row.original.case_number}?paymentId=${row.original.id}&case_type=${row.original.case_management_system}`
                       );
                     }
                   }}
