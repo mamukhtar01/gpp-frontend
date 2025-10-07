@@ -6,33 +6,36 @@ import { readItems } from "@directus/sdk";
 import { CheckCircle2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { TPayment } from "@/lib/schema";
 import ReceiptActions from "@/components/custom/receipt-actions";
 import PaymentNotCompleted from "@/components/custom/payment-not-completed";
+import { TPaymentType } from "@/app/types";
 
 export default async function PaymentConfirmationPage({
   params,
 }: {
   params: Promise<{ case_number: string }>;
 }) {
-
   // Extract case_number from params
   const { case_number } = await params;
 
   // Fetch payment record by case_number to get validationTraceId
-  const response = await client.request<TPayment[]>(
+  const response = await client.request(
     readItems("Payments", {
-      filter: { case_number: { _eq: case_number } },
+      filter: {
+        case_number: { _eq: case_number },
+        type_of_payment: { _eq: TPaymentType.Cash }, // Ensure it's a cash payment
+      },
+      fields: ["*"],
     })
   );
 
-  if (response.length === 0) {
+  if (!response || response.length === 0) {
     throw new Error("No payment record found for this case_number.");
   }
 
   if (response[0].status !== 2) {
     // if status !== 2, payment is failed. render payment failed component
-  return <PaymentNotCompleted caseDetails={response[0]} />;
+    return <PaymentNotCompleted caseDetails={response[0]} />;
   }
 
   const payment = response[0];
@@ -62,7 +65,7 @@ export default async function PaymentConfirmationPage({
           </div>
           <div className="flex justify-between text-sm">
             <span className="font-medium">Type of Payment</span>
-          <PaymentType type_of_payment={payment.type_of_payment} />
+            <PaymentType type_of_payment={payment.type_of_payment} />
           </div>
           <div className="flex justify-between text-sm">
             <span className="font-medium">Transaction Ref:</span>
@@ -71,12 +74,12 @@ export default async function PaymentConfirmationPage({
           <div className="flex justify-between text-sm">
             <span className="font-medium">Amount:</span>
             <span className="font-semibold text-green-600">
-              ${payment.paidAmount}
+              {payment.paidAmount}
             </span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="font-medium">Amount is local currency</span>
-            <span>{payment.amount_in_local_currency}</span>
+            <span className="font-medium">Amount (USD)</span>
+            <span>${payment.amount_in_dollar}</span>
           </div>
           {/* Receipt action buttons (client component) */}
           <Separator className="my-8 border-dashed border-gray-300 border-b-2" />
@@ -97,9 +100,6 @@ export default async function PaymentConfirmationPage({
   );
 }
 
-
-
-
 function PaymentType({ type_of_payment }: { type_of_payment: number }) {
   switch (type_of_payment) {
     case 1:
@@ -109,8 +109,8 @@ function PaymentType({ type_of_payment }: { type_of_payment: number }) {
     case 3:
       return <span>Cash Payment</span>;
     case 4:
-        return <span>Card Payment</span>;
+      return <span>Card Payment</span>;
     default:
       return <span>Unknown</span>;
-  } 
+  }
 }

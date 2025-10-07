@@ -28,7 +28,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { QrCode, Trash2, Plus, X } from "lucide-react";
+import { Trash2, Plus, X, Loader2, Banknote } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { TUKTB_Cases } from "@/lib/schema";
 import { SearchUKTBCombobox } from "./search-uktbcase-combobox";
@@ -58,15 +58,15 @@ interface AddedServiceInstance extends AdditionalServiceFromDB {
 
 type AddedServicesState = Record<string, AddedServiceInstance[]>;
 
-interface QrCodeUKTBPaymentPanelProps {
+interface CashUKTBPaymentPanelProps {
   ukFees: FeeStructure[];
   additionalServicesList: AdditionalServiceFromDB[];
 }
 
-export function QrCodeUKTBPaymentPanel({
+export function CashUKTBPaymentPanel ({
   ukFees,
   additionalServicesList,
-}: QrCodeUKTBPaymentPanelProps) {
+}: CashUKTBPaymentPanelProps) {
   const router = useRouter();
   const [selectedCase, setSelectedCase] = useState<TUKTB_Cases | null>(null);
   const [ukTBCases, setUkCases] = useState<TUKTB_Cases[]>([]);
@@ -76,9 +76,10 @@ export function QrCodeUKTBPaymentPanel({
   const [isServiceDialogOpen, setIsServiceDialogOpen] = useState(false);
   const [activeClientId, setActiveClientId] = useState<string | null>(null);
   const [selectedServiceId, setSelectedServiceId] = useState<number | null>(null);
+  const [remarks, setRemarks] = useState<Record<string, string>>({});
 
   // Exchange Rate Context (local currency per 1 USD)
-  const exchangeRate = useExchangeRate(); // e.g. 133.5
+  const exchangeRate = useExchangeRate();
 
   /* ---------------- Helpers ---------------- */
 
@@ -146,11 +147,16 @@ export function QrCodeUKTBPaymentPanel({
       const { [clientId]: _, ...rest } = prev;
       return rest;
     });
+    setRemarks((prev) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { [clientId]: __, ...rest } = prev;
+      return rest;
+    });
   };
 
   /* ---------------- Payment Submission ---------------- */
 
-  async function handleQRGenerateAndCreatePayment() {
+  async function handleCashPayment() {
     if (!selectedCase) return;
     setLoading(true);
     try {
@@ -159,31 +165,12 @@ export function QrCodeUKTBPaymentPanel({
         ? grandTotalLocal.toFixed(2)
         : totalAmountToPayDollars;
 
-      const res = await fetch("/api/nepalpay/generateQR", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          transactionCurrency: "524",
-          transactionAmount: Number(totalAmountToPayLocalCurrency),
-          billNumber: selectedCase.id ?? "N/A",
-          storeLabel: "Store1",
-          terminalLabel: "Terminal1",
-          purposeOfTransaction: "Bill payment",
-        }),
-      });
-
-      const json = await res.json();
-      if (!res.ok || !json?.data?.qrString || !json?.data?.validationTraceId) {
-        throw new Error("Failed to generate QR code");
-      }
-
-      const { qrString, validationTraceId, timestamp } = json.data;
-
       const clientsInfo = ukTBCases.map((client) => ({
         id: client.id,
         name: `${client.First_Name} ${client.Last_Name}`,
         age: CalculateAge(client.date_of_birth),
         amount: getClientTotal(client).toFixed(2),
+        remark: remarks[client.id] || null,
         additional_services: (addedServices[client.id] || []).map((s) => ({
           id: s.id,
           fee_amount_usd: s.fee_amount_usd,
@@ -199,17 +186,20 @@ export function QrCodeUKTBPaymentPanel({
         reference: null,
         amount_in_dollar: totalAmountToPayDollars,
         amount_in_local_currency: totalAmountToPayLocalCurrency,
-        type_of_payment: 2,
+        type_of_payment: 3, // Cash Payment
         date_of_payment: new Date().toISOString(),
         transaction_id: `TXN-${Date.now()}`,
-        status: 1,
-        validationTraceId: validationTraceId ?? "",
+        status: 2, // Paid
+        validationTraceId: "",
         payerInfo: `${selectedCase.First_Name || ""} ${
           selectedCase.Last_Name || ""
         }`.trim(),
-        qr_timestamp: timestamp ?? "",
+        qr_timestamp: "",
         paidAmount: totalAmountToPayLocalCurrency,
-        qr_string: qrString,
+        destination_country: 16, // UK
+        exchange_rate: exchangeRate || 1,
+        service_type: "medical_exam",
+        qr_string: "",
         wave: null,
         clinic: null,
         clients: clientsInfo as TClientBasicInfo[],
@@ -218,9 +208,9 @@ export function QrCodeUKTBPaymentPanel({
       const paymentRes = await createPayment(paymentRecord);
       if (!paymentRes) throw new Error("Failed to create payment record");
 
-      router.push(`/payments/qrcode/${selectedCase.id}?paymentId=${paymentRes.id}`);
+      router.push(`/payments/cash/${selectedCase.id}?case_type=uktb`);
     } catch (e: unknown) {
-      alert(`Failed to generate QR: ${(e as Error).message}`);
+      alert(`Failed to create payment record: ${(e as Error).message}`);
     } finally {
       setLoading(false);
     }
@@ -230,7 +220,7 @@ export function QrCodeUKTBPaymentPanel({
 
   return (
     <div className="p-8 bg-white rounded shadow w-full max-w-6xl min-h-[470px]">
-      <ExchangeRateWidget exchangeRate={exchangeRate} className="mb-4" />
+      <ExchangeRateWidget exchangeRate={exchangeRate} />
       <SearchUKTBCombobox
         setSelectedCase={setSelectedCase}
         setUkCases={setUkCases}
@@ -273,6 +263,13 @@ export function QrCodeUKTBPaymentPanel({
                             id={`remark-${client.id}`}
                             type="text"
                             placeholder="add remark"
+                            value={remarks[client.id] || ""}
+                            onChange={e =>
+                              setRemarks(prev => ({
+                                ...prev,
+                                [client.id]: e.target.value,
+                              }))
+                            }
                           />
                         </div>
                       </TableCell>
@@ -411,12 +408,21 @@ export function QrCodeUKTBPaymentPanel({
           <Separator className="my-16" />
           <div className="flex gap-6 mt-2 justify-between">
             <button
-              onClick={handleQRGenerateAndCreatePayment}
+              onClick={handleCashPayment}
               disabled={loading || grandTotalUSD <= 0 || !exchangeRate}
               className="flex items-center justify-center h-12 w-[240px] rounded-md bg-brand-500 text-white font-bold text-base shadow-sm hover:bg-brand-600 hover:cursor-pointer transition disabled:opacity-60"
             >
-              {loading ? "GENERATING..." : "GENERATE NEPAL QR"}
-              <QrCode className="ml-2 w-5 h-5" />
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Creating Cash Payment...
+                </>
+              ) : (
+                <>
+                  Create Cash Payment
+                  <Banknote className="ml-2 w-5 h-5" />
+                </>
+              )}
             </button>
 
             <button
@@ -424,6 +430,7 @@ export function QrCodeUKTBPaymentPanel({
                 setSelectedCase(null);
                 setUkCases([]);
                 setAddedServices({});
+                setRemarks({});
                 setActiveClientId(null);
                 setSelectedServiceId(null);
               }}

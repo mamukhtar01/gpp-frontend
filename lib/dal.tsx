@@ -1,20 +1,10 @@
-import "server-only";
+//import "server-only";
 import client from "@/lib/directus";
 import { readMe } from "@directus/sdk";
 import { redirect } from "next/navigation";
 
 export async function getUserData() {
   try {
-    // read token.json
-    const tokenData = await import("@/token.json");
-    const token = tokenData.data.access_token;
-    //const refreshToken = tokenData.data.refresh_token;
-
-    if (!token) {
-      redirect("/login"); // Redirect if unauthorized
-    }
-
-    client.setToken(token);
     const user = await client.request(
       readMe({
         fields: [
@@ -22,6 +12,7 @@ export async function getUserData() {
           "email",
           "first_name",
           "last_name",
+          "status",
           {
             role: ["id", "name", "description"],
           },
@@ -34,6 +25,10 @@ export async function getUserData() {
         ],
       })
     );
+
+    if (!user) {
+      throw new Error("No user data returned");
+    }
 
     return { success: true, user };
   } catch (error) {

@@ -1,3 +1,5 @@
+import { TClientBasicInfo } from "@/app/types";
+
 export type DbSchema = {
   Cases: TCase[];
 
@@ -10,6 +12,7 @@ export type DbSchema = {
   Countries: TCountries[];
   fee_structures: TFeeStructure[];
   service_types: ServiceType[];
+  ExchangeRates: TExchangeRate[];
 };
 
 type TCase = {
@@ -91,6 +94,9 @@ export type TPayment = {
   qr_string: string | null;
   qr_timestamp: string | null;
   paidAmount: number | string | null;
+  clinic: string | null;
+  clients: TClientBasicInfo[] | null; // JSON string of client info
+  service_type: string | null; // JSON string of service types
 };
 
 export type TUKTB_Cases = {
@@ -110,7 +116,7 @@ export type TUKTB_Cases = {
   location: string;
   Country: number;
   Currency: number;
-  date_created: string; 
+  date_created: string;
 };
 
 // userType
@@ -164,7 +170,6 @@ export type TCountries = {
   local_currency: string;
 };
 
-
 export interface TFeeStructure {
   id: number;
   sort: number | null;
@@ -181,11 +186,13 @@ export interface TFeeStructure {
   fee_amount_usd: string;
   description: string | null;
   is_active: boolean;
-  service_type_code: string;
+  service_type_code: ServiceType | string;
 }
 
-
-export type ServiceCategory = "medical_exam" | "vaccination" | "special_service";
+export type ServiceCategory =
+  | "medical_exam"
+  | "vaccination"
+  | "special_service";
 
 export interface ServiceType {
   service_code: string;
@@ -199,3 +206,15 @@ export interface ServiceType {
   category: ServiceCategory;
   is_active: boolean;
 }
+
+export interface TExchangeRate {
+  currency: TCurrency | number; // FK to TCurrency
+  date_updated: string; // ISO date string
+  value: string;
+}
+
+export type TCurrency = {
+  id: number;
+  name: string;
+  currency: string;
+};

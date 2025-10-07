@@ -1,11 +1,15 @@
-import { CaseProvider } from "./caseContext";
+"use client";
+
+import { ExchangeRateProvider } from "../payments/exchangeRateContext";
+
+
 
 export default function NepalQRLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="nepal-qr-layout flex w-full justify-center my-8">
-        <CaseProvider>
+        <ExchangeRateProvider>
           {children}
-        </CaseProvider>
+        </ExchangeRateProvider>
     </div>
   );
 }

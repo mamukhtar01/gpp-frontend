@@ -15,7 +15,6 @@ import {
 } from "@tanstack/react-table";
 
 import { Button } from "@/components/ui/button";
-
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -35,8 +34,6 @@ export function DataTable({
   data: TPayment[];
   columns: ColumnDef<TPayment>[];
 }) {
-
-
   const router = useRouter();
 
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -65,52 +62,87 @@ export function DataTable({
       rowSelection,
     },
   });
+
   return (
-    <div className="w-[65%] ">
-      <div className="flex items-center py-4 w-80">
+    <div className="w-full max-w-5xl mx-auto">
+      {/* Filter/Search */}
+      <div className="flex items-center py-6 gap-8">
         <Input
-          placeholder="Filter Payments by Case ..."
-          value={(table.getColumn("case_number")?.getFilterValue() as string) ?? ""}
+          placeholder="Filter payments by case..."
+          value={
+            (table.getColumn("case_number")?.getFilterValue() as string) ?? ""
+          }
           onChange={(event) =>
             table.getColumn("case_number")?.setFilterValue(event.target.value)
           }
-          className="max-w-sm"
+          className="w-96"
         />
+        <div className="text-sm text-gray-500 ml-auto">
+          {table.getFilteredSelectedRowModel().rows.length} of{" "}
+          {table.getFilteredRowModel().rows.length} row(s) selected.
+        </div>
       </div>
-      <div className="overflow-hidden rounded-md border">
-        <Table className="">
-          <TableHeader className="bg-gray-100">
+
+      {/* Table */}
+      <div className="overflow-auto rounded-lg border bg-white shadow">
+        <Table className="min-w-full">
+          <TableHeader className="bg-gray-50">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  );
-                })}
+              <TableRow key={headerGroup.id} className="h-16">
+                {headerGroup.headers.map((header) => (
+                  <TableHead
+                    key={header.id}
+                    className="px-6 py-4 text-base font-semibold text-gray-800 tracking-wide"
+                  >
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                ))}
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody >
+          <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
-                  className="hover:cursor-pointer hover:bg-gray-200"
-                  onClick={() => {
-                    
-                    router.push(`/payments/cash/${row.original.case_number}`);
-                  }}
                   key={row.id}
+                  className="hover:bg-gray-100 transition-all h-14 hover:cursor-pointer"
+                  // Navigate to payment details page on row click
+                  onClick={() => {
+                    // nepal qrcode payment and status is registered, go to payment page
+                    if (
+                      row.original.status === 1 &&
+                      row.original.type_of_payment === 2
+                    ) {
+                      router.push(
+                        `/payments/qrcode/${row.original.case_number}?case_type=${row.original.case_management_system}`
+                      );
+                    } else if (
+                      row.original.status === 2 &&
+                      row.original.type_of_payment === 2
+                    ) {
+                      router.push(
+                        `/payments/qrcode/${row.original.case_number}/verify?case_type=${row.original.case_management_system}`
+                      );
+                    }
+                    // cash payment, go to cash payment details page
+                    else if (row.original.type_of_payment === 3) {
+                      router.push(
+                        `/payments/cash/${row.original.case_number}?case_type=${row.original.case_management_system}`
+                      );
+                    }
+                  }}
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell
+                      key={cell.id}
+                      className="px-6 py-4 text-sm align-middle"
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -132,29 +164,25 @@ export function DataTable({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="text-muted-foreground flex-1 text-sm">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div>
-        <div className="space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Next
-          </Button>
-        </div>
+
+      {/* Pagination */}
+      <div className="flex items-center justify-end gap-4 py-6">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}
+        >
+          Previous
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}
+        >
+          Next
+        </Button>
       </div>
     </div>
   );

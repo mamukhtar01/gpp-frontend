@@ -1,100 +1,100 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Check, ChevronsUpDown } from "lucide-react"
-
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command"
+import * as React from "react";
+import { Check, ChevronsUpDown, RefreshCw, Search } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandGroup,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 
-export interface TCase {
-  case_id: string | null;      
-  case_status: number;         
-  date_created: string;         
-  id: string;                   
-  main_client: {
-    id: string;
-    first_name: string;
-    last_name: string;
+// Types based on your given API response
+export type CaseMember = {
+  CaseMemberID: number;
+  CaseNo: string;
+  RelationtoPA: string;
+  FullName: string;
+  Age: number;
+  AgeInYears: number;
+  AgeInMonths: number;
+  AgeInDays: number;
+  BirthDate: string;
+  Gender: string;
+  LastName: string;
+  FirstName: string;
+  TravelRequirement: string;
+  IsLoanRecipient: boolean;
+  IsRegisteredByEMedical: boolean;
+  TotalCosts: number;
+  DateOfReturn: { ["xsi:nil"]: string } | string | null;
+};
+
+export type CaseMemberSummaryResponse = {
+  Errors: string;
+  Warnings: string;
+  CaseMemberSummary: {
+    CaseMemberSummary: CaseMember[];
   };
-  package_price: string | null;
-  appointment_date: string | null;
-  amount_to_pay_in_dollar: string | null;
-  amount_to_pay_in_local_currency: string | null;
-  local_currency: string | null;        
-}
+  CaseSize: number;
+};
 
-type TCaseType = "mimosa" | "uktb" | "jims" | ""
+export function CaseMemberSummarySearch({
+  setSelectedSummary,
+}: {
+  setSelectedSummary: (c: CaseMember[] | null) => void;
+}) {
+  const [open, setOpen] = React.useState(false);
+  const [input, setInput] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+  const [summary, setSummary] = React.useState<CaseMember[] | null>(null);
 
-
-export  function CaseSearchCombobox({ setSelectedCase, type }: { setSelectedCase: (c: TCase | null) => void, type: TCaseType   }) {
-  const [open, setOpen] = React.useState(false)
-  const [value, setValue] = React.useState("")
-  const [cases, setCases] = React.useState<TCase[]>([])
-  const [search, setSearch] = React.useState("")
-  const [loading, setLoading] = React.useState(false)
-
-
-  // search mimosa cases or uktb cases based on type prop
-
-
-  // replaced fetchCases + effect with a debounced search effect
-
-  React.useEffect(() => {
-    const controller = new AbortController()
-
-    if (search === "") {
-      setCases([])
-      setLoading(false)
-      return
-    }
-
-    setLoading(true)
-
-    const debounce = setTimeout(async () => {
-
-     
-      try {
-        const res = await fetch(`/api/cases/mimosa?search=${encodeURIComponent(search)}&case_type=${type}`, {
-          signal: controller.signal,
-        })
-        if (!res.ok) {
-          setCases([])
-          return
-        }
-        const data = await res.json()
-        setCases(data)
-      } catch (err: unknown) {
-        if (err instanceof Error && err.name === "AbortError") return
-        console.error("Failed to fetch cases:", err)
-        setCases([])
-      } finally {
-        setLoading(false)
+  async function handleSearch(e?: React.FormEvent) {
+    if (e) e.preventDefault();
+    setError(null);
+    setLoading(true);
+    setSummary(null);
+    setSelectedSummary(null);
+    try {
+      const res = await fetch("/api/soap/case_summary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ CaseNo: input.trim() }),
+      });
+      const data: CaseMemberSummaryResponse = await res.json();
+      console.log("Fetched case member summary:", data);
+      if (!res.ok || !data?.CaseMemberSummary?.CaseMemberSummary?.length) {
+        throw new Error(
+          data?.Errors || data?.Warnings || "No case members found"
+        );
       }
-    }, 300) // debounce delay in ms
-
-    return () => {
-      controller.abort()
-      clearTimeout(debounce)
-      setLoading(false)
+      setSummary(data.CaseMemberSummary.CaseMemberSummary);
+      setSelectedSummary(data.CaseMemberSummary.CaseMemberSummary);
+      setOpen(false);
+    } catch (err: unknown) {
+      setError((err as Error).message);
+      setSummary(null);
+      setSelectedSummary(null);
+    } finally {
+      setLoading(false);
     }
-  }, [search, type])
+  }
 
-
-
-
+  function onReset() {
+    setInput("");
+    setError(null);
+    setSummary(null);
+    setSelectedSummary(null);
+  }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -105,64 +105,89 @@ export  function CaseSearchCombobox({ setSelectedCase, type }: { setSelectedCase
           aria-expanded={open}
           className="w-[400px] justify-between"
         >
-          {value
-            ? cases.find((caseItem) => caseItem.id === value)?.id
+          {summary
+            ? summary[0]?.CaseNo
             : "Search Case Number..."}
           <ChevronsUpDown className="opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[400px] p-0 bg-gray-100 text-gray-800">
-        <Command>
-          <CommandInput
-            placeholder="Search Case Number..."
-            className="h-12"
-            value={search}
-            onValueChange={(val: string) => setSearch(val)}
-            // onChange fallback removed; shadcn CommandInput uses onValueChange
+        <form onSubmit={handleSearch} className="flex gap-2 p-3">
+          <Input
+            placeholder="Enter Full Case Number"
+            className="h-12 flex-1"
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            disabled={loading}
+            autoFocus
+            maxLength={32}
           />
-          <CommandList className="max-h-100 min-h-24">
+          <Button
+            type="submit"
+            className="h-12"
+            disabled={loading || !input.trim()}
+          >
+            {loading ? (
+              <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
+              </svg>
+            ) : (
+              <Search className="w-5 h-5 mr-2" />
+            )}
+            Search
+          </Button>
+          <Button type="button" variant="ghost" onClick={onReset} className="h-12">
+            Reset
+          </Button>
+        </form>
+        <Command>
+          <CommandList>
             {loading && (
-              <div className="px-3 py-2 text-sm text-muted-foreground flex items-center gap-2">
-                <svg
-                  className="h-4 w-4 animate-spin"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
+              <div className="px-3 py-2 text-sm flex items-center gap-2">
+                <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
                 </svg>
-                <span>Searching...</span>
+                <span>Loading...</span>
               </div>
             )}
-
-            {!loading && cases.length === 0 && <CommandEmpty>No case found.</CommandEmpty>}
-
-            <CommandGroup>
-              {cases.map((caseItem) => (
-                <CommandItem
-                  key={caseItem.id}
-                  value={caseItem.id}
-                  onSelect={(currentValue) => {
-                    setValue(currentValue === value ? "" : currentValue)
-                    const selected = cases.find((c) => c.id === currentValue) || null
-                    setSelectedCase(selected)
-                    setOpen(false)
-                  }}
-                >
-                  {caseItem.id}
-                  <Check
-                    className={cn(
-                      "ml-auto",
-                      value === caseItem.id ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                </CommandItem>
-              ))}
-            </CommandGroup>
+            {error && !loading && (
+              <div className="px-3 py-2 flex items-center gap-2 text-red-600 bg-red-50 rounded">
+                <span>{error}</span>
+                <Button size="sm" variant="ghost" onClick={handleSearch}>
+                  <RefreshCw className="w-4 h-4 mr-1" />
+                  Retry
+                </Button>
+              </div>
+            )}
+            {!loading && !error && summary && summary.length > 0 && (
+              <CommandGroup>
+                {summary.map((member) => (
+                  <CommandItem
+                    key={member.CaseMemberID}
+                    value={member.CaseMemberID.toString()}
+                    onSelect={() => {
+                      setSelectedSummary([member]);
+                      setOpen(false);
+                    }}
+                  >
+                    <span>
+                      {member.FullName} ({member.RelationtoPA}) — {member.BirthDate?.slice(0, 10)}
+                    </span>
+                    <Check className={cn("ml-auto", "opacity-100")} />
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
+            {!loading && !error && !summary && (
+              <div className="px-3 py-2 text-sm text-muted-foreground">
+                Enter a Case Number and click Search.
+              </div>
+            )}
           </CommandList>
         </Command>
       </PopoverContent>
     </Popover>
-  )
+  );
 }

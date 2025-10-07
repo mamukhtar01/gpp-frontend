@@ -1,3 +1,5 @@
+import { ServiceCategory } from "@/lib/schema";
+
 export interface TCaseSearchResult {
   case_id: string | null;
   case_status: number;
@@ -132,9 +134,33 @@ export type TNewPaymentRecord = {
   qr_timestamp: string | null;
   qr_string: string | null;
   wave: string | null;
-  clinic: number | null;
+  clinic: string | null;
+  clients: TClientBasicInfo[] | null;
+  service_type?: ServiceCategory | null; // e.g., "special_service"
+  exchange_rate?: number | null;
+  destination_country?: number | null;
+};
+
+export type TClientBasicInfo = {
+  id: string;
+  name: string;
+  age: number;
+  amount: string;
+};
+
+
+export type FeeStructure = {
+  id: number;
+  fee_amount_usd: string; // stored as string
+  min_age_months: number | null;
+  max_age_months: number | null;
 };
 
 
 
-
+export enum TPaymentType {
+  bankDeposit = 1,
+  QR = 2,
+  Cash = 3,
+  Other = "Other",
+}

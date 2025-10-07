@@ -6,18 +6,14 @@ const paymentMethods = [
   { title: "QR PAYMENT", img: "/qrcode.png", value: "Generate QR Payment", href: "/payments/qrcode" },
   { title: "CASH PAYMENT", img: "/cash.png", value: "Create Cash Payment", href: "/payments/cash" },
   { title: "CREDIT PAYMENT", img: "/card.png", value: "Accept Card Payment", href: "/payments/credit-card" },
-  { title: "POS PAYMENT", img: "/card.png", value: "Accept POS Payment", href: "/payments/pos-card-payment" },
   { title: "BANK TRANSFER", img: "/bank.png", value: "Record Bank Transfer", href: "/payments/bank-transfer" },
-  { title: "MOBILE MONEY", img: "/mobile.png", value: "Generate Mobile Payment", href: "/payments/mobile-money" },
 ];
 
 const reportTypes = [
   { title: "END-OF-DAY", img: "/calendar.png", value: "Daily Summary", href: "/reports/end-of-day" },
-  { title: "DAILY INCOME", img: "/cash.png", value: "Daily Income Summary", href: "/reports/daily-income" },
+  { title: "INCOME SUMMARY", img: "/cash.png", value: "Daily Income Summary", href: "/reports/daily-income" },
   { title: "DAILY QR CODE", img: "/qrcode.png", value: "Daily QR Code", href: "/reports/daily-qr" },
-  { title: "RECONCILIATION", img: "/report.png", value: "Reconciliation", href: "/reports/reconciliation" },
-  { title: "VACCINATION", img: "/file.svg", value: "Daily Vaccination", href: "/reports/vaccination" },
-  { title: "ADDITIONAL INCOME", img: "/file.svg", value: "Additional Income", href: "/reports/placeholder-2" },
+  { title: "VACCINATION", img: "/report.png", value: "Daily Vaccination", href: "/reports/vaccination" },
 ];
 
 export default async function Home() {
@@ -30,7 +26,7 @@ export default async function Home() {
             <h2 className="text-3xl font-semibold text-[#0b4b8a] tracking-wide">PAYMENTS</h2>
             <hr className="w-24 border-0 h-0.5 bg-[#e6eef8] mt-4 mb-8" />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2  gap-6">
               {paymentMethods.map((m, i) => (
                 <Link key={i} href={m.href}>
                   <div className="bg-white rounded-xl shadow-md hover:shadow-xl p-6 flex flex-col items-center justify-center h-36 sm:h-40">
@@ -51,7 +47,7 @@ export default async function Home() {
             <h2 className="text-3xl font-semibold text-[#0b4b8a] tracking-wide">REPORTS</h2>
             <hr className="w-24 border-0 h-0.5 bg-[#e6eef8] mt-4 mb-8" />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2  gap-6">
               {reportTypes.map((r, i) => (
                 <Link key={i} href={r.href}>
                   <div className="bg-white rounded-xl shadow-md hover:shadow-xl p-6 flex flex-col items-center justify-center h-36 sm:h-40">

@@ -2,6 +2,7 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { TUKTB_Cases } from "./schema";
+import { FeeStructure } from "@/app/types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -76,4 +77,98 @@ export function mapToUKTBCases(data: string[][]): TUKTB_Cases[] {
   });
 
   return results;
+}
+
+
+
+// string to age
+export function CalculateAge(dateString: string): number | null {
+  const birthDate = new Date(dateString);
+
+  // Check for invalid date
+  if (isNaN(birthDate.getTime())) {
+    return null;
+  }
+
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+
+  return age;
+}
+
+
+
+
+// get fee based on age and fee structure
+export function getFeeByAge(
+  feeStructures: FeeStructure[],
+  ageYears: number
+): number | null {
+  const ageMonths = ageYears * 12;
+
+  const fee = feeStructures.find(
+    (f) =>
+      (f.min_age_months === null || ageMonths >= f.min_age_months) &&
+      (f.max_age_months === null || ageMonths <= f.max_age_months)
+  );
+
+  return fee ? parseFloat(fee.fee_amount_usd) : null;
+}
+
+
+
+/** Reusable QR code generation function */
+export async function generateQRCodeNPR({
+  nprAmount,
+  caseNo,
+  purpose,
+  reference,
+}: {
+  nprAmount: number | string;
+  caseNo: string | number;
+  purpose?: string;
+  reference?: string | null;
+}) {
+  const res = await fetch("/api/nepalpay/generateQR", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      transactionCurrency: "524", // NPR
+      transactionAmount: Number(nprAmount),
+      billNumber: caseNo,
+      referenceLabel: reference,
+      storeLabel: "Store1",
+      terminalLabel: "Terminal1",
+      purposeOfTransaction: purpose || "Bill payment",
+    }),
+  });
+  const json = await res.json();
+  if (!res.ok || !json?.data?.qrString || !json?.data?.validationTraceId) {
+    throw new Error("QR generation failed");
+  }
+  return {
+    qrString: json.data.qrString,
+    validationTraceId: json.data.validationTraceId,
+    timestamp: json.data.timestamp,
+  };
+}
+
+
+// Utility to format date to YYYY-MM-DD
+export function formatReadableDate(dateString: string): string {
+  // Handles ISO string like "2025-10-06T05:25:00"
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return dateString; // fallback for invalid
+  // Example output: "06-Oct-2025"
+  return date.toLocaleDateString(undefined, {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
 }

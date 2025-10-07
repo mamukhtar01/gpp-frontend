@@ -1,17 +1,16 @@
 "use client";
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
 
 const LoginForm: React.FC = () => {
   const [user] = useState<{ name: string } | null>(null);
-  const router = useRouter();
+
   const handleSSOLogin = async () => {
     // Redirect to your backend SSO endpoint
-    //window.location.href = "https://iom-ppo-directus-dev.iom.int/auth/login/azure";
+    window.location.href = "https://iom-ppo-directus-dev.iom.int/auth/login/azure?redirect=http://localhost:3000/callback";
 
     // go home
 
-    router.push("/");
+    //router.push("/");
   };
 
   return (
