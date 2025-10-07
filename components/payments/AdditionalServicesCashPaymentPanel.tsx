@@ -268,9 +268,9 @@ export function AdditionalServicesCashPaymentPanel() {
         exchange_rate: exchangeRate,
       };
 
-      await createPayment(paymentRecord);
+      const paymentRes = await createPayment(paymentRecord);
       router.push(
-        `/payments/cash/${selectedCase.id}?case_type=uktb&mode=additional`
+        `/payments/cash/${selectedCase.id}?paymentId=${paymentRes.id}`
       );
     } catch (e: unknown) {
       alert(`Failed: ${(e as Error).message}`);

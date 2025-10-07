@@ -9,16 +9,37 @@ import { TPaymentType } from "@/app/types";
 
 export default async function VerifyPaymentPageByCaseNumber({
   params,
+  searchParams,
 }: {
   params: { case_number: string };
+  searchParams: { paymentId: string };
 }) {
   const { case_number } = await params;
+  const { paymentId } = await searchParams;
 
+  // Validate case_number and paymentId
+  if (
+    !case_number ||
+    case_number.trim() === "" ||
+    (paymentId && paymentId.trim() === "")
+  ) {
+    return (
+      <div className="max-w-4xl flex flex-col items-center">
+        <h2 className="text-sm text-red-600">
+          Invalid case number or payment ID.
+        </h2>
+      </div>
+    );
+  }
+
+  
   // Fetch Payment Data
-  const paymentRecord = await getPaymentByCaseIdAction(
-    case_number,
-    TPaymentType.QR
-  );
+  const paymentRecord = await getPaymentByCaseIdAction({
+    paymentId: paymentId,
+    caseNo: case_number,
+    paymentType: TPaymentType.QR,
+  });
+
 
   if (!paymentRecord || !paymentRecord.qr_string) {
     return (

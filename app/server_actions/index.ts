@@ -6,7 +6,7 @@ import {
   TTxnReportResponseSuccess,
   TTxnReportResponseFailure,
   TNewPaymentRecord,
-  PaymentType,
+  TPaymentType,
 } from "@/app/types";
 import { mapToUKTBCases } from "@/lib/utils";
 
@@ -72,13 +72,22 @@ export async function getPaymentsAction() {
   }
 }
 
-export async function getPaymentByCaseIdAction(id: string, type: PaymentType) {
+export async function getPaymentByCaseIdAction({
+  paymentId,
+  caseNo,
+  paymentType,
+}: {
+  paymentId: string;
+  caseNo: string;
+  paymentType: TPaymentType;
+}) {
   try {
     const data = await client.request(
       readItems("Payments", {
         filter: {
-          case_number: { _eq: id },
-          type_of_payment: { _eq: type as number },
+          case_number: { _eq: caseNo },
+          id: { _eq: paymentId },
+          type_of_payment: { _eq: paymentType as number },
         },
       })
     );

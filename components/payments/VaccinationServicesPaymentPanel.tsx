@@ -203,8 +203,11 @@ export function VaccinationServicesPaymentPanel({ additionalServices }: Props) {
         service_type: "vaccination",
       };
 
-      await createPayment(paymentRecord);
-      router.push(`/payments/qrcode/${caseNo}`);
+      // Create payment record in the database
+      const paymentRes = await createPayment(paymentRecord);
+
+
+      router.push(`/payments/qrcode/${caseNo}?paymentId=${paymentRes.id}`);
     } catch (e: unknown) {
       alert(`Failed: ${(e as Error).message}`);
     } finally {

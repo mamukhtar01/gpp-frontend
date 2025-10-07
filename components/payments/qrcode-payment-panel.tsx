@@ -135,7 +135,7 @@ export function QrCodePaymentPanel() {
       const paymentRes = await createPayment(paymentRecord);
       if (!paymentRes) throw new Error("Failed to create payment record");
 
-      router.push(`/payments/qrcode/${caseNo}`);
+      router.push(`/payments/qrcode/${caseNo}?paymentId=${paymentRes.id}`);
     } catch (e: unknown) {
       alert("Failed to generate QR: " + (e as Error).message);
     } finally {

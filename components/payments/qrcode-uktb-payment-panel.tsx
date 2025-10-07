@@ -216,7 +216,7 @@ export function QrCodeUKTBPaymentPanel({
       const paymentRes = await createPayment(paymentRecord);
       if (!paymentRes) throw new Error("Failed to create payment record");
 
-      router.push(`/payments/qrcode/${selectedCase.id}?case_type=uktb`);
+      router.push(`/payments/qrcode/${selectedCase.id}?paymentId=${paymentRes.id}`);
     } catch (e: unknown) {
       alert(`Failed to generate QR: ${(e as Error).message}`);
     } finally {
