@@ -89,6 +89,7 @@ export async function getPaymentByCaseIdAction({
           id: { _eq: paymentId },
           type_of_payment: { _eq: paymentType as number },
         },
+        limit: 1,
       })
     );
 

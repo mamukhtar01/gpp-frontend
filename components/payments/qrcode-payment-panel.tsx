@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useMemo } from "react";
 import { Separator } from "@radix-ui/react-separator";
 import { createPayment } from "@/app/server_actions";
@@ -14,7 +13,7 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { QrCode, X, Loader2, Trash2 } from "lucide-react";
+import { QrCode, Loader2, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { TNewPaymentRecord } from "@/app/types";
 import { CaseMember, CaseMemberSummarySearch } from "./search-mimosa-combobox";
@@ -61,6 +60,7 @@ export function QrCodePaymentPanel() {
       const age = calculateAge(member.BirthDate);
       return sum + getCountrySpecificFee(age);
     }, 0);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [caseMembers, country]);
 
   // Total calculation (in local currency)

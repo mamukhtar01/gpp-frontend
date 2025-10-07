@@ -95,6 +95,7 @@ export function QrCodeUKTBPaymentPanel({
 
   const grandTotalUSD = useMemo(
     () => ukTBCases.reduce((sum, c) => sum + getClientTotal(c), 0),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [ukTBCases, addedServices]
   );
 
@@ -141,6 +142,7 @@ export function QrCodeUKTBPaymentPanel({
   const removeClient = (clientId: string) => {
     setUkCases((prev) => prev.filter((c) => c.id !== clientId));
     setAddedServices((prev) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { [clientId]: _, ...rest } = prev;
       return rest;
     });

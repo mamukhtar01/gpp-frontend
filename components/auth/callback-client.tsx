@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import {  useSearchParams } from "next/navigation";
 
 export default function CallbackClient() {
-  const router = useRouter();
+ // const router = useRouter();
   const params = useSearchParams();
 
   useEffect(() => {

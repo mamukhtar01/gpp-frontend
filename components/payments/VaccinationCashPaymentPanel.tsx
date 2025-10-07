@@ -85,6 +85,7 @@ export function VaccinationCashPaymentPanel({ additionalServices }: Props) {
       caseMembers
         ? caseMembers.reduce((sum, m) => sum + getClientTotal(m), 0)
         : 0,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [caseMembers, addedServices]
   );
   const grandTotalNPR = useMemo(
@@ -133,10 +134,12 @@ export function VaccinationCashPaymentPanel({ additionalServices }: Props) {
       prev ? prev.filter((m) => m.CaseMemberID !== clientId) : prev
     );
     setAddedServices((prev) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { [clientId]: _, ...rest } = prev;
       return rest;
     });
     setRemarks((prev) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { [clientId]: __, ...rest } = prev;
       return rest;
     });

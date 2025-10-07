@@ -7,13 +7,15 @@ import Link from "next/link";
 import QRCodeWindows from "@/components/payments/qrcode-windows";
 import { TPaymentType } from "@/app/types";
 
+export interface PageProps {
+  params: Promise<{ case_number: string }>;
+  searchParams: Promise<{ paymentId: string }>;
+}
+
 export default async function VerifyPaymentPageByCaseNumber({
   params,
   searchParams,
-}: {
-  params: { case_number: string };
-  searchParams: { paymentId: string };
-}) {
+}: PageProps) {
   const { case_number } = await params;
   const { paymentId } = await searchParams;
 
@@ -32,14 +34,12 @@ export default async function VerifyPaymentPageByCaseNumber({
     );
   }
 
-  
   // Fetch Payment Data
   const paymentRecord = await getPaymentByCaseIdAction({
     paymentId: paymentId,
     caseNo: case_number,
     paymentType: TPaymentType.QR,
   });
-
 
   if (!paymentRecord || !paymentRecord.qr_string) {
     return (
@@ -59,7 +59,9 @@ export default async function VerifyPaymentPageByCaseNumber({
     <div className="max-w-4xl w-full flex flex-col items-center">
       <div className="flex flex-row items-center justify-between w-full">
         <GoBackBtn />
-        <Link href={`/payments/qrcode/${case_number}/verify`}>
+        <Link
+          href={`/payments/qrcode/${case_number}/verify?paymentId=${paymentId}`}
+        >
           <Button
             className="text-sm text-green-600 hover:cursor-pointer"
             variant="secondary"

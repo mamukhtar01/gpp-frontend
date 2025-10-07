@@ -1,12 +1,9 @@
-import { updatePaymentStatus, verifyPaymentTxn } from "@/app/server_actions";
-import client from "@/lib/directus";
-import { readItems } from "@directus/sdk";
+import { getPaymentByCaseIdAction, updatePaymentStatus, verifyPaymentTxn } from "@/app/server_actions";
 import { CheckCircle2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { TransactionNotCompleted } from "./failed";
-import { TPayment } from "@/lib/schema";
-import { TTxnReportResponseFailure } from "@/app/types";
+import { TPaymentType, TTxnReportResponseFailure } from "@/app/types";
 
 // Label/Value pair component
 function LabelValue({
@@ -24,18 +21,34 @@ function LabelValue({
   );
 }
 
+export interface PageProps {
+  params: Promise<{ case_number: string }>;
+  searchParams: Promise<{ paymentId: string }>;
+}
+
 export default async function PaymentConfirmationPage({
   params,
-}: {
-  params: Promise<{ case_number: string }>;
-}) {
+  searchParams,
+}: PageProps) {
   const { case_number } = await params;
+  const { paymentId } = await searchParams;
+  if (!case_number || case_number.trim() === "" || !paymentId || paymentId.trim() === "") {
+    return (
+      <div className="max-w-4xl flex flex-col items-center">
+        <h2 className="text-sm text-red-600">
+          Invalid case number or payment ID.
+        </h2>
+      </div>
+    );
+  }
 
   // Fetch payment record by case_number to get validationTraceId
-  const response = await client.request<TPayment[]>(
-    readItems("Payments", { filter: { case_number: { _eq: case_number } } })
-  );
-  const payment = response[0];
+ // Fetch Payment Data
+  const payment = await getPaymentByCaseIdAction({
+    paymentId: paymentId,
+    caseNo: case_number,
+    paymentType: TPaymentType.QR,
+  });
 
   if (!payment?.validationTraceId)
     throw new Error("No validationTraceId found for this payment.");

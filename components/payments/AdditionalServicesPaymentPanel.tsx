@@ -106,6 +106,7 @@ export function AdditionalServicesPaymentPanel() {
         const data = await res.json();
         setAdditionalServices(data ?? []);
       } catch (e) {
+        console.error(e);
         setAdditionalServices([]);
       } finally {
         setServicesLoading(false);
@@ -135,6 +136,7 @@ export function AdditionalServicesPaymentPanel() {
 
   const grandTotal = useMemo(
     () => ukTBCases.reduce((sum, c) => sum + getClientTotal(c.id), 0),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [ukTBCases, addedServices]
   );
 
@@ -194,10 +196,12 @@ export function AdditionalServicesPaymentPanel() {
   function removeClient(clientId: string) {
     setUkTBCases((prev) => prev.filter((c) => c.id !== clientId));
     setAddedServices((prev) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { [clientId]: _, ...rest } = prev;
       return rest;
     });
     setRemarks((prev) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { [clientId]: __, ...rest } = prev;
       return rest;
     });
