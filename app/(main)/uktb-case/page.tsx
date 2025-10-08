@@ -1,11 +1,11 @@
 "use client";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@radix-ui/react-separator";
-import { createUKTBCaseMember } from "@/app/server_actions";
+import { createUKTBCaseMember, getUKTBCaseMemberById, updateUKTBCaseMember } from "@/app/server_actions";
 
 const initialForm = {
   First_Name: "",
@@ -33,7 +33,26 @@ export default function UKTBMemberRegistrationPage() {
   const [form, setForm] = useState(initialForm);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isUpdate, setIsUpdate] = useState(false);
+  const [memberId, setMemberId] = useState<string | null>(null);
   const router = useRouter();
+
+  // Check for memberId in query string
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("memberId");
+    if (id) {
+      setMemberId(id);
+      setIsUpdate(true);
+      setLoading(true);
+      getUKTBCaseMemberById(id).then((data) => {
+        if (data) {
+          setForm({ ...initialForm, ...data });
+        }
+        setLoading(false);
+      });
+    }
+  }, []);
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -50,8 +69,15 @@ export default function UKTBMemberRegistrationPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await createUKTBCaseMember(form);
-      if (!res?.id) throw new Error("Failed to register member.");
+      let res;
+      if (isUpdate && memberId) {
+        // update member
+        res = await updateUKTBCaseMember(memberId, { ...form });
+      } else {
+        // create new member
+        res = await createUKTBCaseMember(form);
+      }
+      if (!res?.id) throw new Error(isUpdate ? "Failed to update member." : "Failed to register member.");
       router.push(`/uktb-case/${res.id}`);
     } catch (err: unknown) {
       setError((err as Error).message || "Something went wrong.");
@@ -230,7 +256,7 @@ export default function UKTBMemberRegistrationPage() {
                 className="w-full md:w-1/2 h-14 text-lg font-bold bg-blue-800 hover:bg-blue-900 transition"
                 disabled={loading}
               >
-                {loading ? "Registering..." : "Register"}
+                {loading ? (isUpdate ? "Updating..." : "Registering...") : isUpdate ? "Update" : "Register"}
               </Button>
             </div>
           </form>

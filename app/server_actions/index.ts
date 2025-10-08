@@ -1,19 +1,4 @@
 "use server";
-// Get UKTB Case Member by ID
-export async function getUKTBCaseMemberById(memberId: string) {
-  try {
-    const data = await client.request(
-      readItems("UKTB_Cases", {
-        filter: { id: { _eq: memberId } },
-        limit: 1,
-      })
-    );
-    return data[0] ?? null;
-  } catch (error) {
-    console.error("Error fetching UKTB case member:", error);
-    return null;
-  }
-}
 
 import client from "@/lib/directus";
 import { createItem, readItems, updateItem } from "@directus/sdk";
@@ -231,4 +216,33 @@ export async function createUKTBCaseMember(data : object) {
     console.error("Error creating UKTB case member:", error);
     throw new Error("Failed to create UKTB case member");
   } 
+}
+
+export async function updateUKTBCaseMember(memberId: string, data : object) {
+  console.log("Updating UKTB case member:", { memberId, data });
+  try {
+    const response = await client.request(
+      updateItem("UKTB_Cases", memberId, data)
+    );
+    return response;
+  } catch (error) {
+    console.error("Error updating UKTB case member:", error);
+    throw new Error("Failed to update UKTB case member");
+  }
+}
+
+// Get UKTB Case Member by ID
+export async function getUKTBCaseMemberById(memberId: string) {
+  try {
+    const data = await client.request(
+      readItems("UKTB_Cases", {
+        filter: { id: { _eq: memberId } },
+        limit: 1,
+      })
+    );
+    return data[0] ?? null;
+  } catch (error) {
+    console.error("Error fetching UKTB case member:", error);
+    return null;
+  }
 }

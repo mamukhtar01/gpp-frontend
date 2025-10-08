@@ -2,6 +2,8 @@ import { getUKTBCaseMemberById } from "@/app/server_actions";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import GoBackBtn from "@/components/custom/gobackbtn";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export interface PageProps {
   params: { memberId: string };
@@ -52,17 +54,16 @@ export default async function UKTBCaseMemberPage({ params }: PageProps) {
               <Detail label="Date of Birth" value={member.date_of_birth} />
               <Detail label="Passport" value={member.passport} />
               <Detail label="Exam Date" value={member.exam_date} />
-              <Detail
-                label="Appointment Date"
-                value={member.appointment_date}
-              />
-              <Detail
-                label="Appointment Time"
-                value={member.appointment_time}
-              />
+              <Detail label="Appointment Date" value={member.appointment_date} />
+              <Detail label="Appointment Time" value={member.appointment_time} />
               <Detail label="Location" value={member.location} />
               <Detail label="Telephone" value={member.telephone} />
               <Detail label="Amount" value={member.amount} />
+            </div>
+            <div className="flex justify-end mt-8">
+              <Link href={`/uktb-case?memberId=${member.id}`}>
+                <Button variant="outline" className="text-blue-700 border-blue-700 hover:bg-blue-50 font-semibold">Update</Button>
+              </Link>
             </div>
           </CardContent>
         </Card>
