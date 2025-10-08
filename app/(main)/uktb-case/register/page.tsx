@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@radix-ui/react-separator";
 import { createUKTBCaseMember, getUKTBCaseMemberById, updateUKTBCaseMember } from "@/app/server_actions";
+import GoBackBtn from "@/components/custom/gobackbtn";
 
 const initialForm = {
   First_Name: "",
@@ -78,7 +79,7 @@ export default function UKTBMemberRegistrationPage() {
         res = await createUKTBCaseMember(form);
       }
       if (!res?.id) throw new Error(isUpdate ? "Failed to update member." : "Failed to register member.");
-      router.push(`/uktb-case/${res.id}`);
+      router.push(`/uktb-case/register/${res.id}`);
     } catch (err: unknown) {
       setError((err as Error).message || "Something went wrong.");
     } finally {
@@ -87,10 +88,11 @@ export default function UKTBMemberRegistrationPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-100">
-      <Card className="w-full max-w-3xl shadow-2xl rounded-2xl border-0">
+    <div className=" flex flex-col gap-4 mt-10 min-h-screen items-center justify-center ">
+      <GoBackBtn className=" w-full max-w-4xl  " />
+      <Card className="w-full max-w-4xl shadow-2xl rounded-2xl border-0">
         <CardHeader className="py-8 px-12 bg-blue-100 rounded-t-2xl">
-          <CardTitle className="text-3xl font-bold tracking-tight text-blue-900">
+          <CardTitle className="text-2xl font-bold tracking-tight text-blue-900">
             Register UKTB Case Member
           </CardTitle>
         </CardHeader>

@@ -36,9 +36,9 @@ export default async function UKTBCaseMemberPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4 py-10">
-      <div className="w-full max-w-xl">
+      <div className="w-full max-w-4xl">
         <GoBackBtn />
-        <Card className="shadow-lg border border-gray-200 rounded-2xl mt-4">
+        <Card className="w-full max-w-4xl shadow-lg border border-gray-200 rounded-2xl mt-4">
           <CardHeader className="flex flex-col items-center gap-2 pt-8 pb-4">
             <CardTitle className="text-2xl font-bold text-blue-700">
               UKTB Case Member Details
