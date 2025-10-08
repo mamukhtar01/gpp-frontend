@@ -16,17 +16,26 @@ import { Button } from "@/components/ui/button";
 import { QrCode, Loader2, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { TNewPaymentRecord } from "@/app/types";
-import { CaseMemberDetailsResponse, CaseMemberSummarySearch,  } from "./search-mimosa-combobox";
+import {
+  CaseMemberDetailsResponse,
+  CaseMemberSummarySearch,
+} from "./search-mimosa-combobox";
 import { useExchangeRate } from "@/app/(main)/payments/exchangeRateContext";
 import { ExchangeRateWidget } from "../exchangeRateWidget";
-import { CountryOfDestination, TCountryKey } from "./country-of-destination-select";
-import { calculateAge, getAustraliaAgeBasedFee, getCanadaAgeBasedFee, getJapanAgeBasedFee, getNewZealandAgeBasedFee, getUKAgeBasedFee, getUSAgeBasedFee } from "@/lib/fee-utils";
+import {
+  calculateAge,
+  getAustraliaAgeBasedFee,
+  getCanadaAgeBasedFee,
+  getJapanAgeBasedFee,
+  getNewZealandAgeBasedFee,
+  getUKAgeBasedFee,
+  getUSAgeBasedFee,
+} from "@/lib/fee-utils";
+import { getCountryIdFromCode } from "@/lib/utils";
 
 export function QrCodePaymentPanel() {
-  // Use the first country as default
-  const [country, setCountry] = useState<TCountryKey>(13); // Default to US
-
-  const [caseSearchResponse, setCaseSearchResponse] = useState<CaseMemberDetailsResponse | null>(null);
+  const [caseSearchResponse, setCaseSearchResponse] =
+    useState<CaseMemberDetailsResponse | null>(null);
   const [reference, setReference] = useState<string>("");
 
   // Exchange rate state Context
@@ -38,18 +47,29 @@ export function QrCodePaymentPanel() {
   // Remove a member from the table
   const handleRemoveMember = (id: number) => {
     setCaseSearchResponse((prev) =>
-      prev ? { ...prev, members: prev.members.filter((m) => m.CaseMemberID !== id) } : prev
+      prev
+        ? {
+            ...prev,
+            members: prev.members.filter((m) => m.CaseMemberID !== id),
+          }
+        : prev
     );
   };
 
   // Country-specific fee calculation
   function getCountrySpecificFee(age: number, specialType?: string) {
-    if (country === 12) return getCanadaAgeBasedFee(age);
-    if (country === 13) return getUSAgeBasedFee(age);
-    if (country === 14) return getAustraliaAgeBasedFee(age, specialType);
-    if (country === 15) return getNewZealandAgeBasedFee(age);
-    if (country === 16) return getUKAgeBasedFee(age);
-    if (country === 29) return getJapanAgeBasedFee(age);
+    if (caseSearchResponse?.DestinationCountry === "US")
+      return getUSAgeBasedFee(age);
+    if (caseSearchResponse?.DestinationCountry === "CA")
+      return getCanadaAgeBasedFee(age);
+    if (caseSearchResponse?.DestinationCountry === "AU")
+      return getAustraliaAgeBasedFee(age, specialType);
+    if (caseSearchResponse?.DestinationCountry === "NZ")
+      return getNewZealandAgeBasedFee(age);
+    if (caseSearchResponse?.DestinationCountry === "UK")
+      return getUKAgeBasedFee(age);
+    if (caseSearchResponse?.DestinationCountry === "JP")
+      return getJapanAgeBasedFee(age);
     return 0;
   }
 
@@ -60,8 +80,8 @@ export function QrCodePaymentPanel() {
       const age = calculateAge(member.BirthDate);
       return sum + getCountrySpecificFee(age);
     }, 0);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [caseSearchResponse, country]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [caseSearchResponse?.members]);
 
   // Total calculation (in local currency)
   const grandTotalNPR = useMemo(() => {
@@ -72,7 +92,10 @@ export function QrCodePaymentPanel() {
   async function handleQRGenerateAndCreatePayment() {
     setLoading(true);
     try {
-      if (!caseSearchResponse?.members || caseSearchResponse.members.length === 0)
+      if (
+        !caseSearchResponse?.members ||
+        caseSearchResponse.members.length === 0
+      )
         throw new Error("No case members selected.");
       if (!exchangeRate) throw new Error("Exchange rate is not available.");
 
@@ -116,13 +139,16 @@ export function QrCodePaymentPanel() {
         transaction_id: `TXN-${Date.now()}`,
         status: 1,
         validationTraceId: validationTraceId ?? "",
-        payerInfo: caseSearchResponse?.members.map((m) => m.FullName).join(", "),
+        payerInfo: caseSearchResponse?.members
+          .map((m) => m.FullName)
+          .join(", "),
         qr_timestamp: timestamp ?? "",
         paidAmount: grandTotalNPR ? grandTotalNPR.toFixed(2) : "",
         qr_string: qrString,
         wave: null,
         clinic: null,
-        destination_country: country,
+        destination_country:
+          getCountryIdFromCode(caseSearchResponse?.DestinationCountry) || null,
         exchange_rate: exchangeRate,
         clients: caseSearchResponse?.members.map((m) => ({
           id: m.CaseMemberID.toString(),
@@ -144,13 +170,28 @@ export function QrCodePaymentPanel() {
     }
   }
 
-  console.log("Rendering QrCodePaymentPanel with country:", country);
-
   return (
     <div className="p-8 bg-white rounded shadow w-full max-w-6xl min-h-[470px]">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
         <ExchangeRateWidget exchangeRate={exchangeRate} />
-        <CountryOfDestination value={country} onChange={setCountry} />
+
+          {/* Country details */}
+        {caseSearchResponse?.DestinationCountry && caseSearchResponse?.OriginCountry && (
+          <div className="text-sm text-gray-600 flex flex-col sm:flex-row sm:items-center gap-4">
+            <p>
+              Destination:{" "}
+              <span className="font-bold">
+                {caseSearchResponse?.DestinationCountry}
+              </span>
+            </p>
+            <p>
+              Origin:{" "}
+              <span className="font-bold">
+                {caseSearchResponse?.OriginCountry}
+              </span>
+            </p>
+          </div>
+        )}
       </div>
 
       <CaseMemberSummarySearch setSelectedSummary={setCaseSearchResponse} />
@@ -168,7 +209,9 @@ export function QrCodePaymentPanel() {
                   <TableHead className="w-[8%]">Gender</TableHead>
                   <TableHead className="w-[14%]">Birth Date</TableHead>
                   <TableHead className="w-[8%]">Age</TableHead>
-                  <TableHead className="w-[14%] text-right">Amount (USD)</TableHead>
+                  <TableHead className="w-[14%] text-right">
+                    Amount (USD)
+                  </TableHead>
                   <TableHead className="w-[10%] text-center">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -182,31 +225,22 @@ export function QrCodePaymentPanel() {
                       <TableCell className="font-mono text-[11px]">
                         {member.CaseMemberID}
                       </TableCell>
-                      <TableCell>
-                        {member.FullName}
-                      </TableCell>
-                      <TableCell>
-                        {member.RelationtoPA}
-                      </TableCell>
-                      <TableCell>
-                        {member.Gender}
-                      </TableCell>
-                      <TableCell>
-                        {member.BirthDate?.slice(0, 10)}
-                      </TableCell>
-                      <TableCell>
-                        {age}
-                      </TableCell>
+                      <TableCell>{member.FullName}</TableCell>
+                      <TableCell>{member.RelationtoPA}</TableCell>
+                      <TableCell>{member.Gender}</TableCell>
+                      <TableCell>{member.BirthDate?.slice(0, 10)}</TableCell>
+                      <TableCell>{age}</TableCell>
                       <TableCell className="text-right font-semibold font-mono">
                         ${amount.toFixed(2)}
                       </TableCell>
                       <TableCell className="flex justify-center">
-                      
-                         <Button
+                        <Button
                           variant="ghost"
                           size="sm"
                           className="text-red-500 hover:text-red-600 "
-                         onClick={() => handleRemoveMember(member.CaseMemberID)}
+                          onClick={() =>
+                            handleRemoveMember(member.CaseMemberID)
+                          }
                           title="Remove client"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -223,7 +257,10 @@ export function QrCodePaymentPanel() {
                 </span>
                 {exchangeRate && (
                   <span className="ml-2 text-green-700">
-                    | NPR {grandTotalNPR?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    | NPR{" "}
+                    {grandTotalNPR?.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                    })}
                   </span>
                 )}
               </TableCaption>
