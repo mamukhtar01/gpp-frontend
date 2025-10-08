@@ -61,7 +61,7 @@ export default async function UKTBCaseMemberPage({ params }: PageProps) {
               <Detail label="Amount" value={member.amount} />
             </div>
             <div className="flex justify-end mt-8">
-              <Link href={`/uktb-case?memberId=${member.id}`}>
+              <Link href={`/uktb-case/register?memberId=${member.id}`}>
                 <Button variant="outline" className="text-blue-700 border-blue-700 hover:bg-blue-50 font-semibold">Update</Button>
               </Link>
             </div>
