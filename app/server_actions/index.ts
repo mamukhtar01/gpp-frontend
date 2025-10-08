@@ -19,7 +19,6 @@ export async function updateCaseStatus({
   caseId: string;
   case_status: number;
 }) {
-  console.log("Updating case status:", { caseId, case_status });
 
   try {
     const response = await client.request(
@@ -38,20 +37,38 @@ export async function uploadUKTBCases(data: string[][]) {
     throw new Error("No data to upload");
   }
 
-  try {
-    const cases = mapToUKTBCases(data);
+  const cases = mapToUKTBCases(data);
+  const results: { id: string; success: boolean; error?: string, isDuplicate?: boolean }[] = [];
 
-    // Create each case individually because createItem expects a single item
-    const responses = await Promise.all(
-      cases.map((caseItem) =>
-        client.request(createItem("UKTB_Cases", caseItem))
-      )
-    );
-    return responses;
-  } catch (error) {
-    console.error("Error uploading UKTB cases:", error);
-    throw new Error("Failed to upload UKTB cases");
+  for (const caseItem of cases) {
+    try {
+      await client.request(createItem("UKTB_Cases", caseItem));
+      results.push({ id: caseItem.id, success: true });
+    } catch (error) {
+      // Directus error structure
+      const duplicateIdMsg = 'Value for field "id" in collection "UKTB_Cases" has to be unique.';
+      let errorMsg = "Unknown error";
+      let isDuplicate = false;
+
+      if (typeof error === "object" && error !== null && "errors" in error && Array.isArray(error.errors)) {
+
+      if (
+        error?.errors?.[0]?.message === duplicateIdMsg
+      ) {
+        errorMsg = "Duplicate ID";
+        isDuplicate = true;
+      } else if (error?.errors?.[0]?.message) {
+        errorMsg = error.errors[0].message;
+      } 
+
+    }
+
+      results.push({ id: caseItem.id, success: false, error: errorMsg, isDuplicate });
+
+    }
   }
+
+  return results;
 }
 
 // Payment Actions
@@ -130,7 +147,6 @@ export async function updatePaymentStatus({
   payerInfo: string;
   status: number;
 }) {
-  console.log("Updating payment status:", { paymentId, status });
 
   try {
     const response = await client.request(
@@ -207,7 +223,6 @@ export async function createUKTBCaseMember(data : object) {
   // create unique id for the new member starting with "uktb-"
   data = { ...data, id: `uktb-${Date.now()}` };
 
-  console.log("Creating UKTB case member:", data);
  
   try {
     const response = await client.request(createItem("UKTB_Cases", data));
@@ -219,7 +234,6 @@ export async function createUKTBCaseMember(data : object) {
 }
 
 export async function updateUKTBCaseMember(memberId: string, data : object) {
-  console.log("Updating UKTB case member:", { memberId, data });
   try {
     const response = await client.request(
       updateItem("UKTB_Cases", memberId, data)

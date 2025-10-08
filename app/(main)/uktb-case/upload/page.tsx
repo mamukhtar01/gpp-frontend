@@ -6,34 +6,33 @@ import { parseExcelFile } from "@/lib/excel";
 import { uploadUKTBCases } from "@/app/server_actions";
 import Link from "next/link";
 
-export default function UploadUKTBCasesPage() {
-  // Modal open state for upload confirmation
-  const [open, setOpen] = React.useState(false);
-  // Upload result message (success or error)
-  const [uploadResult, setUploadResult] = React.useState<null | {
-    type: "success" | "error";
-    message: string;
-  }>(null);
+interface UploadResult {
+  id: string;
+  success: boolean;
+  error?: string;
+}
 
-  // Holds the parsed Excel data (headers and rows)
+export default function UploadUKTBCasesPage() {
+  const [open, setOpen] = React.useState(false);
   const [excelData, setExcelData] = React.useState<{
     headers: string[];
     rows: unknown[][];
   } | null>(null);
-  // Holds error messages for user feedback
   const [error, setError] = React.useState<string | null>(null);
-  // Loading state for UX
   const [loading, setLoading] = React.useState(false);
+  const [uploadResults, setUploadResults] = React.useState<UploadResult[] | null>(null);
+  const [showTable, setShowTable] = React.useState(true);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  // Handles file input change, parses Excel, and updates state
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setError(null);
+    setUploadResults(null);
+    setShowTable(true);
     const file = e.target.files?.[0];
     if (!file) return;
     setLoading(true);
     try {
       const data = await parseExcelFile(file);
-      // Basic validation: check headers
       if (!data.headers || data.headers.length < 5) {
         setError("Invalid or empty Excel file. Please check the format.");
         setExcelData(null);
@@ -52,23 +51,34 @@ export default function UploadUKTBCasesPage() {
       setError("No data to upload");
       return;
     }
+    setLoading(true);
+    setError(null);
+    setUploadResults(null);
+    setShowTable(false); // Hide the table on upload
     try {
-      setLoading(true);
-      setUploadResult(null);
-      const data = await uploadUKTBCases(excelData.rows as string[][]);
-      if (!data) throw new Error("No data returned");
-      setUploadResult({ type: "success", message: "Upload successful!" });
-      setExcelData(null); // Clear data after successful upload
-    } catch (error) {
-      setUploadResult({
-        type: "error",
-        message: `Failed to upload data. Please try again. ${error}`,
-      });
-      setError(`Failed to upload data. Please try again. ${error}`);
+      const results: UploadResult[] = await uploadUKTBCases(excelData.rows as string[][]);
+      setUploadResults(results);
+
+      // Always reset form after upload
+      setExcelData(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      setError(null);
+
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(`Failed to upload data. Please try again. ${error.message}`);
+      } else {
+        setError(`Failed to upload data. Please try again. ${String(error)}`);
+      }
+      setUploadResults(null);
     } finally {
       setLoading(false);
     }
   };
+
+  const uploadedIds = uploadResults?.filter(r => r.success).map(r => r.id) ?? [];
+  const duplicateIds = uploadResults?.filter(r => !r.success && r.error === "Duplicate ID").map(r => r.id) ?? [];
+  const otherErrors = uploadResults?.filter(r => !r.success && r.error !== "Duplicate ID") ?? [];
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-100 py-10 px-4">
@@ -98,6 +108,7 @@ export default function UploadUKTBCasesPage() {
               Select Excel file (.xlsx, .xls)
             </span>
             <Input
+              ref={fileInputRef}
               type="file"
               accept=".xlsx,.xls"
               onChange={handleFileChange}
@@ -106,17 +117,34 @@ export default function UploadUKTBCasesPage() {
           </label>
         </div>
         {/* Loading indicator */}
-        {loading && <div className="mb-4 text-blue-600 text-center">Loading...</div>}
+        {loading && (
+          <div className="mb-4 flex flex-col items-center justify-center">
+            <span className="text-blue-700 font-semibold text-lg animate-pulse">
+              Uploading cases, please wait...
+            </span>
+            <div className="mt-2 flex justify-center">
+              <svg className="animate-spin h-6 w-6 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v8z"></path>
+              </svg>
+            </div>
+          </div>
+        )}
         {/* Error message */}
         {error && <div className="mb-4 text-red-600 text-center">{error}</div>}
 
         {/* Table preview after successful Excel parsing */}
-        {excelData && (
+        {excelData && showTable && (
           <UKTBDataDisplay
             excelData={excelData}
             onReset={() => {
               setExcelData(null);
               setError(null);
+              setUploadResults(null);
+              setShowTable(false);
+              if (fileInputRef.current) fileInputRef.current.value = "";
             }}
             onUpload={handleFileUpload}
             loading={loading}
@@ -125,16 +153,38 @@ export default function UploadUKTBCasesPage() {
           />
         )}
 
-        {/* Upload result message */}
-        {uploadResult && (
-          <div
-            className={`mb-6 px-4 py-3 rounded text-base font-medium text-center ${
-              uploadResult.type === "success"
-                ? "bg-green-50 text-green-700 border border-green-200"
-                : "bg-red-50 text-red-700 border border-red-200"
-            }`}
-          >
-            {uploadResult.message}
+        {/* Upload results display */}
+        {uploadResults && (
+          <div className="mb-6 flex flex-col gap-4">
+            {/* Uploaded IDs in highly visible green */}
+            {uploadedIds.length > 0 && (
+              <div className="px-4 py-3 rounded text-base font-bold text-center bg-green-100 text-green-900 border-2 border-green-600 shadow-lg">
+                <span className="text-xl font-extrabold text-green-800">✔ Uploaded Cases:</span>
+                <div className="mt-2">
+                  <span className="text-green-700">{uploadedIds.join(", ")}</span>
+                </div>
+              </div>
+            )}
+            {/* Duplicate IDs in highly visible red */}
+            {duplicateIds.length > 0 && (
+              <div className="px-4 py-3 rounded text-base font-bold text-center bg-red-100 text-red-900 border-2 border-red-600 shadow-lg">
+                <span className="text-xl font-extrabold text-red-800">✘ Duplicate IDs (already exist):</span>
+                <div className="mt-2">
+                  <span className="text-red-700">{duplicateIds.join(", ")}</span>
+                </div>
+              </div>
+            )}
+            {/* Other errors in highly visible orange */}
+            {otherErrors.length > 0 && (
+              <div className="px-4 py-3 rounded text-base font-bold text-center bg-orange-100 text-orange-900 border-2 border-orange-600 shadow-lg">
+                <span className="text-xl font-extrabold text-orange-800">⚠ Other errors:</span>
+                <div className="mt-2">
+                  <span className="text-orange-700">
+                    {otherErrors.map(e => `[${e.id}]: ${e.error}`).join(", ")}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         )}
         <div className="flex justify-end">
