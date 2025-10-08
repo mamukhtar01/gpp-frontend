@@ -3,12 +3,6 @@ import client from "@/lib/directus";
 import { readItems } from "@directus/sdk";
 import { TClientBasicInfo } from "@/app/types";
 
-// Util: Validate YYYY-MM-DD format
-function isValidDateString(str: string | null): boolean {
-  return !!str && /^\d{4}-\d{2}-\d{2}$/.test(str);
-}
-
-
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -21,20 +15,15 @@ export async function GET(request: Request) {
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, '0');
     const dd = String(today.getDate()).padStart(2, '0');
-    fromDateParam = `${yyyy}-${mm}-${dd}`;
-    toDateParam = `${yyyy}-${mm}-${dd}`;
+    fromDateParam = `${yyyy}-${mm}-${dd}T00:00:00Z`;
+    toDateParam = `${yyyy}-${mm}-${dd}T23:59:59Z`;
   }
 
-  // Validation: date format
-  if (!isValidDateString(fromDateParam) || !isValidDateString(toDateParam)) {
-    return NextResponse.json(
-      { error: "fromDate and toDate must be in YYYY-MM-DD format." },
-      { status: 400 }
-    );
-  }
 
-  const startOfDay = new Date(`${fromDateParam}T00:00:00`);
-  const endOfDay = new Date(`${toDateParam}T23:59:59.999`);
+
+  const startOfDay = new Date(`${fromDateParam}`);
+  const endOfDay = new Date(`${toDateParam}`);
+  
 
   // Validation: date logic
   if (startOfDay > endOfDay) {
@@ -110,6 +99,7 @@ type TResponse = {
 };
 
 // Example conversion rate, update as needed.
+// todo: Fetch live rates from a reliable API if needed.
 const USD_TO_NPR = 141.70; // Use latest USD-NPR rate
 
 export function aggregateVaccinations(payments: TResponse[]) {
