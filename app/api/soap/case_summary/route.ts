@@ -6,6 +6,17 @@ type CaseMemberSummaryRequest = {
 };
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
+
+ const soapApiUrl = process.env.MIMOSA_SOAP_API_URL; 
+
+  // Validate that the SOAP API URL is configured
+  if (!soapApiUrl) {
+    return NextResponse.json(
+      { error: "Server configuration error: MIMOSA_SOAP_API_URL is not set" },
+      { status: 500 }
+    );
+  }
+
   try {
     const body: CaseMemberSummaryRequest = JSON.parse(await req.text());
 
@@ -27,7 +38,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
 // todo. only authenticated users should call the api. 
 
-    const response = await fetch("https://k-apiqaz.iom.int/mwebsvc/CaseManagementService.svc", {
+    const response = await fetch(soapApiUrl, {
       method: "POST",
       headers: {
         "Content-Type": "text/xml;charset=UTF-8",
