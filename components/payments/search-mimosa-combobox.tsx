@@ -38,19 +38,19 @@ export type CaseMember = {
   DateOfReturn: { ["xsi:nil"]: string } | string | null;
 };
 
-export type CaseMemberSummaryResponse = {
+export type CaseMemberDetailsResponse = {
   Errors: string;
   Warnings: string;
-  CaseMemberSummary: {
-    CaseMemberSummary: CaseMember[];
-  };
-  CaseSize: number;
+  DestinationCountry: string;
+  OriginCountry: string; 
+  members: CaseMember[];   
+ 
 };
 
 export function CaseMemberSummarySearch({
   setSelectedSummary,
 }: {
-  setSelectedSummary: (c: CaseMember[] | null) => void;
+  setSelectedSummary: (c: CaseMemberDetailsResponse | null) => void;
 }) {
   const [open, setOpen] = React.useState(false);
   const [input, setInput] = React.useState("");
@@ -58,37 +58,51 @@ export function CaseMemberSummarySearch({
   const [error, setError] = React.useState<string | null>(null);
   const [summary, setSummary] = React.useState<CaseMember[] | null>(null);
 
-  async function handleSearch(e?: React.FormEvent) {
-    if (e) e.preventDefault();
-    setError(null);
-    setLoading(true);
+ async function handleSearch(e?: React.FormEvent) {
+  if (e) e.preventDefault();
+  setError(null);
+  setLoading(true);
+  setSummary(null);
+  setSelectedSummary(null);
+  try {
+    const res = await fetch("/api/soap/case_details", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ CaseNo: input.trim() }),
+    });
+
+    if (res.status === 404) {
+      throw new Error("Network error");
+    }
+
+    let data: CaseMemberDetailsResponse;
+    try {
+      data = await res.json();
+    } catch {
+      throw new Error("Network error");
+    }
+
+    if (!res.ok || !data?.members?.length) {
+      throw new Error(
+        data?.Errors || data?.Warnings || "No case members found"
+      );
+    }
+    setSummary(data.members);
+    setSelectedSummary(data);
+    setOpen(false);
+  } catch (err: unknown) {
+    // If it's a fetch error (network unreachable, etc.), set network error
+    const errMsg =
+      (err as Error)?.message === "Failed to fetch"
+        ? "Network error"
+        : (err as Error).message;
+    setError(errMsg);
     setSummary(null);
     setSelectedSummary(null);
-    try {
-      const res = await fetch("/api/soap/case_summary", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ CaseNo: input.trim() }),
-      });
-      const data: CaseMemberSummaryResponse = await res.json();
-      console.log("Fetched case member summary:", data);
-      if (!res.ok || !data?.CaseMemberSummary?.CaseMemberSummary?.length) {
-        throw new Error(
-          data?.Errors || data?.Warnings || "No case members found"
-        );
-      }
-      setSummary(data.CaseMemberSummary.CaseMemberSummary);
-      setSelectedSummary(data.CaseMemberSummary.CaseMemberSummary);
-      setOpen(false);
-    } catch (err: unknown) {
-      setError((err as Error).message);
-      setSummary(null);
-      setSelectedSummary(null);
-    } finally {
-      setLoading(false);
-    }
+  } finally {
+    setLoading(false);
   }
-
+}
   function onReset() {
     setInput("");
     setError(null);
@@ -168,7 +182,13 @@ export function CaseMemberSummarySearch({
                     key={member.CaseMemberID}
                     value={member.CaseMemberID.toString()}
                     onSelect={() => {
-                      setSelectedSummary([member]);
+                      setSelectedSummary({
+                        Errors: "",
+                        Warnings: "",
+                        DestinationCountry: "",
+                        OriginCountry: "",
+                        members: [member],
+                      });
                       setOpen(false);
                     }}
                   >

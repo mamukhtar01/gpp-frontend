@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { QrCode, Loader2, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { TNewPaymentRecord } from "@/app/types";
-import { CaseMember, CaseMemberSummarySearch } from "./search-mimosa-combobox";
+import { CaseMemberDetailsResponse, CaseMemberSummarySearch,  } from "./search-mimosa-combobox";
 import { useExchangeRate } from "@/app/(main)/payments/exchangeRateContext";
 import { ExchangeRateWidget } from "../exchangeRateWidget";
 import { CountryOfDestination, TCountryKey } from "./country-of-destination-select";
@@ -26,7 +26,7 @@ export function QrCodePaymentPanel() {
   // Use the first country as default
   const [country, setCountry] = useState<TCountryKey>(13); // Default to US
 
-  const [caseMembers, setCaseMembers] = useState<CaseMember[] | null>(null);
+  const [caseSearchResponse, setCaseSearchResponse] = useState<CaseMemberDetailsResponse | null>(null);
   const [reference, setReference] = useState<string>("");
 
   // Exchange rate state Context
@@ -37,8 +37,8 @@ export function QrCodePaymentPanel() {
 
   // Remove a member from the table
   const handleRemoveMember = (id: number) => {
-    setCaseMembers((prev) =>
-      prev ? prev.filter((m) => m.CaseMemberID !== id) : prev
+    setCaseSearchResponse((prev) =>
+      prev ? { ...prev, members: prev.members.filter((m) => m.CaseMemberID !== id) } : prev
     );
   };
 
@@ -55,13 +55,13 @@ export function QrCodePaymentPanel() {
 
   // Total calculation (in USD)
   const grandTotalUSD = useMemo(() => {
-    if (!caseMembers) return 0;
-    return caseMembers.reduce((sum, member) => {
+    if (!caseSearchResponse?.members) return 0;
+    return caseSearchResponse.members.reduce((sum, member) => {
       const age = calculateAge(member.BirthDate);
       return sum + getCountrySpecificFee(age);
     }, 0);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [caseMembers, country]);
+  }, [caseSearchResponse, country]);
 
   // Total calculation (in local currency)
   const grandTotalNPR = useMemo(() => {
@@ -72,12 +72,12 @@ export function QrCodePaymentPanel() {
   async function handleQRGenerateAndCreatePayment() {
     setLoading(true);
     try {
-      if (!caseMembers || caseMembers.length === 0)
+      if (!caseSearchResponse?.members || caseSearchResponse.members.length === 0)
         throw new Error("No case members selected.");
       if (!exchangeRate) throw new Error("Exchange rate is not available.");
 
       // Use the CaseNo from the first member, adjust if needed
-      const caseNo = caseMembers[0].CaseNo;
+      const caseNo = caseSearchResponse.members[0].CaseNo;
 
       const res = await fetch("/api/nepalpay/generateQR", {
         method: "POST",
@@ -116,7 +116,7 @@ export function QrCodePaymentPanel() {
         transaction_id: `TXN-${Date.now()}`,
         status: 1,
         validationTraceId: validationTraceId ?? "",
-        payerInfo: caseMembers.map((m) => m.FullName).join(", "),
+        payerInfo: caseSearchResponse?.members.map((m) => m.FullName).join(", "),
         qr_timestamp: timestamp ?? "",
         paidAmount: grandTotalNPR ? grandTotalNPR.toFixed(2) : "",
         qr_string: qrString,
@@ -124,11 +124,12 @@ export function QrCodePaymentPanel() {
         clinic: null,
         destination_country: country,
         exchange_rate: exchangeRate,
-        clients: caseMembers.map((m) => ({
+        clients: caseSearchResponse?.members.map((m) => ({
           id: m.CaseMemberID.toString(),
           name: m.FullName,
           age: calculateAge(m.BirthDate),
           amount: getCountrySpecificFee(calculateAge(m.BirthDate)).toFixed(2),
+          additional_services: null,
         })),
       };
 
@@ -152,10 +153,10 @@ export function QrCodePaymentPanel() {
         <CountryOfDestination value={country} onChange={setCountry} />
       </div>
 
-      <CaseMemberSummarySearch setSelectedSummary={setCaseMembers} />
+      <CaseMemberSummarySearch setSelectedSummary={setCaseSearchResponse} />
       <Separator className="my-8" />
 
-      {caseMembers && caseMembers.length > 0 && (
+      {caseSearchResponse?.members && caseSearchResponse.members.length > 0 && (
         <>
           <div className="rounded-lg border border-slate-200 overflow-hidden">
             <Table>
@@ -172,7 +173,7 @@ export function QrCodePaymentPanel() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {caseMembers.map((member) => {
+                {caseSearchResponse.members.map((member) => {
                   const age = calculateAge(member.BirthDate);
                   const amount = getCountrySpecificFee(age);
 
@@ -261,7 +262,7 @@ export function QrCodePaymentPanel() {
             </button>
             <button
               onClick={() => {
-                setCaseMembers(null);
+                setCaseSearchResponse(null);
                 setReference("");
               }}
               className="flex items-center justify-center h-12 w-[140px] rounded-md border border-brand-700 text-brand-500 font-bold text-base bg-white hover:cursor-pointer hover:bg-blue-50 transition"
