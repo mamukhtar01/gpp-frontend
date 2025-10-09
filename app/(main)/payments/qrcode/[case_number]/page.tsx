@@ -6,6 +6,7 @@ import GoBackBtn from "@/components/custom/gobackbtn";
 import Link from "next/link";
 import QRCodeWindows from "@/components/payments/qrcode-windows";
 import { TPaymentType } from "@/app/types";
+import { formatCurrency } from "@/lib/fee-utils";
 
 export interface PageProps {
   params: Promise<{ case_number: string }>;
@@ -89,8 +90,10 @@ export default async function VerifyPaymentPageByCaseNumber({
           <Separator className="my-8 border-b h-0.5 border-gray-200 w-full" />
           <div className="w-full max-w-md">
             <div className="text-md">
-              Total Amount to Pay (NPR):{" "}
-              <span className="font-semibold">{amount.toFixed(2)}</span>
+              Total Amount to Pay:{" "}
+              <span className="font-semibold">{
+              formatCurrency(amount, "NPR")
+              }</span>
             </div>
             <div className="text-md">
               Case Number:{" "}
@@ -108,7 +111,7 @@ export default async function VerifyPaymentPageByCaseNumber({
                         <th className="px-2 py-1 text-left">#</th>
                         <th className="px-2 py-1 text-left">Name</th>
                         <th className="px-2 py-1 text-left">Age</th>
-                        <th className="px-2 py-1 text-left">Amount</th>
+                        <th className="px-2 py-1 text-left">Amount USD</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -117,7 +120,7 @@ export default async function VerifyPaymentPageByCaseNumber({
                           <td className="px-2 py-1">{index + 1}</td>
                           <td className="px-2 py-1">{client.name}</td>
                           <td className="px-2 py-1">{client.age}</td>
-                          <td className="px-2 py-1">${client.amount}</td>
+                          <td className="px-2 py-1">{formatCurrency(client.amount, "USD")}</td>
                         </tr>
                       ))}
                     </tbody>
