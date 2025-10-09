@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic"; // update data on every request
+
 import { getPaymentsAction } from "@/app/server_actions";
 import { columns } from "./columns";
 import { DataTable } from "./table";

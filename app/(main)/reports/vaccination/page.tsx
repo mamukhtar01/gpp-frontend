@@ -3,7 +3,9 @@
 import VaccinationReport, {
   VaccinationReportRow,
 } from "@/components/reports/VaccinationReport";
-import React, { useState } from "react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircleIcon } from "lucide-react";
+import React, { useState, useEffect } from "react";
 
 // Demo locations, you can replace or fetch dynamically as needed
 const LOCATIONS = [
@@ -12,49 +14,41 @@ const LOCATIONS = [
   { label: "MHAC Biratnagar", value: "Biratnagar, Ward-10" },
 ];
 
-// Example initial data, replace with fetch/filter logic as needed
-const initialRows: VaccinationReportRow[] = [
-  {
-    vaccination: "Varicella",
-    unit: 17,
-    rate: "$35.00",
-    totalAmount: "$595.00",
-    nprAmount: "84,019.95",
-  },
-  {
-    vaccination: "Td",
-    unit: 13,
-    rate: "$2.00",
-    totalAmount: "$26.00",
-    nprAmount: "3,671.46",
-  },
-  {
-    vaccination: "Pentavalent",
-    unit: 1,
-    rate: "$8.00",
-    totalAmount: "$8.00",
-    nprAmount: "1,129.68",
-  },
-  {
-    vaccination: "MMR",
-    unit: 15,
-    rate: "$9.00",
-    totalAmount: "$135.00",
-    nprAmount: "19,063.35",
-  },
-  {
-    vaccination: "Hepatitis B",
-    unit: 12,
-    rate: "$4.00",
-    totalAmount: "$48.00",
-    nprAmount: "6,778.08",
-  },
-];
-
 export default function VaccinationReportPage() {
-  const [fromDate, setFromDate] = useState("2025-09-05");
-  const [toDate, setToDate] = useState("2025-09-05");
+  // make the date inputs default to today
+  const [fromDate, setFromDate] = useState(
+    new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split("T")[0]
+  );
+  const [toDate, setToDate] = useState(new Date().toISOString().split("T")[0]);
   const [location, setLocation] = useState(LOCATIONS[0].value);
+  const [rows, setRows] = useState<VaccinationReportRow[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
+
+  // Fetch data when dates change
+  useEffect(() => {
+    async function fetchData() {
+      setLoading(true);
+      setError("");
+      try {
+        const res = await fetch(
+          `/api/payments/vaccinations?fromDate=${fromDate}&toDate=${toDate}`
+        );
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error || "Failed to fetch data.");
+        }
+        const data = await res.json();
+        setRows(data);
+      } catch (err: unknown) {
+        setError((err as Error).message || "Unknown error");
+        setRows([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, [fromDate, toDate]);
 
   // Format date range for display
   const dateRange =
@@ -82,8 +76,21 @@ export default function VaccinationReportPage() {
         })
       : "";
 
-  // You may filter or fetch rows based on date/location if your data allows
-  const rows = initialRows;
+  // Calculate totals from rows
+  const totalUsd = rows
+    .reduce((sum, row) => sum + parseFloat(row.totalAmount.replace("$", "")), 0)
+    .toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+      style: "currency",
+      currency: "USD",
+    });
+  const totalNpr = rows
+    .reduce((sum, row) => sum + parseFloat(row.nprAmount.replace(/,/g, "")), 0)
+    .toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
 
   return (
     <div className="mx-auto my-8 w-full max-w-6xl">
@@ -129,17 +136,29 @@ export default function VaccinationReportPage() {
       </form>
 
       {/* Report */}
-      <VaccinationReport
-        orgName="IOM Migration Health Assessment Center"
-        orgSub="UN MIGRATION"
-        orgAddress={orgAddress}
-        orgPhone="+977 1 5970001"
-        dateRange={dateRange}
-        reportDate={reportDate}
-        rows={rows}
-        totalUsd="$812.00"
-        totalNpr="114,662.52"
-      />
+      {loading ? (
+        <div>Loading...</div>
+      ) : error ? (
+        <Alert variant="destructive">
+          <AlertCircleIcon />
+          <AlertTitle>No Data found for Selected Date Range.</AlertTitle>
+          <AlertDescription>
+            <p>Please try adjusting your date range or filters.</p>
+          </AlertDescription>
+        </Alert>
+      ) : (
+        <VaccinationReport
+          orgName="IOM Migration Health Assessment Center"
+          orgSub="UN MIGRATION"
+          orgAddress={orgAddress}
+          orgPhone="+977 1 5970001"
+          dateRange={dateRange}
+          reportDate={reportDate}
+          rows={rows}
+          totalUsd={totalUsd}
+          totalNpr={totalNpr}
+        />
+      )}
     </div>
   );
 }

@@ -146,6 +146,12 @@ export type TClientBasicInfo = {
   name: string;
   age: number;
   amount: string;
+  additional_services: {
+    id: string;
+    service_name: string;
+    service_code: string;
+    fee_amount_usd: string; // stored as string
+  }[] | null;
 };
 
 

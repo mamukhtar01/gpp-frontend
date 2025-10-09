@@ -172,3 +172,17 @@ export function formatReadableDate(dateString: string): string {
     year: "numeric",
   });
 }
+
+
+// Get Country id from country code
+export function getCountryIdFromCode(countryCode: string): number | null {
+  const countryMap: { [key: string]: number } = {
+    CA: 12,
+    US: 13,
+    AU: 14,
+    NZ: 15,
+    UK: 16,
+    JP: 29,
+  };
+  return countryMap[countryCode] || null;
+}

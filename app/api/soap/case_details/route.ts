@@ -1,13 +1,51 @@
 import { NextRequest, NextResponse } from "next/server";
 import { XMLParser } from "fast-xml-parser";
 
-type CaseMemberSummaryRequest = {
+type CaseMemberDetailsRequest = {
   CaseNo: string;
 };
 
+// Types based on your given API response
+export type CaseMember = {
+  CaseMemberID: number;
+  CaseNo: string;
+  RelationtoPA: string;
+  FullName: string;
+  Age: number;
+  AgeInYears: number;
+  AgeInMonths: number;
+  AgeInDays: number;
+  BirthDate: string;
+  Gender: string;
+  LastName: string;
+  FirstName: string;
+  TravelRequirement: string;
+  IsLoanRecipient: boolean;
+  IsRegisteredByEMedical: boolean;
+  TotalCosts: number;
+  DateOfReturn: { ["xsi:nil"]: string } | string | null;
+};
+
+type CaseMemberResponse = {
+  Errors: string;
+  Warnings: string;
+  DestinationCountry: string;
+  OriginCountry: string;
+  members: CaseMember[];
+};
+
 export async function POST(req: NextRequest): Promise<NextResponse> {
+  const soapApiUrl = process.env.MIMOSA_SOAP_API_URL;
+
+  if (!soapApiUrl) {
+    return NextResponse.json(
+      { error: "Server configuration error: MIMOSA_SOAP_API_URL is not set" },
+      { status: 500 }
+    );
+  }
+
   try {
-    let body: CaseMemberSummaryRequest;
+    let body: CaseMemberDetailsRequest;
     try {
       body = JSON.parse(await req.text());
     } catch {
@@ -17,7 +55,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       );
     }
 
-    if (!body || typeof body !== "object" || !body.CaseNo || typeof body.CaseNo !== "string" || body.CaseNo.trim() === "") {
+    if (!body?.CaseNo || typeof body.CaseNo !== "string" || body.CaseNo.trim() === "") {
       return NextResponse.json(
         { error: "Missing or invalid required field: CaseNo" },
         { status: 400 }
@@ -29,32 +67,24 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
    <soapenv:Header/>
    <soapenv:Body>
       <tem:RetrieveMigrantCaseByCaseNo>
-         <!--Optional:-->
          <tem:dataEntry>
-            <!--Optional:-->
             <tem:CaseNo>${body.CaseNo}</tem:CaseNo>
-            <!--Optional:-->
             <tem:CurrentUserName>mamukhtar</tem:CurrentUserName>
          </tem:dataEntry>
       </tem:RetrieveMigrantCaseByCaseNo>
    </soapenv:Body>
 </soapenv:Envelope>`;
 
-    // todo. only authenticated users should call the api.
-
-    const response = await fetch(
-      "https://k-apiqaz.iom.int/mwebsvc/CaseManagementService.svc",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "text/xml;charset=UTF-8",
-          SOAPAction:
-            '"http://tempuri.org/ICaseManagementService/RetrieveMigrantCaseByCaseNo"',
-          "User-Agent": "Apache-HttpClient/4.5.5 (Java/17.0.12)",
-        },
-        body: soapEnvelope,
-      }
-    );
+    const response = await fetch(soapApiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/xml;charset=UTF-8",
+        SOAPAction:
+          '"http://tempuri.org/ICaseManagementService/RetrieveMigrantCaseByCaseNo"',
+        "User-Agent": "Apache-HttpClient/4.5.5 (Java/17.0.12)",
+      },
+      body: soapEnvelope,
+    });
 
     if (!response.ok) {
       return NextResponse.json(
@@ -65,13 +95,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     const xmlText = await response.text();
 
-    // Parse the XML response
+    const parser = new XMLParser({
+      ignoreAttributes: false,
+      attributeNamePrefix: "",
+    });
+
     let parsed;
     try {
-      const parser = new XMLParser({
-        ignoreAttributes: false,
-        attributeNamePrefix: "",
-      });
       parsed = parser.parse(xmlText);
     } catch {
       return NextResponse.json(
@@ -80,69 +110,51 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // Extract the RetrieveMigrantCaseByCaseNoResult from the SOAP response
+    // Drill down to the SOAP payload
     const result =
       parsed["s:Envelope"]?.["s:Body"]?.["RetrieveMigrantCaseByCaseNoResponse"]?.["RetrieveMigrantCaseByCaseNoResult"] ||
       parsed["Envelope"]?.["Body"]?.["RetrieveMigrantCaseByCaseNoResponse"]?.["RetrieveMigrantCaseByCaseNoResult"];
 
-    if (!result || typeof result !== "object") {
+    if (!result) {
       return NextResponse.json(
         { error: "RetrieveMigrantCaseByCaseNoResult not found or invalid", debug: parsed },
         { status: 500 }
       );
     }
 
-    // Validate MigrantCase
-    if (!result.MigrantCase || typeof result.MigrantCase !== "object") {
+    // Format the response
+    const Errors = result.Errors ?? "";
+    const Warnings = result.Warnings ?? "";
+    const migrantCase = result.MigrantCase ?? {};
+    const caseMemberSummary = result.CaseMemberSummary ?? {};
+
+    const membersRaw = caseMemberSummary?.CaseMemberSummary ?? [];
+    // Ensure members is always an array
+    const members: CaseMember[] = Array.isArray(membersRaw) ? membersRaw : [membersRaw].filter(Boolean);
+
+    const DestinationCountry = migrantCase?.DestinationCountry ?? "";
+    // You specified OriginCountry, but original code uses LocationCountry
+    const OriginCountry = migrantCase?.LocationCountry ?? "";
+
+    // Validate essential data
+    if (!DestinationCountry || !OriginCountry) {
       return NextResponse.json(
-        { error: "MigrantCase not found in response", debug: result },
+        { error: "Incomplete case data", debug: { DestinationCountry, OriginCountry } },
         { status: 500 }
       );
     }
 
-    // Validate CaseMemberSummary
-    if (!result.CaseMemberSummary || typeof result.CaseMemberSummary !== "object") {
-      return NextResponse.json(
-        { error: "CaseMemberSummary not found in response", debug: result },
-        { status: 500 }
-      );
-    }
-
-    // Extract case members, destination country, and origin country
-    const caseMembers = result.CaseMemberSummary?.CaseMemberSummary || [];
-    const destinationCountry = result.MigrantCase?.DestinationCountry || null;
-    const originCountry = result.MigrantCase?.LocationCountry || null;
-
-    // Normalize caseMembers to always be an array and filter invalid members
-    let members = Array.isArray(caseMembers) ? caseMembers : [caseMembers];
-    members = members.filter(
-      (m) => m && typeof m === "object" && m.CaseMemberID && m.FullName
-    );
-
-    // Reconstruct the response
-    const reconstructed = {
-      caseNo: result.MigrantCase?.CaseNo || null,
-      destinationCountry,
-      originCountry,
+    const responsePayload: CaseMemberResponse = {
+      Errors,
+      Warnings,
+      DestinationCountry,
+      OriginCountry,
       members,
     };
 
-    // Final validation: must have caseNo, destinationCountry, originCountry, and at least one member
-    if (!reconstructed.caseNo || !reconstructed.destinationCountry || !reconstructed.originCountry || reconstructed.members.length === 0) {
-      return NextResponse.json(
-        { error: "Incomplete case data", debug: reconstructed },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json(reconstructed);
+    return NextResponse.json(responsePayload);
   } catch (error: unknown) {
-    if (error instanceof Error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-    return NextResponse.json(
-      { error: "Unknown error occurred" },
-      { status: 500 }
-    );
+    const message = error instanceof Error ? error.message : "Unknown error occurred";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

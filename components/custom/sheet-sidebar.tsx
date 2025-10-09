@@ -6,7 +6,7 @@ import { Menu, Upload, FileText, ListChecks, RefreshCcw, CurrencyIcon } from "lu
 
 
 const sidebarMenu = [
-  { href: "/actions/upload/uktbcases", icon: Upload, label: "Upload UKTB Cases" },
+  { href: "/uktb-case/upload", icon: Upload, label: "Upload UKTB Cases" },
   { href: "/main/reports/reconciliation", icon: ListChecks, label: "Reconciliations" },
   { href: "/main/reports", icon: FileText, label: "Reports" },
   { href: "/payments/pricing", icon: CurrencyIcon, label: "Pricing Plans" },

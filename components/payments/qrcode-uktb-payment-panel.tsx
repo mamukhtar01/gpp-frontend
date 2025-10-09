@@ -37,6 +37,7 @@ import { CalculateAge, getFeeByAge } from "@/lib/utils";
 import React from "react";
 import { useExchangeRate } from "@/app/(main)/payments/exchangeRateContext";
 import { ExchangeRateWidget } from "../exchangeRateWidget";
+import Link from "next/link";
 
 /* ---------------- Types ---------------- */
 
@@ -179,13 +180,13 @@ export function QrCodeUKTBPaymentPanel({
 
       const { qrString, validationTraceId, timestamp } = json.data;
 
-      const clientsInfo = ukTBCases.map((client) => ({
+      const clientsInfo: TClientBasicInfo[] = ukTBCases.map((client) => ({
         id: client.id,
         name: `${client.First_Name} ${client.Last_Name}`,
-        age: CalculateAge(client.date_of_birth),
-        amount: getClientTotal(client).toFixed(2),
+        age: CalculateAge(client.date_of_birth) ?? 0,
+        amount: getClientTotal(client).toFixed(2).toString(),
         additional_services: (addedServices[client.id] || []).map((s) => ({
-          id: s.id,
+          id: s.id.toString(),
           fee_amount_usd: s.fee_amount_usd,
           service_code: s.service_type_code.service_code,
           service_name: s.service_type_code.service_name,
@@ -212,7 +213,7 @@ export function QrCodeUKTBPaymentPanel({
         qr_string: qrString,
         wave: null,
         clinic: null,
-        clients: clientsInfo as TClientBasicInfo[],
+        clients: clientsInfo,
       };
 
       const paymentRes = await createPayment(paymentRecord);
@@ -229,7 +230,7 @@ export function QrCodeUKTBPaymentPanel({
   /* ---------------- Render ---------------- */
 
   return (
-    <div className="p-8 bg-white rounded shadow w-full max-w-6xl min-h-[470px]">
+    <div className="p-8 rounded shadow w-full max-w-6xl min-h-[470px] flex flex-col bg-white">
       <ExchangeRateWidget exchangeRate={exchangeRate} className="mb-4" />
       <SearchUKTBCombobox
         setSelectedCase={setSelectedCase}
@@ -434,6 +435,11 @@ export function QrCodeUKTBPaymentPanel({
           </div>
         </>
       )}
+      <div className="mt-auto ml-auto">
+        <Link href="/uktb-case/register" className="text-blue-500 hover:underline">
+          Create New Case
+        </Link>
+      </div>
     </div>
   );
 }

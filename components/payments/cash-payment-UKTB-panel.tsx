@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/select";
 import { Trash2, Plus, X, Loader2, Banknote } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { TUKTB_Cases } from "@/lib/schema";
 import { SearchUKTBCombobox } from "./search-uktbcase-combobox";
 import { FeeStructure, TClientBasicInfo, TNewPaymentRecord } from "@/app/types";
@@ -165,14 +166,14 @@ export function CashUKTBPaymentPanel ({
         ? grandTotalLocal.toFixed(2)
         : totalAmountToPayDollars;
 
-      const clientsInfo = ukTBCases.map((client) => ({
+      const clientsInfo: TClientBasicInfo[] = ukTBCases.map((client) => ({
         id: client.id,
         name: `${client.First_Name} ${client.Last_Name}`,
-        age: CalculateAge(client.date_of_birth),
-        amount: getClientTotal(client).toFixed(2),
+        age: CalculateAge(client.date_of_birth) ?? 0,
+        amount: getClientTotal(client).toFixed(2).toString(),
         remark: remarks[client.id] || null,
         additional_services: (addedServices[client.id] || []).map((s) => ({
-          id: s.id,
+          id: s.id.toString(),
           fee_amount_usd: s.fee_amount_usd,
           service_code: s.service_type_code.service_code,
           service_name: s.service_type_code.service_name,
@@ -202,7 +203,7 @@ export function CashUKTBPaymentPanel ({
         qr_string: "",
         wave: null,
         clinic: null,
-        clients: clientsInfo as TClientBasicInfo[],
+        clients: clientsInfo,
       };
 
       const paymentRes = await createPayment(paymentRecord);
@@ -219,7 +220,7 @@ export function CashUKTBPaymentPanel ({
   /* ---------------- Render ---------------- */
 
   return (
-    <div className="p-8 bg-white rounded shadow w-full max-w-6xl min-h-[470px]">
+    <div className="p-8 rounded shadow w-full max-w-6xl min-h-[470px] flex flex-col bg-white">
       <ExchangeRateWidget exchangeRate={exchangeRate} />
       <SearchUKTBCombobox
         setSelectedCase={setSelectedCase}
@@ -441,6 +442,11 @@ export function CashUKTBPaymentPanel ({
           </div>
         </>
       )}
+      <div className="mt-auto ml-auto">
+        <Link href="/uktb-case/register" className="text-blue-500 hover:underline">
+          Create New Case
+        </Link>
+      </div>
     </div>
   );
 }

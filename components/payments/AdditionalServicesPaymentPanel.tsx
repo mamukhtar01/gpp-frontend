@@ -254,18 +254,18 @@ export function AdditionalServicesPaymentPanel() {
 
       const { qrString, validationTraceId, timestamp } = qrJson.data;
 
-      const clientsInfo = ukTBCases.map((c) => ({
-        id: c.id,
+      const clientsInfo: TClientBasicInfo[] = ukTBCases.map((c) => ({
+        id: c.id.toString(),
         name: `${c.First_Name} ${c.Last_Name}`,
-        age: CalculateAge(c.date_of_birth),
-        amount: getClientTotal(c.id).toFixed(2),
+        age: CalculateAge(c.date_of_birth) || 0,
+        amount: getClientTotal(c.id).toFixed(2).toString(),
         remark: remarks[c.id] || null,
         additional_services: (addedServices[c.id] || []).map((s) => ({
-          id: s.id,
+          id: s.id.toString(),
           fee_amount_usd: s.fee_amount_usd,
           service_code: s.service_type_code.service_code,
           service_name: s.service_type_code.service_name,
-        })),
+        })) || null,
       }));
 
       const paymentRecord: TNewPaymentRecord = {
@@ -288,7 +288,7 @@ export function AdditionalServicesPaymentPanel() {
         qr_string: qrString,
         wave: null,
         clinic: null,
-        clients: clientsInfo as TClientBasicInfo[],
+        clients: clientsInfo,
         service_type: "special_service",
         destination_country: country,
         exchange_rate: exchangeRate,
