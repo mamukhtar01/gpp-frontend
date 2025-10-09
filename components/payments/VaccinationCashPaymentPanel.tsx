@@ -29,10 +29,11 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CaseMember, CaseMemberSummarySearch } from "./search-mimosa-combobox";
+import { CaseMember, CaseMemberDetailsResponse, CaseMemberSummarySearch } from "./search-mimosa-combobox";
 import { useExchangeRate } from "@/app/(main)/payments/exchangeRateContext";
 import { TClientBasicInfo, TNewPaymentRecord } from "@/app/types";
 import { createPayment } from "@/app/server_actions";
+
 
 /* --- Service addition types --- */
 export interface AdditionalServiceFromDB {
@@ -55,7 +56,8 @@ interface Props {
 
 export function VaccinationCashPaymentPanel({ additionalServices }: Props) {
   const router = useRouter();
-  const [caseMembers, setCaseMembers] = useState<CaseMember[] | null>(null);
+  const [caseSearchResponse, setCaseSearchResponse] =
+    useState<CaseMemberDetailsResponse | null>(null);
   const [remarks, setRemarks] = useState<Record<string, string>>({});
   const [addedServices, setAddedServices] = useState<AddedServicesState>({});
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -79,6 +81,13 @@ export function VaccinationCashPaymentPanel({ additionalServices }: Props) {
     );
   };
 
+  const caseMembers = useMemo(
+    () =>
+      caseSearchResponse?.members
+        ? caseSearchResponse.members
+        : [],
+    [caseSearchResponse]
+  );
   // USD and NPR totals
   const grandTotalUSD = useMemo(
     () =>
@@ -130,8 +139,8 @@ export function VaccinationCashPaymentPanel({ additionalServices }: Props) {
   }
 
   function removeClient(clientId: number) {
-    setCaseMembers((prev) =>
-      prev ? prev.filter((m) => m.CaseMemberID !== clientId) : prev
+    setCaseSearchResponse((prev) =>
+      prev ? { ...prev, members: prev.members.filter((m) => m.CaseMemberID !== clientId) } : prev
     );
     setAddedServices((prev) => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -146,7 +155,7 @@ export function VaccinationCashPaymentPanel({ additionalServices }: Props) {
   }
 
   function resetAll() {
-    setCaseMembers(null);
+    setCaseSearchResponse(null);
     setAddedServices({});
     setRemarks({});
     setActiveClientId(null);
@@ -161,18 +170,18 @@ export function VaccinationCashPaymentPanel({ additionalServices }: Props) {
       const totalAmountLocal = grandTotalNPR.toFixed(2);
       const caseNo = caseMembers[0].CaseNo;
 
-      const clientsInfo = caseMembers.map((m) => ({
+      const clientsInfo: TClientBasicInfo[] = caseMembers.map((m) => ({
         id: m.CaseMemberID.toString(),
         name: m.FullName,
         age: m.Age,
-        amount: getClientTotal(m).toFixed(2),
+        amount: getClientTotal(m).toFixed(2).toString(),
         remark: remarks[m.CaseMemberID] || null,
         additional_services: (addedServices[m.CaseMemberID] || []).map((s) => ({
-          id: s.id,
+          id: s.id.toString(),
           fee_amount_usd: s.fee_amount_usd,
           service_code: s.service_type_code.service_code,
           service_name: s.service_type_code.service_name,
-        })),
+        })) || null,
       }));
 
       const paymentRecord: TNewPaymentRecord = {
@@ -193,7 +202,7 @@ export function VaccinationCashPaymentPanel({ additionalServices }: Props) {
         qr_string: "",
         wave: null,
         clinic: null,
-        clients: clientsInfo as TClientBasicInfo[],
+        clients: clientsInfo,
         service_type: "vaccination",
       };
 
@@ -232,7 +241,7 @@ export function VaccinationCashPaymentPanel({ additionalServices }: Props) {
       </div>
 
       {/* --- Use CaseMemberSummarySearch for searching and selection --- */}
-      <CaseMemberSummarySearch setSelectedSummary={setCaseMembers} />
+     <CaseMemberSummarySearch setSelectedSummary={setCaseSearchResponse} />
 
       <Separator className="my-6" />
 

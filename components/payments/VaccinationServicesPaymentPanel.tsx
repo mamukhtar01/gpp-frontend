@@ -29,11 +29,15 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CaseMember, CaseMemberSummarySearch } from "./search-mimosa-combobox";
+import {
+  CaseMemberDetailsResponse,
+  CaseMemberSummarySearch,
+} from "./search-mimosa-combobox";
 import { useExchangeRate } from "@/app/(main)/payments/exchangeRateContext";
 import { TClientBasicInfo, TNewPaymentRecord } from "@/app/types";
 import { createPayment } from "@/app/server_actions";
-import { generateQRCodeNPR } from "@/lib/utils";
+import { ExchangeRateWidget } from "../exchangeRateWidget";
+import { getCountryIdFromCode } from "@/lib/utils";
 
 /* --- Service addition types --- */
 export interface AdditionalServiceFromDB {
@@ -54,10 +58,46 @@ interface Props {
   additionalServices: AdditionalServiceFromDB[];
 }
 
+// InputCol (copied for remarks)
+function InputCol({
+  label,
+  id,
+  value,
+  placeholder,
+  isDisabled = true,
+  onChange = () => {},
+  ...props
+}: {
+  label: string;
+  value: string | number;
+  id: string;
+  placeholder: string;
+  isDisabled?: boolean;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+} & React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div className="flex gap-4 w-full max-w-sm my-6">
+      <label htmlFor={id} className="font-medium">
+        {label}
+      </label>
+      <Input
+        type="text"
+        id={id}
+        disabled={isDisabled}
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+        {...props}
+      />
+    </div>
+  );
+}
+
 export function VaccinationServicesPaymentPanel({ additionalServices }: Props) {
   const router = useRouter();
-  const [caseMembers, setCaseMembers] = useState<CaseMember[] | null>(null);
-  const [remarks, setRemarks] = useState<Record<string, string>>({});
+  const [caseSearchResponse, setCaseSearchResponse] =
+    useState<CaseMemberDetailsResponse | null>(null);
+  const [reference, setReference] = useState<string>("");
   const [addedServices, setAddedServices] = useState<AddedServicesState>({});
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [activeClientId, setActiveClientId] = useState<string | null>(null);
@@ -73,8 +113,8 @@ export function VaccinationServicesPaymentPanel({ additionalServices }: Props) {
     return additionalServices.filter((s) => !used.has(s.id));
   }, [activeClientId, addedServices, additionalServices]);
 
-  const getClientTotal = (member: CaseMember) => {
-    return (addedServices[member.CaseMemberID] || []).reduce(
+  const getClientTotal = (memberId: number) => {
+    return (addedServices[memberId] || []).reduce(
       (sum, svc) => sum + parseFloat(svc.fee_amount_usd),
       0
     );
@@ -83,22 +123,21 @@ export function VaccinationServicesPaymentPanel({ additionalServices }: Props) {
   // USD and NPR totals
   const grandTotalUSD = useMemo(
     () =>
-      caseMembers
-        ? caseMembers.reduce((sum, m) => sum + getClientTotal(m), 0)
+      caseSearchResponse?.members
+        ? caseSearchResponse.members.reduce(
+            (sum, m) => sum + getClientTotal(m.CaseMemberID),
+            0
+          )
         : 0,
-    [caseMembers, addedServices]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [caseSearchResponse?.members, addedServices]
   );
   const grandTotalNPR = useMemo(
     () => (exchangeRate ? grandTotalUSD * exchangeRate : 0),
     [grandTotalUSD, exchangeRate]
   );
 
-  const bigCTAEnabled =
-    caseMembers &&
-    caseMembers.length > 0 &&
-    grandTotalUSD > 0 &&
-    !!exchangeRate &&
-    grandTotalNPR > 0;
+
 
   function openAddServiceDialog(clientId: number) {
     setActiveClientId(clientId.toString());
@@ -130,62 +169,81 @@ export function VaccinationServicesPaymentPanel({ additionalServices }: Props) {
   }
 
   function removeClient(clientId: number) {
-    setCaseMembers((prev) =>
-      prev ? prev.filter((m) => m.CaseMemberID !== clientId) : prev
+    setCaseSearchResponse((prev) =>
+      prev
+        ? {
+            ...prev,
+            members: prev.members.filter((m) => m.CaseMemberID !== clientId),
+          }
+        : prev
     );
     setAddedServices((prev) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { [clientId]: _, ...rest } = prev;
-      return rest;
-    });
-    setRemarks((prev) => {
-      const { [clientId]: __, ...rest } = prev;
       return rest;
     });
   }
 
   function resetAll() {
-    setCaseMembers(null);
+    setCaseSearchResponse(null);
     setAddedServices({});
-    setRemarks({});
+    setReference("");
     setActiveClientId(null);
     setServiceSelectId(null);
   }
 
   async function handleCreatePayment() {
-    if (!caseMembers || caseMembers.length === 0) return;
+    if (!caseSearchResponse?.members || caseSearchResponse.members.length === 0)
+      return;
     setLoading(true);
     try {
       const totalAmountUSD = grandTotalUSD.toFixed(2);
       const totalAmountLocal = grandTotalNPR.toFixed(2);
-      const caseNo = caseMembers[0].CaseNo;
+      const caseNo = caseSearchResponse.members[0].CaseNo;
 
       // Generate QR using NPR amount
-      const { qrString, validationTraceId, timestamp } =
-        await generateQRCodeNPR({
-          nprAmount: totalAmountLocal,
-          caseNo: caseNo ?? "N/A",
-          purpose: "Bill payment",
-        });
+      const res = await fetch("/api/nepalpay/generateQR", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          transactionCurrency: "524",
+          transactionAmount: grandTotalNPR,
+          billNumber: caseNo,
+          referenceLabel: reference,
+          storeLabel: "Store1",
+          terminalLabel: "Terminal1",
+          purposeOfTransaction: "Bill payment",
+        }),
+      });
+      const json = await res.json();
 
-      const clientsInfo = caseMembers.map((m) => ({
-        id: m.CaseMemberID.toString(),
+      if (!res.ok) throw new Error(JSON.stringify(json));
+      if (!json?.data?.qrString || !json?.data?.validationTraceId) {
+        throw new Error("Invalid response from QR generation API");
+      }
+
+      const qrString = json.data?.qrString;
+      const validationTraceId = json.data?.validationTraceId;
+      const timestamp = json?.timestamp;
+
+      const clientsInfo: TClientBasicInfo[] = caseSearchResponse.members.map((m) => ({
+        id: String(m.CaseMemberID),
         name: m.FullName,
         age: m.Age,
-        amount: getClientTotal(m).toFixed(2),
-        remark: remarks[m.CaseMemberID] || null,
+        amount: getClientTotal(m.CaseMemberID).toFixed(2).toString(),
         additional_services: (addedServices[m.CaseMemberID] || []).map((s) => ({
-          id: s.id,
+          id: String(s.id),
           fee_amount_usd: s.fee_amount_usd,
           service_code: s.service_type_code.service_code,
           service_name: s.service_type_code.service_name,
-        })),
+        })) || null,
       }));
 
       const paymentRecord: TNewPaymentRecord = {
         case_number: caseNo,
-        case_management_system: 1,
         mimosa_case: null,
-        reference: null,
+        case_management_system: 1,
+        reference: reference || null,
         amount_in_dollar: totalAmountUSD,
         amount_in_local_currency: totalAmountLocal,
         type_of_payment: 2,
@@ -193,19 +251,21 @@ export function VaccinationServicesPaymentPanel({ additionalServices }: Props) {
         transaction_id: `TXN-${Date.now()}`,
         status: 1,
         validationTraceId: validationTraceId ?? "",
-        payerInfo: caseMembers.map((m) => m.FullName).join(", "),
+        payerInfo: caseSearchResponse.members.map((m) => m.FullName).join(", "),
         qr_timestamp: timestamp ?? "",
         paidAmount: totalAmountLocal,
         qr_string: qrString,
         wave: null,
         clinic: null,
-        clients: clientsInfo as TClientBasicInfo[],
+        destination_country:
+          getCountryIdFromCode(caseSearchResponse?.DestinationCountry) || null,
+        exchange_rate: exchangeRate,
+        clients: clientsInfo,
         service_type: "vaccination",
       };
 
       // Create payment record in the database
       const paymentRes = await createPayment(paymentRecord);
-
 
       router.push(`/payments/qrcode/${caseNo}?paymentId=${paymentRes.id}`);
     } catch (e: unknown) {
@@ -216,66 +276,66 @@ export function VaccinationServicesPaymentPanel({ additionalServices }: Props) {
   }
 
   return (
-    <div className="relative w-full bg-white p-6 md:p-8 rounded-xl shadow-sm ring-1 ring-slate-100 max-w-6xl">
-      <div className="mb-6">
-        <h1 className="text-xl md:text-2xl font-semibold tracking-tight">
-          Vaccination Payment <span className="font-light font-mono ml-10">(US)</span>
-        </h1>
-        <p className="text-sm text-muted-foreground mt-2">
-          <b>Instructions:</b> Search and select case members, add vaccination
-          services, and generate a QR code for payment.
-        </p>
-      </div>
-
-      <div className="mb-3 text-sm font-medium text-gray-700 flex items-center gap-2">
-        {exchangeRate === null ? (
-          <span className="text-red-500">
-            Exchange rate (USD → NPR) unavailable.
-          </span>
-        ) : (
-          <span>
-            <span className="font-semibold">Exchange Rate:</span> 1 USD ={" "}
-            <span className="font-bold">{exchangeRate}</span> NPR
-          </span>
+    <div className="p-8 bg-white rounded shadow w-full max-w-6xl min-h-[470px]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
+        <ExchangeRateWidget exchangeRate={exchangeRate} />
+        {/* Country details */}
+        {caseSearchResponse?.DestinationCountry && caseSearchResponse?.OriginCountry && (
+          <div className="text-sm text-gray-600 flex flex-col sm:flex-row sm:items-center gap-4">
+            <p>
+              Destination:{" "}
+              <span className="font-bold">
+                {caseSearchResponse?.DestinationCountry}
+              </span>
+            </p>
+            <p>
+              Origin:{" "}
+              <span className="font-bold">
+                {caseSearchResponse?.OriginCountry}
+              </span>
+            </p>
+          </div>
         )}
       </div>
 
       {/* --- Use CaseMemberSummarySearch for searching and selection --- */}
-      <CaseMemberSummarySearch setSelectedSummary={setCaseMembers} />
+      <CaseMemberSummarySearch setSelectedSummary={setCaseSearchResponse} />
 
-      <Separator className="my-6" />
+      <Separator className="my-8" />
 
-      {caseMembers && caseMembers.length > 0 ? (
+      {caseSearchResponse?.members && caseSearchResponse.members.length > 0 ? (
         <>
           <div className="rounded-lg border border-slate-200 overflow-hidden">
             <Table>
               <TableHeader className="bg-slate-50/60">
                 <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Gender</TableHead>
-                  <TableHead>Birth Date</TableHead>
-                  <TableHead>Additional Services</TableHead>
-                  <TableHead className="text-right">Total (USD)</TableHead>
-                  <TableHead className="text-center">Remark</TableHead>
-                  <TableHead className="text-center">Actions</TableHead>
+                  <TableHead className="w-[8%]">ID</TableHead>
+                  <TableHead className="w-[18%]">Name</TableHead>
+                  <TableHead className="w-[12%]">Relation</TableHead>
+                  <TableHead className="w-[8%]">Gender</TableHead>
+                  <TableHead className="w-[14%]">Birth Date</TableHead>
+                  <TableHead className="w-[8%]">Age</TableHead>
+                  <TableHead className="w-[14%]">Additional Services</TableHead>
+                  <TableHead className="w-[8%] text-right">
+                    Amount (USD)
+                  </TableHead>
+                  <TableHead className="w-[10%] text-center">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {caseMembers.map((member) => {
+                {caseSearchResponse.members.map((member) => {
                   const services = addedServices[member.CaseMemberID] || [];
-                  const total = getClientTotal(member);
+                  const total = getClientTotal(member.CaseMemberID);
                   return (
                     <TableRow key={member.CaseMemberID}>
                       <TableCell className="font-mono text-[11px]">
                         {member.CaseMemberID}
                       </TableCell>
-                      <TableCell>
-                        {member.FullName} - {member?.RelationtoPA}
-                      </TableCell>
-
+                      <TableCell>{member.FullName}</TableCell>
+                      <TableCell>{member.RelationtoPA}</TableCell>
                       <TableCell>{member.Gender}</TableCell>
                       <TableCell>{member.BirthDate?.slice(0, 10)}</TableCell>
+                      <TableCell>{member.Age}</TableCell>
                       <TableCell>
                         {services.length === 0 && (
                           <span className="text-xs italic text-slate-400">
@@ -323,25 +383,13 @@ export function VaccinationServicesPaymentPanel({ additionalServices }: Props) {
                       <TableCell className="text-right font-semibold font-mono">
                         ${total.toFixed(2)}
                       </TableCell>
-                      <TableCell>
-                        <Input
-                          placeholder="Remark"
-                          className="h-8 w-40 text-xs bg-gray-50 border-gray-200"
-                          value={remarks[member.CaseMemberID] || ""}
-                          onChange={(e) =>
-                            setRemarks((prev) => ({
-                              ...prev,
-                              [member.CaseMemberID]: e.target.value,
-                            }))
-                          }
-                        />
-                      </TableCell>
-                      <TableCell className="text-center">
+                      <TableCell className="flex justify-center">
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="text-red-500 hover:text-red-600"
+                          className="text-red-500 hover:text-red-600 "
                           onClick={() => removeClient(member.CaseMemberID)}
+                          title="Remove client"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -350,33 +398,61 @@ export function VaccinationServicesPaymentPanel({ additionalServices }: Props) {
                   );
                 })}
               </TableBody>
-              <TableCaption className="px-4 pb-4 text-right">
-                <div className="inline-flex flex-col items-end">
-                  <span className="text-xs tracking-wide text-slate-500">
-                    Total (USD)
+              <TableCaption className="mt-8 font-bold text-right">
+                Total Amount to Pay:
+                <span className="ml-2 text-blue-700">
+                  USD ${grandTotalUSD.toFixed(2)}
+                </span>
+                {exchangeRate && (
+                  <span className="ml-2 text-green-700">
+                    | NPR{" "}
+                    {grandTotalNPR?.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                    })}
                   </span>
-                  <span className="text-xl font-bold">
-                    ${grandTotalUSD.toFixed(2)}
-                  </span>
-                  {exchangeRate && (
-                    <>
-                      <span className="text-xs tracking-wide text-green-700 mt-1">
-                        Total (NPR)
-                      </span>
-                      <span className="text-xl font-bold text-green-700">
-                        NPR{" "}
-                        {grandTotalNPR.toLocaleString(undefined, {
-                          minimumFractionDigits: 2,
-                        })}
-                      </span>
-                    </>
-                  )}
-                </div>
+                )}
               </TableCaption>
             </Table>
           </div>
-
-          {/* Service Add Dialog */}
+          <Separator className="my-8" />
+          <InputCol
+            label="Remarks: "
+            id="remarks"
+            value={reference}
+            isDisabled={false}
+            placeholder="Remarks"
+            className="w-full"
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setReference(e.target.value)
+            }
+          />
+          <Separator className="my-16" />
+          <div className="flex gap-6 mt-2 justify-between">
+            <button
+              onClick={handleCreatePayment}
+              disabled={loading || grandTotalUSD <= 0 || !exchangeRate}
+              className="flex items-center justify-center h-12 w-[220px] rounded-md bg-brand-500 text-white font-bold text-base shadow-sm hover:bg-brand-600 hover:cursor-pointer transition disabled:opacity-60"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  GENERATING...
+                </>
+              ) : (
+                <>
+                  GENERATE NEPAL QR
+                  <QrCode className="ml-2 w-5 h-5" />
+                </>
+              )}
+            </button>
+            <button
+              onClick={resetAll}
+              className="flex items-center justify-center h-12 w-[140px] rounded-md border border-brand-700 text-brand-500 font-bold text-base bg-white hover:cursor-pointer hover:bg-blue-50 transition"
+            >
+              RESET FIELD
+            </button>
+          </div>
+          {/* Add Service Dialog */}
           <Dialog
             open={isDialogOpen}
             onOpenChange={(open) => {
@@ -387,7 +463,7 @@ export function VaccinationServicesPaymentPanel({ additionalServices }: Props) {
               setIsDialogOpen(open);
             }}
           >
-            <DialogContent className="sm:max-w-[460px]">
+            <DialogContent className="sm:max-w-[460px] bg-white">
               <DialogHeader>
                 <DialogTitle className="text-base font-semibold">
                   Add Additional Service
@@ -432,63 +508,6 @@ export function VaccinationServicesPaymentPanel({ additionalServices }: Props) {
               </DialogFooter>
             </DialogContent>
           </Dialog>
-
-          <Separator className="my-10" />
-
-          <div className="flex flex-col md:flex-row gap-4 md:gap-6 justify-between items-center bg-gradient-to-br from-slate-50 to-white rounded-xl border border-slate-200 p-5 shadow-sm">
-            <div className="flex flex-wrap gap-3 text-[11px] md:text-xs">
-              <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 font-medium text-slate-600">
-                Members: {caseMembers.length}
-              </span>
-              <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 font-medium text-slate-600">
-                Services:{" "}
-                {Object.values(addedServices).reduce(
-                  (n, arr) => n + arr.length,
-                  0
-                )}
-              </span>
-              <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 font-medium text-slate-600">
-                Total: ${grandTotalUSD.toFixed(2)}
-              </span>
-              {exchangeRate && (
-                <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-1 font-medium text-green-700">
-                  Total NPR{" "}
-                  {grandTotalNPR.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                  })}
-                </span>
-              )}
-            </div>
-            <div className="flex flex-col sm:flex-row gap-4 items-center">
-              <Button
-                type="button"
-                onClick={handleCreatePayment}
-                disabled={!bigCTAEnabled || loading}
-                className="sm:min-w-[230px] h-14 px-8 text-base font-semibold bg-brand-500 text-white shadow-lg disabled:opacity-50"
-              >
-                {loading ? (
-                  <span className="flex items-center gap-2">
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                    Generating QR...
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-2">
-                    Generate QR & Pay
-                    <QrCode className="h-5 w-5" />
-                  </span>
-                )}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                disabled={loading}
-                onClick={resetAll}
-                className="sm:min-w-[120px]"
-              >
-                Reset
-              </Button>
-            </div>
-          </div>
         </>
       ) : (
         <div className="mt-4 rounded-lg border border-dashed border-slate-300 bg-slate-50/40 p-10 text-center">
