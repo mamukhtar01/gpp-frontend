@@ -102,7 +102,7 @@ type TResponse = {
 // todo: Fetch live rates from a reliable API if needed.
 const USD_TO_NPR = 141.70; // Use latest USD-NPR rate
 
-export function aggregateVaccinations(payments: TResponse[]) {
+function aggregateVaccinations(payments: TResponse[]) {
   const vaccineMap: Record<string, { 
     vaccination: string,
     unit: number,

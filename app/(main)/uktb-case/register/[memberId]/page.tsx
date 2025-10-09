@@ -6,12 +6,12 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 export interface PageProps {
-  params: { memberId: string };
-  searchParams?: { [key: string]: string };
+  params: Promise<{ memberId: string }>;
+  searchParams?: Promise<{ [key: string]: string }>;
 }
 
 export default async function UKTBCaseMemberPage({ params }: PageProps) {
-  const { memberId } = params;
+  const { memberId } = await params;
   if (!memberId || memberId.trim() === "") {
     return (
       <div className="max-w-2xl mx-auto py-10 text-center">
