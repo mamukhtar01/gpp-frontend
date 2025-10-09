@@ -97,7 +97,7 @@ export default function ReceiptActions({
         Go back
       </Button>
       <Button onClick={handlePrint} size="sm" variant={"outline"}>
-        Print receipt
+        Share / Print Receipt
       </Button>
     </div>
   );
