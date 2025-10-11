@@ -22,9 +22,9 @@ export async function getServiceTypes() {
 }
 
 // Pricing Actions
-export async function getFeeStructures({
+export async function getFeeStructuresAction({
   countryCode,
-  type,
+  type = "medical_exam",
 }: {
   countryCode: number;
   type: "medical_exam" | "vaccination" | "special_service";
@@ -37,6 +37,9 @@ export async function getFeeStructures({
           "fee_amount_usd",
           "min_age_months",
           "max_age_months",
+          "country_id",
+          "is_active",
+          "service_type_code",
           {
             service_type_code: ["service_code", "category", "service_name"],
           }, // include related category in response

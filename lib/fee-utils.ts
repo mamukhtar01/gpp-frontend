@@ -1,7 +1,48 @@
+export function getServiceFee(
+  data: ServiceRecord[],
+  country_id: number,
+  age_years: number
+): TGetFeeResponse {
+  const age_months = age_years * 12;
+  
+  const record = data.find(record => {
+    if (!record.is_active || record.country_id !== country_id || !record.service_type_code) return false;
+    const min = record.min_age_months;
+    const max = record.max_age_months;
 
-// Fee calculation utilities based on country and age
+    // Applies to all ages if both min and max are null/0
+    const appliesToAllAges =
+      (min === null || min === 0) && (max === null || max === 0);
 
-// based on US Fee Table
+    if (appliesToAllAges) return true;
+    if ((min !== null && age_months < min)) return false;
+    if ((max !== null && age_months > max)) return false;
+    return true;
+  });
+
+  if (!record || record.service_type_code == null) return null;
+  return {
+    service_name: record.service_type_code.service_name,
+    service_code: record.service_type_code.service_code,
+    fee_amount_usd: record.fee_amount_usd,
+  };
+}
+
+type TGetFeeResponse = { service_code: string; service_name: string; fee_amount_usd: string } | null
+
+
+type ServiceRecord = {
+  country_id: number | null;
+  min_age_months: number | null;
+  max_age_months: number | null;
+  is_active: boolean;
+ service_type_code: {
+        service_code: string;
+        category: string;
+        service_name: string;
+    }
+  fee_amount_usd: string;
+};
 
 export function getUSAgeBasedFee(age: number) {
   if (age < 2) return 65;

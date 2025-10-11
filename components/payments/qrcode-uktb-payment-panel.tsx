@@ -38,6 +38,7 @@ import React from "react";
 import { useExchangeRate } from "@/app/(main)/payments/exchangeRateContext";
 import { ExchangeRateWidget } from "../exchangeRateWidget";
 import Link from "next/link";
+import { getServiceFee } from "@/lib/fee-utils";
 
 /* ---------------- Types ---------------- */
 
@@ -83,6 +84,7 @@ export function QrCodeUKTBPaymentPanel({
 
   /* ---------------- Helpers ---------------- */
 
+  
   const getBaseFee = (client: TUKTB_Cases) =>
     getFeeByAge(ukFees, CalculateAge(client.date_of_birth) ?? 0) ?? 0;
 
@@ -185,6 +187,9 @@ export function QrCodeUKTBPaymentPanel({
         name: `${client.First_Name} ${client.Last_Name}`,
         age: CalculateAge(client.date_of_birth) ?? 0,
         amount: getClientTotal(client).toFixed(2).toString(),
+        remark: "",
+        // service details
+        services: getServiceFee(ukFees, 16, CalculateAge(client.date_of_birth) ?? 0),
         additional_services: (addedServices[client.id] || []).map((s) => ({
           id: s.id.toString(),
           fee_amount_usd: s.fee_amount_usd,
@@ -205,6 +210,9 @@ export function QrCodeUKTBPaymentPanel({
         transaction_id: `TXN-${Date.now()}`,
         status: 1,
         validationTraceId: validationTraceId ?? "",
+        service_type: "medical_exam",       
+        exchange_rate: exchangeRate ?? null,
+        destination_country: 13, // UK
         payerInfo: `${selectedCase.First_Name || ""} ${
           selectedCase.Last_Name || ""
         }`.trim(),

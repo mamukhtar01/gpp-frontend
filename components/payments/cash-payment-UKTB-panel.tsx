@@ -38,6 +38,7 @@ import { CalculateAge, getFeeByAge } from "@/lib/utils";
 import React from "react";
 import { useExchangeRate } from "@/app/(main)/payments/exchangeRateContext";
 import { ExchangeRateWidget } from "../exchangeRateWidget";
+import { getServiceFee } from "@/lib/fee-utils";
 
 /* ---------------- Types ---------------- */
 
@@ -64,7 +65,7 @@ interface CashUKTBPaymentPanelProps {
   additionalServicesList: AdditionalServiceFromDB[];
 }
 
-export function CashUKTBPaymentPanel ({
+export function CashUKTBPaymentPanel({
   ukFees,
   additionalServicesList,
 }: CashUKTBPaymentPanelProps) {
@@ -76,7 +77,9 @@ export function CashUKTBPaymentPanel ({
   const [addedServices, setAddedServices] = useState<AddedServicesState>({});
   const [isServiceDialogOpen, setIsServiceDialogOpen] = useState(false);
   const [activeClientId, setActiveClientId] = useState<string | null>(null);
-  const [selectedServiceId, setSelectedServiceId] = useState<number | null>(null);
+  const [selectedServiceId, setSelectedServiceId] = useState<number | null>(
+    null
+  );
   const [remarks, setRemarks] = useState<Record<string, string>>({});
 
   // Exchange Rate Context (local currency per 1 USD)
@@ -172,6 +175,12 @@ export function CashUKTBPaymentPanel ({
         age: CalculateAge(client.date_of_birth) ?? 0,
         amount: getClientTotal(client).toFixed(2).toString(),
         remark: remarks[client.id] || null,
+        // service details
+        services: getServiceFee(
+          ukFees,
+          16,
+          CalculateAge(client.date_of_birth) ?? 0
+        ),
         additional_services: (addedServices[client.id] || []).map((s) => ({
           id: s.id.toString(),
           fee_amount_usd: s.fee_amount_usd,
@@ -265,8 +274,8 @@ export function CashUKTBPaymentPanel ({
                             type="text"
                             placeholder="add remark"
                             value={remarks[client.id] || ""}
-                            onChange={e =>
-                              setRemarks(prev => ({
+                            onChange={(e) =>
+                              setRemarks((prev) => ({
                                 ...prev,
                                 [client.id]: e.target.value,
                               }))
@@ -285,7 +294,9 @@ export function CashUKTBPaymentPanel ({
                           }}
                         >
                           <Plus className="h-4 w-4" />
-                          <span className="hidden sm:inline">Additional Service</span>
+                          <span className="hidden sm:inline">
+                            Additional Service
+                          </span>
                         </Button>
 
                         <Button
@@ -342,7 +353,10 @@ export function CashUKTBPaymentPanel ({
                 </span>
                 {exchangeRate && (
                   <span className="ml-2 text-green-700">
-                    | NPR {grandTotalLocal?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    | NPR{" "}
+                    {grandTotalLocal?.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                    })}
                   </span>
                 )}
               </TableCaption>
@@ -443,7 +457,10 @@ export function CashUKTBPaymentPanel ({
         </>
       )}
       <div className="mt-auto ml-auto">
-        <Link href="/uktb-case/register" className="text-blue-500 hover:underline">
+        <Link
+          href="/uktb-case/register"
+          className="text-blue-500 hover:underline"
+        >
           Create New Case
         </Link>
       </div>

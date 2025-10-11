@@ -1,5 +1,5 @@
 import { CashPaymentPanelMimosa } from "@/components/payments/cash-payment-panel-mimosa";
-import { getFeeStructures } from "@/app/server_actions/pricing";
+import { getFeeStructuresAction } from "@/app/server_actions/pricing";
 import { QrCodePaymentPanel } from "@/components/payments/qrcode-payment-panel";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,7 +7,7 @@ import Link from "next/link";
 import { CashUKTBPaymentPanel } from "@/components/payments/cash-payment-UKTB-panel";
 
 export default async function CashPaymentsPage() {
-  const ukFees = await getFeeStructures({
+  const ukFees = await getFeeStructuresAction({
     countryCode: 16,
     type: "medical_exam",
   });
@@ -16,7 +16,7 @@ export default async function CashPaymentsPage() {
     throw new Error("Failed to fetch UK fee structures");
   }
 
-  const additionalServicesList = await getFeeStructures({
+  const additionalServicesList = await getFeeStructuresAction({
     countryCode: 16,
     type: "special_service",
   });

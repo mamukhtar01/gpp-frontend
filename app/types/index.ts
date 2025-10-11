@@ -160,6 +160,13 @@ export type FeeStructure = {
   fee_amount_usd: string; // stored as string
   min_age_months: number | null;
   max_age_months: number | null;
+  country_id: number | null;
+  is_active: boolean;
+  service_type_code: {
+    service_code: string;
+    category: string;
+    service_name: string;
+  };
 };
 
 
