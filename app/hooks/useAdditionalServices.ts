@@ -1,6 +1,6 @@
 
-import { AdditionalServiceFromDB } from "@/components/payments/cash-payment-UKTB-panel";
 import { useState, useMemo } from "react";
+import { AdditionalServiceFromDB } from "../types";
 
 
 export function useAdditionalServices(

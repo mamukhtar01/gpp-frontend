@@ -1,10 +1,10 @@
-import { getFeeStructures } from "@/app/server_actions/pricing";
+import { getFeeStructuresAction } from "@/app/server_actions/pricing";
 import { VaccinationServicesPaymentPanel } from "@/components/payments/VaccinationServicesPaymentPanel";
 
 export default async function AdditionalServicesPaymentPage() {
   
   // Server-side fetch
-  const additionalServices = await getFeeStructures({
+  const additionalServices = await getFeeStructuresAction({
     countryCode: 13,
     type: "vaccination",
   }); 

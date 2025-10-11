@@ -9,7 +9,7 @@ MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAi0LF+eHiysi/etC2HBKIf1eZ6Fyr/hLzBQ6X
 -----END PUBLIC KEY-----
 `;
 
-const api_token_raw = "sfHFLRZYJPCtKkdjUQH9ugMJ1ttULcyCQ1dTGXWbJSI="; // Replace with actual API token
+const api_token_raw = "sfHFLRZYJPCtKkdjUQH9ugMJ1ttULcyCQ1dTGXWbJSI="; // API token
 
 function encryptApiToken(apiToken: string): string {
   const publicKey = forge.pki.publicKeyFromPem(NCHL_PUBLIC_KEY);

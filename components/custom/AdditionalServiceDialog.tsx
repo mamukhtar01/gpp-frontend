@@ -15,7 +15,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { AdditionalServiceFromDB } from "../payments/cash-payment-UKTB-panel";
+import { AdditionalServiceFromDB } from "@/app/types";
 
 export const AdditionalServiceDialog: React.FC<{
   open: boolean;
