@@ -2,7 +2,7 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { TUKTB_Cases } from "./schema";
-import { FeeStructure } from "@/app/types";
+import { AdditionalServiceFromDB, FeeStructure, TNewPaymentRecord } from "@/app/types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -185,4 +185,65 @@ export function getCountryIdFromCode(countryCode: string): number | null {
     JP: 29,
   };
   return countryMap[countryCode] || null;
+}
+
+
+
+// Create UKTB Payment Record
+
+type QRFields = {
+  qrString: string;
+  validationTraceId: string;
+  timestamp: string;
+};
+
+export function createUKTBPaymentRecord(
+  selectedCase: TUKTB_Cases,
+  clients: TUKTB_Cases[],
+  getClientTotal: (client: TUKTB_Cases) => number,
+  remarks: Record<string, string>,
+  addedServices: Record<string, AdditionalServiceFromDB[]>,
+  grandTotalUSD: number,
+  grandTotalLocal: number | null,
+  exchangeRate: number | null,
+  qrFields: QRFields
+): TNewPaymentRecord {
+  return {
+    case_number: selectedCase.id,
+    case_management_system: 2,
+    mimosa_case: null,
+    reference: null,
+    amount_in_dollar: grandTotalUSD.toFixed(2),
+    amount_in_local_currency: grandTotalLocal ? grandTotalLocal.toFixed(2) : grandTotalUSD.toFixed(2),
+    type_of_payment: 2,
+    date_of_payment: new Date().toISOString(),
+    transaction_id: `TXN-${Date.now()}`,
+    status: 1,
+    validationTraceId: qrFields.validationTraceId ?? "",
+    service_type: "medical_exam",
+    exchange_rate: exchangeRate || null,
+    destination_country: 13, // UK
+    payerInfo: `${selectedCase.First_Name || ""} ${selectedCase.Last_Name || ""}`.trim(),
+    qr_timestamp: qrFields.timestamp ?? "",
+    paidAmount: grandTotalLocal ? grandTotalLocal.toFixed(2) : grandTotalUSD.toFixed(2),
+    qr_string: qrFields.qrString,
+    wave: null,
+    clinic: null,
+    clients: clients.map((client) => ({
+      id: client.id,
+      name: `${client.First_Name} ${client.Last_Name}`,
+      age: client.date_of_birth
+        ? new Date().getFullYear() - new Date(client.date_of_birth).getFullYear()
+        : 0,
+      amount: getClientTotal(client).toFixed(2),
+      remark: remarks[client.id] || "",
+      services: [], // Fill if needed
+      additional_services: (addedServices[client.id] || []).map((s) => ({
+        id: s.id.toString(),
+        fee_amount_usd: s.fee_amount_usd,
+        service_code: s.service_type_code.service_code,
+        service_name: s.service_type_code.service_name,
+      })),
+    })),
+  };
 }
