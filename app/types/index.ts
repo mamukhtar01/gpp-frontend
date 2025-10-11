@@ -177,3 +177,13 @@ export enum TPaymentType {
   Cash = 3,
   Other = "Other",
 }
+
+export interface AdditionalServiceFromDB {
+  id: number;
+  fee_amount_usd: string;
+  service_type_code: {
+    service_code: string;
+    category: string;
+    service_name: string;
+  };
+}

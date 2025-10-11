@@ -1,6 +1,6 @@
 import { getFeeStructuresAction } from "@/app/server_actions/pricing";
 import { QrCodePaymentPanel } from "@/components/payments/qrcode-payment-panel";
-import { QrCodeUKTBPaymentPanel } from "@/components/payments/qrcode-uktb-payment-panel";
+import { UKTBPaymentPanelQR } from "@/components/payments/qrcode-uktb-payment-panel";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
@@ -57,7 +57,7 @@ export default async function QRCodePaymentsPage() {
           <QrCodePaymentPanel />
         </TabsContent>
         <TabsContent value="uktb">
-          <QrCodeUKTBPaymentPanel
+          <UKTBPaymentPanelQR
             ukFees={ukFees}
             additionalServicesList={additionalServicesList}
           />
