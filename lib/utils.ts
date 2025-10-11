@@ -206,7 +206,7 @@ export function createUKTBPaymentRecord(
   grandTotalUSD: number,
   grandTotalLocal: number | null,
   exchangeRate: number | null,
-  qrFields: QRFields
+  qrFields: QRFields | null
 ): TNewPaymentRecord {
   return {
     case_number: selectedCase.id,
@@ -219,14 +219,14 @@ export function createUKTBPaymentRecord(
     date_of_payment: new Date().toISOString(),
     transaction_id: `TXN-${Date.now()}`,
     status: 1,
-    validationTraceId: qrFields.validationTraceId ?? "",
+    validationTraceId: qrFields?.validationTraceId ?? "",
     service_type: "medical_exam",
     exchange_rate: exchangeRate || null,
     destination_country: 13, // UK
     payerInfo: `${selectedCase.First_Name || ""} ${selectedCase.Last_Name || ""}`.trim(),
-    qr_timestamp: qrFields.timestamp ?? "",
+    qr_timestamp: qrFields?.timestamp ?? "",
     paidAmount: grandTotalLocal ? grandTotalLocal.toFixed(2) : grandTotalUSD.toFixed(2),
-    qr_string: qrFields.qrString,
+    qr_string: qrFields?.qrString ?? "",
     wave: null,
     clinic: null,
     clients: clients.map((client) => ({

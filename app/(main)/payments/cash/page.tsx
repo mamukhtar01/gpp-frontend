@@ -4,7 +4,7 @@ import { QrCodePaymentPanel } from "@/components/payments/qrcode-payment-panel";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
-import { CashUKTBPaymentPanel } from "@/components/payments/cash-payment-UKTB-panel";
+import { UKTBCashPaymentPanel } from "@/components/payments/cash-payment-UKTB-panel";
 
 export default async function CashPaymentsPage() {
   const ukFees = await getFeeStructuresAction({
@@ -58,7 +58,7 @@ export default async function CashPaymentsPage() {
           <CashPaymentPanelMimosa />
         </TabsContent>
         <TabsContent value="uktb">
-          <CashUKTBPaymentPanel
+          <UKTBCashPaymentPanel
             ukFees={ukFees}
             additionalServicesList={additionalServicesList}
           />
